@@ -19,7 +19,7 @@ class MessageUtil {
           SmsQueryKind.inbox, //SmsQueryKind.sent, //SmsMessageKind.draft
         ],
         // raddress: sender, //'+254712345789'
-        count: (count > 0 ? count : CONST_DEFAULT_MESSAGE_COUNT),
+        // count: (count > 0 ? count : CONST_DEFAULT_MESSAGE_COUNT),
       );
     } 
     else {

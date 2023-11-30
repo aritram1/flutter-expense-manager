@@ -20,8 +20,8 @@ class SalesforceUtil {
   String instanceUrl = '';
   String token = '';
   DateTime? tokenExpiresAt;
-  List<SmsMessage> messages = [];
-
+  List<SmsMessage> allMessages = [];
+  
   // final String authUrl = 'https://login.salesforce.com/services/oauth2/token?client_id=3MVG9wt4IL4O5wvIBCa0yrhLb82rC8GGk03G2F26xbcntt9nq1JXS75mWYnnuS2rxwlghyQczUFgX4whptQeT&client_secret=3E0A6C0002E99716BD15C7C35F005FFFB716B8AA2DE28FBD49220EC238B2FFC7&grant_type=password&username=aritram1@gmail.com.financeplanner&password=financeplanner123W8oC4taee0H2GzxVbAqfVB14';
   
   /////////////////////////////////////////////////////////////////////////////////////
@@ -60,12 +60,22 @@ class SalesforceUtil {
   ///////////////////////////////Save To Salesforce////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////
   Future<String> saveToSalesForce(String sender, int count) async {
+    allMessages.clear();
+    allMessages = await MessageUtil().getMessages(sender, count); // '' = get all messages
+    for(List<SmsMessage> sms in allMessages){
+      saveToSalesForceEach(sender, count);
+    }
+  }
+  /////////////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////Save To Salesforce////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////
+  Future<String> saveToSalesForceEach(String sender, int count, List<SmsMessage> messages) async {
     
     String sfResponse = '';
     
     // Generate the token and retrieve the messages if not already done
     if(token == '' || instanceUrl == '') await loginToSalesforce();
-    if(messages.isEmpty) messages = await MessageUtil().getMessages(sender, count); // '' = get all messages
+    
     print('Messages are now retrieved. All messages => ${messages.length}');
 
     final Map<String, String> headers = {

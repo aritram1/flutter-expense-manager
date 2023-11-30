@@ -163,13 +163,13 @@ class _MyHomePageState extends State<MyHomePage> {
               child: const Icon(Icons.message),
             )
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: FloatingActionButton(
-              onPressed: handleLoginToSFButtonPress,
-              child: const Icon(Icons.login),
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.all(8.0),
+          //   child: FloatingActionButton(
+          //     onPressed: handleLoginToSFButtonPress,
+          //     child: const Icon(Icons.login),
+          //   ),
+          // ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: FloatingActionButton(
