@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_phone_app/util/message_util.dart';
 //import 'package:flutter_phone_app/util/salesforce_util.dart';
 import 'package:flutter_phone_app/util/sflib.dart';
-import 'util/core_util.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 // import 'package:permission_handler/permission_handler.dart';
 import 'widget/messages_list_view.dart';
@@ -82,10 +81,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
   //////////////////////Method to save data to Salesforce////////////////////////////
   void handleSaveDataToSFButtonPress() async {
-    List<Map<String, String>> data = [{
-      "FinPlan__Content__c": "From Flutter",
-      "FinPlan__Sender__c": "FlutterSender",
-    }];
+    final List<SmsMessage> msgs = await MessageUtil().getMessages('', 10);
+    List<Map<String, dynamic>> data = [];
+    for(SmsMessage msg in msgs){
+      data.add({
+        "FinPlan__content__c"    : msg.body,
+        "FinPlan__Sender__c"     : msg.sender,
+        //"FinPlan_Received_at__c" : msg.date.toString()
+      });
+    }
     final saveDataResponse = await Sflib.insertSFData('FinPlan__SMS_Message__c', data);
     setState(() {
       _sfSaveResponse = saveDataResponse;
