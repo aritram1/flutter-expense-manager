@@ -1,4 +1,5 @@
 import 'dart:core';
+import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_app/util/message_util.dart';
 import 'package:flutter_phone_app/util/sflib.dart';
@@ -31,9 +32,8 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////Main stateful widget////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////  
+
+/////////////////////////////Main stateful widget////////////////////////////////////  
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
   final String title;
@@ -42,9 +42,8 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-/////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////Stateful Class//////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////  
+
+/////////////////////////////Stateful Class//////////////////////////////////////////  
 class _MyHomePageState extends State<MyHomePage> {
   
   final String CONST_DEFAULT_TEXT = 'Nothing to show. Tap the message button...';
@@ -75,14 +74,17 @@ class _MyHomePageState extends State<MyHomePage> {
   void handleSaveDataToSFButtonPress() async {
     final List<SmsMessage> msgs = await MessageUtil().getMessages('', 10);
     List<Map<String, dynamic>> data = [];
+    
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
     String deviceName = androidInfo.model;
+    
     for(SmsMessage msg in msgs){
       data.add({
-        "FinPlan__content__c"    : msg.body,
-        "FinPlan__Sender__c"     : msg.sender,
-        "FinPlan_Received_at__c" : msg.date.toString()
-        "FinPlan__Device__c": deviceName
-        
+        "FinPlan__content__c"     : msg.body,
+        "FinPlan__Sender__c"      : msg.sender,
+        "FinPlan__Received_At__c" : msg.date.toString(),
+        "FinPlan__Device__c"      : deviceName
       });
     }
     final saveDataResponse = await Sflib.insertSFData('FinPlan__SMS_Message__c', data);
