@@ -1,16 +1,30 @@
 # flutter_phone_app
 
-A new Flutter project.
+A fun-learn flutter project - This project is a starting point for a Flutter application. As of now this application works as retrieving sms messages from phone, logs into Salesforce and stores them as Salesforce custom object records. It uses the standard composite API (url below) to insert the data. 
 
-## Getting Started
+Sample composite endpoint : <instance_url>/services/data/v53.0/composite/tree/<object_api_name>
+Sample composite request : 
+{
+    "records" : [
+        {
+            "attributes": {
+                "type": "<object_api>",
+                "referenceId": "ref0"
+            },
+            "Name" : "Sample Record 1",
+            "Website" : "Sample Site 1"
+        },
+        {
+            "attributes": {
+                "type": "<object_api>",
+                "referenceId": "ref1"
+            },
+            "Name" : "Sample Record 2",
+            "Website" : "Sample Site 2"
+        }
+    ]
+}
 
-This project is a starting point for a Flutter application.
+Note the referenceId neeeds to be unique for each record and the maximum number of records that can be part of a single composite request is 200.
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+~ Aritra
