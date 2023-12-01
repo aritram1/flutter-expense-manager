@@ -33,7 +33,9 @@ dependencies:
 
   http: ^0.13.3  # Use the latest version of the http package 
   telephony: #latest_version
+  device_info: ^2.0.0
 
+    
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -45,8 +47,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   
-  device_info: ^2.0.0
-
+  logger: ^2.0.2+1
+  
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
