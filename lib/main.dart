@@ -3,11 +3,12 @@
 import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_app/util/message_util.dart';
-import 'package:flutter_phone_app/util/salesforce_util.dart';
-import 'util/core_util.dart';
+//import 'package:flutter_phone_app/util/salesforce_util.dart';
+import 'package:flutter_phone_app/util/sflib.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 // import 'package:permission_handler/permission_handler.dart';
 import 'widget/messages_list_view.dart';
+
 
 /////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////Main method to run////////////////////////////////////
@@ -70,35 +71,31 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
   }
-  
-  //////////////////////Method to get the Sample Callout/////////////////////////////
-  void handleButtonPress() async{
-    _counter++;
-    final data = await CoreUtil().getData(_counter);
-    setState((){ 
-      _response = data;
-      currentPage = 'Save';
-    });
-  }
-
   //////////////////////Method to handle Salesforce Login////////////////////////////
   void handleLoginToSFButtonPress() async {
-    final loginResponse = await SalesforceUtil().loginToSalesforce();
-      setState(() {
-        _sfLoginResponse = loginResponse;
-        currentPage = 'Login';
-      });
+    final loginResponse = await Sflib.loginToSalesforce();
+    setState(() {
+      _sfLoginResponse = loginResponse;
+      currentPage = 'Login';
+    });
   }
-
   //////////////////////Method to save data to Salesforce////////////////////////////
   void handleSaveDataToSFButtonPress() async {
-    final saveDataResponse = await SalesforceUtil().saveToSalesForce(sender, count);
+    final List<SmsMessage> msgs = await MessageUtil().getMessages('', 10);
+    List<Map<String, dynamic>> data = [];
+    for(SmsMessage msg in msgs){
+      data.add({
+        "FinPlan__content__c"    : msg.body,
+        "FinPlan__Sender__c"     : msg.sender,
+        //"FinPlan_Received_at__c" : msg.date.toString()
+      });
+    }
+    final saveDataResponse = await Sflib.insertSFData('FinPlan__SMS_Message__c', data);
     setState(() {
       _sfSaveResponse = saveDataResponse;
       currentPage = 'Save';
     });
   }
-
   //////////////////////Method to get SMS data///////////////////////////////////////
   void handleMessageButtonPress() async{
     final msgs = await MessageUtil().getMessages(sender, count);
@@ -106,14 +103,8 @@ class _MyHomePageState extends State<MyHomePage> {
       _messages = msgs;
       currentPage = 'Message';
     });
-    // try{}
-    // on Exception catch (_, e){
-    //   setState(() {
-    //     _error = e.toString();
-    //   });
-    // }
   }
-  
+
   //////////////////////Build Method for generating widget content///////////////////
   @override
   Widget build(BuildContext context) {
