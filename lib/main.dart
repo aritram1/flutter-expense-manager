@@ -3,11 +3,13 @@
 import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_app/util/message_util.dart';
-import 'package:flutter_phone_app/util/salesforce_util.dart';
+//import 'package:flutter_phone_app/util/salesforce_util.dart';
+import 'package:flutter_phone_app/util/sflib.dart';
 import 'util/core_util.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 // import 'package:permission_handler/permission_handler.dart';
 import 'widget/messages_list_view.dart';
+
 
 /////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////Main method to run////////////////////////////////////
@@ -83,20 +85,29 @@ class _MyHomePageState extends State<MyHomePage> {
 
   //////////////////////Method to handle Salesforce Login////////////////////////////
   void handleLoginToSFButtonPress() async {
-    final loginResponse = await SalesforceUtil().loginToSalesforce();
-      setState(() {
-        _sfLoginResponse = loginResponse;
-        currentPage = 'Login';
-      });
+    await Sflib.loginToSalesforce();
+    
+    // final loginResponse = await SalesforceUtil().loginToSalesforce();
+    //   setState(() {
+    //     _sfLoginResponse = loginResponse;
+    //     currentPage = 'Login';
+    //   });
   }
 
   //////////////////////Method to save data to Salesforce////////////////////////////
   void handleSaveDataToSFButtonPress() async {
-    final saveDataResponse = await SalesforceUtil().saveToSalesForce(sender, count);
-    setState(() {
-      _sfSaveResponse = saveDataResponse;
-      currentPage = 'Save';
-    });
+    Map<String, String> data = {
+      "FinPlan__Content__c": "From Flutter",
+      "FinPlan__Sender__c": "FlutterSender",
+      "FinPlan__Received_At__c": "LOL",
+    };
+    await Sflib.insertSFData('FinPlan__SMS_Message__c', data);
+
+    // final saveDataResponse = await SalesforceUtil().saveToSalesForce(sender, count);
+    // setState(() {
+    //   _sfSaveResponse = saveDataResponse;
+    //   currentPage = 'Save';
+    // });
   }
 
   //////////////////////Method to get SMS data///////////////////////////////////////

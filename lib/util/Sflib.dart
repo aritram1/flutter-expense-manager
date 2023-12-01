@@ -1,25 +1,25 @@
-// ignore_for_file: depend_on_referenced_packages
-
 import 'dart:convert';
 import 'dart:core';
-import 'dart:math';
-import 'package:flutter_phone_app/util/SflibEnv.dart';
 import 'package:http/http.dart' as http;
-import 'package:device_info/device_info.dart';
+// ignore: depend_on_referenced_packages
 import 'package:logger/logger.dart';
-
 
 class Sflib {
 
-  Logger log = Logger();
-  
+  static const Map<String, String> _loginCredential = {
+    'tokenEndpoint' : 'https://login.salesforce.com/services/oauth2/token',
+    'clientId' : '3MVG9wt4IL4O5wvIBCa0yrhLb82rC8GGk03G2F26xbcntt9nq1JXS75mWYnnuS2rxwlghyQczUFgX4whptQeT',
+    'clientSecret' : '3E0A6C0002E99716BD15C7C35F005FFFB716B8AA2DE28FBD49220EC238B2FFC7',
+    'userName' : 'aritram1@gmail.com.financeplanner',
+    'tokenGrantType' : 'password',
+    'pwdWithToken' : 'financeplanner123W8oC4taee0H2GzxVbAqfVB14',
+  };
+
   static String authToken = '';
   static String instanceUrl = '';
-  static bool isLoggedIn(){
-    return (authToken != '');
-  }
-
-
+  static bool isLoggedIn() => (authToken != '');
+  static Logger log = Logger();
+  
   ///////////////////////////////util methods///////////////////////////////////
   static Map<String, String> generateLoginHeader(){
     final Map<String, String> loginHeader = {
@@ -28,26 +28,20 @@ class Sflib {
     return loginHeader;
   }
   static Map<String, String> generateLoginBody(){
-    Map<String, String> loginBody = {};
-    return loginBody;
+    return {};
   }
-  static String generateLoginURL(){
-    String authUrl = '$SflibEnv._baseUrl?client_id=$SflibEnv._clientId&client_secret=$SflibEnv._clientSecret&username=$SflibEnv._userName&password=$SflibEnv._pwdWithToken&grant_type=$SflibEnv._tokenGrantType';
-    return authUrl;
+  static String generateLoginUrl(){
+    String loginAuthUrl = '$_loginCredential.tokenEndpoint?client_id=$_loginCredential.clientId&client_secret=$_loginCredential._clientSecret&username=$_loginCredential._userName&password=$_loginCredential._pwdWithToken&grant_type=$_loginCredential._tokenGrantType';
+    log.d('loginAuthUrl : $loginAuthUrl');
+    return loginAuthUrl;
   }
-
   ///////////////////////////////login method///////////////////////////////////
-  Future<void> loginToSalesforce() async {
-    
-    final String authUrl = generateLoginURL();
-    final Map<String, String> header = generateLoginHeader();
-    final Map<String, String> body = generateLoginBody();
-    
+  static Future<void> loginToSalesforce() async {
     try{
       final response = await http.post(
-        Uri.parse(authUrl),
-        headers: (header),
-        body: body,
+        Uri.parse(generateLoginUrl()),
+        headers: (generateLoginHeader()),
+        body: generateLoginBody(),
       );
       if (response.statusCode == 200) { 
         final Map<String, dynamic> data = json.decode(response.body);
@@ -63,90 +57,55 @@ class Sflib {
       log.d('Error occurred while logging into Salesforce. Error is : $error');
     }
   }
-
-  /////////////////////////////////////////////////////////////////////////////////////
-  ///////////////////////////////Save To Salesforce////////////////////////////////////
-  /////////////////////////////////////////////////////////////////////////////////////
-  Future<String> saveToSalesForce(String sender, int count) async {
-    
-    String result = '';
-    List<SmsMessage> eachList = [];
-    int counter = 0;
-
-    allMessages.clear();
-    allMessages = await MessageUtil().getMessages(sender, count); // '' = get all messages
-      
-    for(SmsMessage sms in allMessages){
-      eachList.add(sms);
-      counter++;
-      if(counter == CONST_BATCH_SIZE){
-        String currentResult = await saveEachListToSalesForce('', 0, eachList);
-        print('currentresult=>$currentResult');
-        result += currentResult;
-        counter = 0;
-        eachList = [];
-      }     
-    }
-    return result;
-  }
-
-  /////////////////////////////////////////////////////////////////////////////////////
-  ///////////////////////////////Save To Salesforce////////////////////////////////////
-  /////////////////////////////////////////////////////////////////////////////////////
-  Future<String> saveEachListToSalesForce(String sender, int count, List<SmsMessage> messages) async {
-    
-    String sfResponse = '';
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    String deviceName = androidInfo.model;
-    // Generate the token and retrieve the messages if not already done
-    if(token == '' || instanceUrl == '') await loginToSalesforce();
-    
-    print('Messages are now retrieved. All messages => ${messages.length}');
-
-    final Map<String, String> headers = {
-      'Authorization': 'Bearer $token',
+  //////////////////////////////////crud methods///////////////////////////////////////
+  static Map<String, String> generateHeader(){
+    final Map<String, String> header = {
+      'Authorization': 'Bearer $authToken',
       'Content-Type': 'application/json',
-      // Add any other headers as needed
     };
-
-    List<Map<String, dynamic>> allRecords = [];
-    for (SmsMessage sms in messages) {
+    return header;
+  }
+  static String generateEndpointUrl(String objAPIName){
+    String endpointUrl = '$instanceUrl/services/data/v53.0/composite/tree/$objAPIName'; //FinPlan__SMS_Message__c;
+    return endpointUrl;
+  }
+  static Map<String, dynamic> generateBody(String objAPIName, Map<String, dynamic> fieldNameValuePair){
+    var allRecords = [];
+    int count = 0;
+    for(String fieldAPIName in fieldNameValuePair.keys){
       Map<String, dynamic> record = {
         "attributes": {
-          "type": "FinPlan__SMS_Message__c",
+          "type": objAPIName,
           "referenceId": "ref$count"
         },
-        "FinPlan__Content__c": "${sms.body != null && sms.body!.length > 255 ? sms.body?.substring(0, 255) : sms.body}",
-        "FinPlan__Sender__c": "${sms.sender}",
-        "FinPlan__Received_At__c": sms.date.toString(),
-        "FinPlan__Device__c": deviceName
+        fieldAPIName : fieldNameValuePair[fieldAPIName]
       };
-      //print('record is $record');
       allRecords.add(record);
-      count++;
     }
-    final Map<String, dynamic> requestBody = {
-      "records": allRecords,
+    return {
+      'records' : allRecords
     };
-    //print('Body is ${jsonEncode(requestBody)}');
+  }
+  /////////////////////////////////////insert method /////////////////////////////////////
+  static Future<void> insertSFData(String objAPIName, Map<String, dynamic> data) async { 
+    if(!isLoggedIn()) await loginToSalesforce();
     try{
-        final response = await http.post(
-          Uri.parse('$instanceUrl/services/data/v53.0/composite/tree/FinPlan__SMS_Message__c'),
-          headers: headers,
-          body: jsonEncode(requestBody)
-        );
-        //print('Response received as ${response.statusCode}');
-        if (response.statusCode == 201) { 
-          final Map<String, dynamic> data = json.decode(response.body);
-          sfResponse = data.toString();
-        } else {
-          sfResponse = response.body;//statusCode.toString();//CONST_SAVE_SMS_ERROR;      
-        }
+      final response = await http.post(
+        Uri.parse(generateEndpointUrl(objAPIName)),
+        headers: generateHeader(),
+        body: jsonEncode(generateBody(objAPIName, data)),
+      );
+      if(response.statusCode == 201){
+        final Map<String, dynamic> data = json.decode(response.body);
+        log.d('Insert Operation : ${data.toString()}');
+      } 
+      else {
+        // Log an error
+        log.d('Response code other than 201 detected : ${response.body}');
+      }
     }
-    on Exception catch (_, e){
-      sfResponse = e.toString();
+    catch(error){
+      log.d('Error occurred while inserting data to Salesforce. Error is : $error');
     }
-    return sfResponse;
   }
 }
