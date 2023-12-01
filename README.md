@@ -1,9 +1,15 @@
 # flutter_phone_app
 
-A fun-learn flutter project - This project is a starting point for a Flutter application. As of now this application works as retrieving sms messages from phone, logs into Salesforce and stores them as Salesforce custom object records. It uses the standard composite API (url below) to insert the data. 
+A fun-learn Flutter project. This application works as follows:
 
-Sample composite endpoint : <instance_url>/services/data/v53.0/composite/tree/<object_api_name>
-Sample composite request : 
+1. Retrieves SMS messages from the phone.
+2. Logs into Salesforce and stores them as Salesforce custom object records.
+3. Uses the standard composite API (URL below) to insert the data.
+
+**Sample Composite Endpoint:** `<instance_url>/services/data/v53.0/composite/tree/<object_api_name>`
+
+**Sample Composite Request:**
+```json
 {
     "records" : [
         {
@@ -24,7 +30,3 @@ Sample composite request :
         }
     ]
 }
-
-Note the referenceId neeeds to be unique for each record and the maximum number of records that can be part of a single composite request is 200.
-
-~ Aritra
