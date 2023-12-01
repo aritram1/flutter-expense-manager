@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:core';
+import 'dart:js_util';
 import 'package:http/http.dart' as http;
 // ignore: depend_on_referenced_packages
 import 'package:logger/logger.dart';
@@ -92,8 +93,38 @@ class Sflib {
     log.d(body);
     return body;
   }
+
   /////////////////////////////////////insert method /////////////////////////////////////
-  static Future<String> insertSFData(String objAPIName, List<Map<String, dynamic>> data) async { 
+  Future<String> saveToSalesForce(String objAPIName, List<Map<String, dynamic>> data) async {
+    
+    List<Map<String, dynamic>> eachList = [];
+    int counter = 0;
+    String result = '';
+    
+    // check the size of the list and if more than 200, need to split to batch of 200 to 
+    // avoid composite API limit (i.e. 200 records at a time)
+    if(data.length <= 200){
+      String currentResult = await Sflib._insertSFData(objAPIName, data);
+      return currentResult;
+    }
+    else{
+      for(Map<String, dynamic> each in data){
+        eachList.add(each);
+        counter++;
+        if(counter == 200){
+          String currentResult = await Sflib._insertSFData(objAPIName, eachList);
+          log.d('currentresult=>$currentResult');
+          result += currentResult;
+          counter = 0;
+          eachList = [];
+        }     
+      }
+    }
+    return result;
+  }
+
+  /////////////////////////////////////insert method /////////////////////////////////////
+  static Future<String> _insertSFData(String objAPIName, List<Map<String, dynamic>> data) async { 
     if(accessToken == '') await loginToSalesforce();
     dynamic response;
     try{
