@@ -17,7 +17,7 @@ Sample composite request :
         {
             "attributes": {
                 "type": "<object_api>",
-                "referenceId": "ref0"
+                "referenceId": "ref1"
             },
             "Name" : "Sample Record 2",
             "Website" : "Sample Site 2"
@@ -25,6 +25,6 @@ Sample composite request :
     ]
 }
 
-The maximum number of records that can be part of a single composite request is 200.
+Note the referenceId neeeds to be unique for each record and the maximum number of records that can be part of a single composite request is 200.
 
 ~ Aritra
