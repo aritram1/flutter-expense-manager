@@ -1,25 +1,17 @@
-// ignore_for_file: constant_identifier_names, non_constant_identifier_names
-
 import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_app/util/message_util.dart';
-//import 'package:flutter_phone_app/util/salesforce_util.dart';
 import 'package:flutter_phone_app/util/sflib.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
-// import 'package:permission_handler/permission_handler.dart';
 import 'widget/messages_list_view.dart';
 
-
-/////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////Main method to run////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////  
 void main() {
   runApp(const MyApp());
 }
 
-/////////////////////////////////////////////////////////////////////////////////////
 /////////////////////MyApp Stateless Parent Widget //////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////  
+  
 class MyApp extends StatelessWidget {
 
   const MyApp({Key? key}) : super(key: key);
@@ -83,11 +75,14 @@ class _MyHomePageState extends State<MyHomePage> {
   void handleSaveDataToSFButtonPress() async {
     final List<SmsMessage> msgs = await MessageUtil().getMessages('', 10);
     List<Map<String, dynamic>> data = [];
+    String deviceName = androidInfo.model;
     for(SmsMessage msg in msgs){
       data.add({
         "FinPlan__content__c"    : msg.body,
         "FinPlan__Sender__c"     : msg.sender,
-        //"FinPlan_Received_at__c" : msg.date.toString()
+        "FinPlan_Received_at__c" : msg.date.toString()
+        "FinPlan__Device__c": deviceName
+        
       });
     }
     final saveDataResponse = await Sflib.insertSFData('FinPlan__SMS_Message__c', data);
