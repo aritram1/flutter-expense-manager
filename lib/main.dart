@@ -72,44 +72,26 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
   }
-  
-  //////////////////////Method to get the Sample Callout/////////////////////////////
-  void handleButtonPress() async{
-    _counter++;
-    final data = await CoreUtil().getData(_counter);
-    setState((){ 
-      _response = data;
+  //////////////////////Method to handle Salesforce Login////////////////////////////
+  void handleLoginToSFButtonPress() async {
+    final loginResponse = await Sflib.loginToSalesforce();
+    setState(() {
+      _sfLoginResponse = loginResponse;
+      currentPage = 'Login';
+    });
+  }
+  //////////////////////Method to save data to Salesforce////////////////////////////
+  void handleSaveDataToSFButtonPress() async {
+    List<Map<String, String>> data = [{
+      "FinPlan__Content__c": "From Flutter",
+      "FinPlan__Sender__c": "FlutterSender",
+    }];
+    final saveDataResponse = await Sflib.insertSFData('FinPlan__SMS_Message__c', data);
+    setState(() {
+      _sfSaveResponse = saveDataResponse;
       currentPage = 'Save';
     });
   }
-
-  //////////////////////Method to handle Salesforce Login////////////////////////////
-  void handleLoginToSFButtonPress() async {
-    await Sflib.loginToSalesforce();
-    
-    // final loginResponse = await SalesforceUtil().loginToSalesforce();
-    //   setState(() {
-    //     _sfLoginResponse = loginResponse;
-    //     currentPage = 'Login';
-    //   });
-  }
-
-  //////////////////////Method to save data to Salesforce////////////////////////////
-  void handleSaveDataToSFButtonPress() async {
-    Map<String, String> data = {
-      "FinPlan__Content__c": "From Flutter",
-      "FinPlan__Sender__c": "FlutterSender",
-      "FinPlan__Received_At__c": "LOL",
-    };
-    await Sflib.insertSFData('FinPlan__SMS_Message__c', data);
-
-    // final saveDataResponse = await SalesforceUtil().saveToSalesForce(sender, count);
-    // setState(() {
-    //   _sfSaveResponse = saveDataResponse;
-    //   currentPage = 'Save';
-    // });
-  }
-
   //////////////////////Method to get SMS data///////////////////////////////////////
   void handleMessageButtonPress() async{
     final msgs = await MessageUtil().getMessages(sender, count);
@@ -117,14 +99,8 @@ class _MyHomePageState extends State<MyHomePage> {
       _messages = msgs;
       currentPage = 'Message';
     });
-    // try{}
-    // on Exception catch (_, e){
-    //   setState(() {
-    //     _error = e.toString();
-    //   });
-    // }
   }
-  
+
   //////////////////////Build Method for generating widget content///////////////////
   @override
   Widget build(BuildContext context) {
@@ -174,13 +150,13 @@ class _MyHomePageState extends State<MyHomePage> {
               child: const Icon(Icons.message),
             )
           ),
-          // Padding(
-          //   padding: const EdgeInsets.all(8.0),
-          //   child: FloatingActionButton(
-          //     onPressed: handleLoginToSFButtonPress,
-          //     child: const Icon(Icons.login),
-          //   ),
-          // ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FloatingActionButton(
+              onPressed: handleLoginToSFButtonPress,
+              child: const Icon(Icons.login),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: FloatingActionButton(
