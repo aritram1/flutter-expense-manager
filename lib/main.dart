@@ -1,8 +1,7 @@
 import 'dart:core';
-import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_phone_app/util/message_util.dart';
-import 'package:flutter_phone_app/util/sflib.dart';
+import 'package:flutter_phone_app/util/MessageUtil.dart';
+import 'package:flutter_phone_app/util/SfUtil.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'widget/messages_list_view.dart';
 
@@ -73,20 +72,9 @@ class _MyHomePageState extends State<MyHomePage> {
   //////////////////////Method to save data to Salesforce////////////////////////////
   void handleSaveDataToSFButtonPress() async {
     final List<SmsMessage> msgs = await MessageUtil().getMessages('', 10);
-    List<Map<String, dynamic>> data = [];
     
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    String deviceName = androidInfo.model;
-    
-    for(SmsMessage msg in msgs){
-      data.add({
-        "FinPlan__content__c"     : msg.body,
-        "FinPlan__Sender__c"      : msg.sender,
-        "FinPlan__Received_At__c" : msg.date.toString(),
-        "FinPlan__Device__c"      : deviceName
-      });
-    }
+    final List<Map<String, dynamic>> data = await MessageUtil().convert(msgs);
+
     final saveDataResponse = await Sflib.insertSFData('FinPlan__SMS_Message__c', data);
     setState(() {
       _sfSaveResponse = saveDataResponse;
@@ -109,6 +97,16 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
+        actions: [
+          Tab(
+            : ()=>{
+              Navigator.pushNamed(context, '/')
+            },
+            child: const Text('Home')
+          ), 
+          //ElevatedButton(onPressed: onPressed, child: child),
+          //ElevatedButton(onPressed: onPressed, child: child)
+        ]
       ),
       body: Container(
         padding: const EdgeInsets.all(10.0),

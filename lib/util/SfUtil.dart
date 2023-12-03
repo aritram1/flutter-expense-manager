@@ -1,11 +1,10 @@
 import 'dart:convert';
 import 'dart:core';
-import 'dart:js_util';
 import 'package:http/http.dart' as http;
 // ignore: depend_on_referenced_packages
 import 'package:logger/logger.dart';
 
-class Sflib {
+class SfUtil {
 
   static String tokenEndpoint = 'https://login.salesforce.com/services/oauth2/token';
   static String clientId ='3MVG9wt4IL4O5wvIBCa0yrhLb82rC8GGk03G2F26xbcntt9nq1JXS75mWYnnuS2rxwlghyQczUFgX4whptQeT';
