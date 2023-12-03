@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 // ignore: depend_on_referenced_packages
 import 'package:logger/logger.dart';
 
-class SfUtil {
+class SalesforceUtil {
 
   static String tokenEndpoint = 'https://login.salesforce.com/services/oauth2/token';
   static String clientId ='3MVG9wt4IL4O5wvIBCa0yrhLb82rC8GGk03G2F26xbcntt9nq1JXS75mWYnnuS2rxwlghyQczUFgX4whptQeT';
@@ -94,7 +94,7 @@ class SfUtil {
   }
 
   /////////////////////////////////////insert method /////////////////////////////////////
-  Future<String> saveToSalesForce(String objAPIName, List<Map<String, dynamic>> data) async {
+  static Future<String> saveToSalesForce(String objAPIName, List<Map<String, dynamic>> data) async {
     
     List<Map<String, dynamic>> eachList = [];
     int counter = 0;
@@ -103,7 +103,7 @@ class SfUtil {
     // check the size of the list and if more than 200, need to split to batch of 200 to 
     // avoid composite API limit (i.e. 200 records at a time)
     if(data.length <= 200){
-      String currentResult = await Sflib._insertSFData(objAPIName, data);
+      String currentResult = await SalesforceUtil._insertSFData(objAPIName, data);
       return currentResult;
     }
     else{
@@ -111,7 +111,7 @@ class SfUtil {
         eachList.add(each);
         counter++;
         if(counter == 200){
-          String currentResult = await Sflib._insertSFData(objAPIName, eachList);
+          String currentResult = await SalesforceUtil._insertSFData(objAPIName, eachList);
           log.d('currentresult=>$currentResult');
           result += currentResult;
           counter = 0;

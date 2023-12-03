@@ -1,7 +1,7 @@
 import 'dart:core';
 import 'package:flutter/material.dart';
-import 'package:flutter_phone_app/util/MessageUtil.dart';
-import 'package:flutter_phone_app/util/SfUtil.dart';
+import 'package:flutter_phone_app/util/message_util.dart';
+import 'package:flutter_phone_app/util/salesforce_util.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'widget/messages_list_view.dart';
 
@@ -63,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
   //////////////////////Method to handle Salesforce Login////////////////////////////
   void handleLoginToSFButtonPress() async {
-    final loginResponse = await Sflib.loginToSalesforce();
+    final loginResponse = await SalesforceUtil.loginToSalesforce();
     setState(() {
       _sfLoginResponse = loginResponse;
       currentPage = 'Login';
@@ -71,42 +71,42 @@ class _MyHomePageState extends State<MyHomePage> {
   }
   //////////////////////Method to save data to Salesforce////////////////////////////
   void handleSaveDataToSFButtonPress() async {
-    final List<SmsMessage> msgs = await MessageUtil().getMessages('', 10);
+    final List<SmsMessage> msgs = await MessageUtil.getMessages(count : 10);
     
-    final List<Map<String, dynamic>> data = await MessageUtil().convert(msgs);
+    final List<Map<String, dynamic>> data = await MessageUtil.convert(msgs);
 
-    final saveDataResponse = await Sflib.insertSFData('FinPlan__SMS_Message__c', data);
+    final saveDataResponse = await SalesforceUtil.saveToSalesForce('FinPlan__SMS_Message__c', data);
     setState(() {
       _sfSaveResponse = saveDataResponse;
       currentPage = 'Save';
     });
   }
-  //////////////////////Method to get SMS data///////////////////////////////////////
+  ////////////////////// Method to get SMS data ///////////////////////////////////////
   void handleMessageButtonPress() async{
-    final msgs = await MessageUtil().getMessages(sender, count);
+    final msgs = await MessageUtil.getMessages(); //(sender : ... , count : ...);
     setState(() {
       _messages = msgs;
       currentPage = 'Message';
     });
   }
 
-  //////////////////////Build Method for generating widget content///////////////////
+  ////////////////////// Build Method for generating widget content ///////////////////
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
-        actions: [
-          Tab(
-            : ()=>{
-              Navigator.pushNamed(context, '/')
-            },
-            child: const Text('Home')
-          ), 
+        // actions: [
+        //   Tab(
+        //     : ()=>{
+        //       Navigator.pushNamed(context, '/')
+        //     },
+        //     child: const Text('Home')
+        //   ), 
           //ElevatedButton(onPressed: onPressed, child: child),
           //ElevatedButton(onPressed: onPressed, child: child)
-        ]
+        //]
       ),
       body: Container(
         padding: const EdgeInsets.all(10.0),
