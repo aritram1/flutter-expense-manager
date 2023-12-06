@@ -20,7 +20,7 @@ class MessageUtil {
     // Provide sms kind list
     List<SmsQueryKind> smsKinds = [];
     if(kinds == null){
-      smsKinds.add('SmsQueryKind.inbox' as SmsQueryKind); //SmsQueryKind.inbox ,SmsQueryKind.sent, SmsMessageKind.draft
+      smsKinds = [SmsQueryKind.inbox]; //SmsQueryKind.inbox ,SmsQueryKind.sent, SmsMessageKind.draft
     }
 
     if (permission.isGranted) {
