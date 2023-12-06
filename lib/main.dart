@@ -1,172 +1,61 @@
-import 'dart:core';
-import 'package:flutter/material.dart';
-import 'package:flutter_phone_app/util/message_util.dart';
-import 'package:flutter_phone_app/util/salesforce_util.dart';
-import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
-import 'widget/messages_list_view.dart';
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, library_private_types_in_public_api
 
-///////////////////////////////Main method to run////////////////////////////////////
+import 'package:flutter/material.dart';
+import 'tab_data.dart';
+
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
-/////////////////////MyApp Stateless Parent Widget //////////////////////////////////
-  
 class MyApp extends StatelessWidget {
-
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromARGB(255, 95, 54, 244),
-        ),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'SMS Forwarder'),
+      home: MyTabs(),
     );
   }
 }
 
-
-/////////////////////////////Main stateful widget////////////////////////////////////  
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-  final String title;
+class MyTabs extends StatefulWidget {
+  const MyTabs({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _MyTabsState createState() => _MyTabsState();
 }
 
+class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
 
-/////////////////////////////Stateful Class//////////////////////////////////////////  
-class _MyHomePageState extends State<MyHomePage> {
-  
-  final String CONST_DEFAULT_TEXT = 'Nothing to show. Tap the message button...';
-  String _response = '';
-  String _error = '';
-  int _counter = 1;
-  List<SmsMessage> _messages = [];
-  String _sfLoginResponse = '';
-  String _sfSaveResponse = '';
-  String currentPage = ''; //Other options are 'Message', 'Login' and 'Save'
-  String sender = '';
-  int count = 0;
-
-  //////////////////////Initialise the state from parent Class///////////////////////
   @override
   void initState() {
     super.initState();
-  }
-  //////////////////////Method to handle Salesforce Login////////////////////////////
-  void handleLoginToSFButtonPress() async {
-    final loginResponse = await SalesforceUtil.loginToSalesforce();
-    setState(() {
-      _sfLoginResponse = loginResponse;
-      currentPage = 'Login';
-    });
-  }
-  //////////////////////Method to save data to Salesforce////////////////////////////
-  void handleSaveDataToSFButtonPress() async {
-    final List<SmsMessage> msgs = await MessageUtil.getMessages(count : 10);
-    
-    final List<Map<String, dynamic>> data = await MessageUtil.convert(msgs);
-
-    final saveDataResponse = await SalesforceUtil.saveToSalesForce('FinPlan__SMS_Message__c', data);
-    setState(() {
-      _sfSaveResponse = saveDataResponse;
-      currentPage = 'Save';
-    });
-  }
-  ////////////////////// Method to get SMS data ///////////////////////////////////////
-  void handleMessageButtonPress() async{
-    final msgs = await MessageUtil.getMessages(); //(sender : ... , count : ...);
-    setState(() {
-      _messages = msgs;
-      currentPage = 'Message';
-    });
+    _tabController = TabController(vsync: this, length: 3);
   }
 
-  ////////////////////// Build Method for generating widget content ///////////////////
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-        // actions: [
-        //   Tab(
-        //     : ()=>{
-        //       Navigator.pushNamed(context, '/')
-        //     },
-        //     child: const Text('Home')
-        //   ), 
-          //ElevatedButton(onPressed: onPressed, child: child),
-          //ElevatedButton(onPressed: onPressed, child: child)
-        //]
+        title: Text('Flutter Tabs Demo'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(text: 'Tab 1'),
+            Tab(text: 'Tab 2'),
+            Tab(text: 'Tab 3'),
+          ],
+        ),
       ),
-      body: Container(
-        padding: const EdgeInsets.all(10.0),
-        child: () {
-          if (currentPage == 'Message') {
-            return MessagesListView(
-              messages: _messages,
-            );
-          } 
-          else if(currentPage == 'Login') {
-            return Text(
-              _sfLoginResponse,
-              style: Theme.of(context).textTheme.headlineSmall,
-              textAlign: TextAlign.center,
-            );
-          }
-          else if(currentPage == 'Save') {
-            return Text(
-              _sfSaveResponse,
-              style: Theme.of(context).textTheme.headlineSmall,
-              textAlign: TextAlign.center,
-            );
-          }
-          else{
-            return Text(
-              CONST_DEFAULT_TEXT,
-              style: Theme.of(context).textTheme.headlineSmall,
-              textAlign: TextAlign.center,
-            );
-          }
-        }(),
-      ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
+      body: TabBarView(
+        controller: _tabController,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child : FloatingActionButton(
-              onPressed: handleMessageButtonPress,
-              child: const Icon(Icons.message),
-            )
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: FloatingActionButton(
-              onPressed: handleLoginToSFButtonPress,
-              child: const Icon(Icons.login),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: FloatingActionButton(
-              onPressed: handleSaveDataToSFButtonPress,
-              child: const Icon(Icons.save),
-            ),
-          )
+          TabData(tabIndex: 0),
+          TabData(tabIndex: 1),
+          TabData(tabIndex: 2),
         ],
-        )
-        
+      ),
     );
   }
 }
-
