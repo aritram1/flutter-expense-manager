@@ -6,12 +6,13 @@ import 'package:logger/logger.dart';
 
 class SalesforceUtil {
 
-  static String tokenEndpoint = 'https://login.salesforce.com/services/oauth2/token';
   static String clientId ='3MVG9wt4IL4O5wvIBCa0yrhLb82rC8GGk03G2F26xbcntt9nq1JXS75mWYnnuS2rxwlghyQczUFgX4whptQeT';
   static String clientSecret ='3E0A6C0002E99716BD15C7C35F005FFFB716B8AA2DE28FBD49220EC238B2FFC7';
   static String userName = 'aritram1@gmail.com.financeplanner';
-  static String tokenGrantType = 'password';
   static String pwdWithToken =  'financeplanner123W8oC4taee0H2GzxVbAqfVB14';
+  
+  static String tokenEndpoint = 'https://login.salesforce.com/services/oauth2/token';
+  static String tokenGrantType = 'password';
   static String compositeUrl = '/services/data/v53.0/composite/tree/';
 
   static String accessToken = '';
