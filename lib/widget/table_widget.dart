@@ -24,6 +24,9 @@ class _TableWidgetState extends State<TableWidget> {
     selectedRows = List.generate(widget.tableData.length, (index) => false);
   }
 
+  int _sortColumnIndex = 0;
+  bool _sortAscending = true;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -32,13 +35,13 @@ class _TableWidgetState extends State<TableWidget> {
           child: SingleChildScrollView(
             scrollDirection: Axis.vertical,
             child: DataTable(
-              columnSpacing: 18.0,
+              columnSpacing: 12.0,
               headingRowHeight: 40.0,
               decoration: BoxDecoration(
                 border: Border.all(width: 1.0, color: Colors.grey),
               ),
               sortAscending: true,
-              sortColumnIndex: 0,
+              // sortColumnIndex: 1, //Sorting TBImplemented
               columns: [
                 DataColumn(
                   label: Padding(
@@ -56,6 +59,7 @@ class _TableWidgetState extends State<TableWidget> {
                     child: Text(COLUMN_NAMES[1]),
                   ),
                   onSort: (columnIndex, ascending) {
+                    _sortColumn(columnIndex, ascending);
                     setState(() {});
                   },
                   numeric: false,
@@ -132,6 +136,29 @@ class _TableWidgetState extends State<TableWidget> {
         ),
       ],
     );
+  }
+
+  void _sortColumn(int columnIndex, bool ascending) {
+    setState(() {
+      _sortColumnIndex = columnIndex;
+      _sortAscending = ascending;
+
+      widget.tableData.sort((a, b) {
+        var aValue = a[columnIndex];
+        var bValue = b[columnIndex];
+
+        if (columnIndex == 1) {
+          // Assuming columns 1 and 2 are numeric, convert them to integers
+          return ascending ? int.parse(aValue) - int.parse(bValue) : int.parse(bValue) - int.parse(aValue);
+        } else if(columnIndex == 0){
+          // Assuming column 0 is non-numeric (e.g., names), perform a regular string comparison
+          return ascending ? aValue.compareTo(bValue) : bValue.compareTo(aValue);
+        }
+        else{
+          return 1; //default case
+        }
+      });
+    });
   }
 
   void _performCommonOperation() {
