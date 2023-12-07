@@ -124,13 +124,13 @@ class _TableWidgetState extends State<TableWidget> {
     // List<Map<String, dynamic>> fieldValuesMapList = [] ;
     for (int i = selectedRows.length - 1; i >= 0; i--) {
       if (selectedRows[i]) {
+        recordIds.add(widget.tableData[i][3]);
         // Map<String, dynamic> fieldValuesMap = {};
         // fieldValuesMap['Id'] = widget.tableData[i][3];
         // fieldValuesMap['FinPlan__Approved__c'] = true;
         log.d('Selected=>${widget.tableData[i]}');
         widget.tableData.removeAt(i);
         selectedRows.removeAt(i);
-        recordIds.add(widget.tableData[i][3]);
       }
     }
     log.d('fieldValues inside _performCommonOperation=>$recordIds');
