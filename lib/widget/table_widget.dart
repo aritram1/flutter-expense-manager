@@ -13,6 +13,7 @@ class TableWidget extends StatefulWidget {
 
 class _TableWidgetState extends State<TableWidget> {
   late List<bool> selectedRows;
+  final String _commaOperationName = 'Delete';
 
   @override
   void initState() {
@@ -62,7 +63,7 @@ class _TableWidgetState extends State<TableWidget> {
             // Replace this with your own logic
             _performCommonOperation();
           },
-          child: const Text('Common Operation'),
+          child: Text(_commaOperationName),
         ),
       ],
     );

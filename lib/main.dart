@@ -23,6 +23,7 @@ class MyTabs extends StatefulWidget {
 
 class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final String title = 'Expense Manager';
 
   @override
   void initState() {
@@ -34,11 +35,11 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Expense Manager'),
+        title: Text(title),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
+        children: const [
           TabData(tabIndex: 0, title: 'Credit/Debit'),
           TabData(tabIndex: 1, title: 'Investments'),
           TabData(tabIndex: 2, title: 'Another Category'),
@@ -46,7 +47,7 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
       ),
       bottomNavigationBar: TabBar(
         controller: _tabController,
-        tabs: [
+        tabs: const [
           Tab(text: 'Credit/Debit'),
           Tab(text: 'Investments'),
           Tab(text: 'Another'),
