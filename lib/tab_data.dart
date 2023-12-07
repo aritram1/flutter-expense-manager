@@ -1,32 +1,29 @@
-// ignore_for_file: use_key_in_widget_constructors, avoid_print, prefer_const_constructors_in_immutables
+// tab_data.dart
 
 import 'package:flutter/material.dart';
 import './widget/table_widget.dart';
+import './data_generator.dart';
 
 class TabData extends StatelessWidget {
   final int tabIndex;
+  final String title;
 
-  TabData({required this.tabIndex});
+  const TabData({Key? key, required this.tabIndex, required this.title})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    List<List<String>> tableData = DataGenerator.generateTableData();
+
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Implement tab-specific floating button logic here
-          print('Floating button pressed on Tab $tabIndex');
+          print('Floating button pressed on $title');
         },
         child: const Icon(Icons.add),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('Tab $tabIndex'),
-            TableData(tabIndex: tabIndex),
-          ],
-        ),
-      ),
+      body: TableWidget(tableData: tableData),
     );
   }
 }
