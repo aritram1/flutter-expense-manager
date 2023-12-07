@@ -8,7 +8,7 @@ import 'package:logger/logger.dart';
 class TabData extends StatelessWidget {
   final int tabIndex;
   final String title;
-  Logger log = Logger();
+  final Logger log = Logger();
 
   TabData({Key? key, required this.tabIndex, required this.title})
       : super(key: key);

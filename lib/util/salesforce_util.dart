@@ -13,7 +13,8 @@ class SalesforceUtil {
   
   static String tokenEndpoint = 'https://login.salesforce.com/services/oauth2/token';
   static String tokenGrantType = 'password';
-  static String compositeUrl = '/services/data/v53.0/composite/tree/';
+  static String compositeUrlForInsert = '/services/data/v53.0/composite/tree/';
+  static String customEndpointForUpdate = '/services/apexrest/updateApprovedField/';
   static String queryUrl = '/services/data/v53.0/query?q=';
 
   static String accessToken = '';
@@ -69,27 +70,31 @@ class SalesforceUtil {
     };
     return header;
   }
-  static String generateQueryEndpointUrl(String objAPIName, List<String> fieldList, int count){
+  static String generateQueryEndpointUrl(String objAPIName, List<String> fieldList, String whereClauseString, String orderByClauseString, int count){
     String query = 'SELECT';
-    String fields = '';
-    if(fieldList.isNotEmpty){
-      fields = fieldList.join(',');
-    }
-    else{
-      fields = 'count()';
-    }
-    query = '$query $fields FROM $objAPIName LIMIT $count';
+    String fields = fieldList.isNotEmpty ? fieldList.join(',') : 'count()';
+    String whereClause = whereClauseString != '' ? 'WHERE $whereClauseString' : '' ;
+    String orderByClause =  orderByClauseString != '' ? 'ORDER BY $orderByClauseString' : '';
+
+    query = '$query $fields FROM $objAPIName $whereClause $orderByClause LIMIT $count';
     log.d('Generated Query : $query');
+
     query = query.replaceAll(' ', '+');
-    //query = Uri.encodeComponent('$query $fields FROM $objAPIName LIMIT $count');
     log.d('Encoded Query : $query');
-    String endpointUrl = '$instanceUrl$queryUrl$query';
+    
+    final String endpointUrl = '$instanceUrl$queryUrl$query';
     return endpointUrl;
   }
 
   
-  static String generateInsertUpdateEndpointUrl(String objAPIName){
-    String endpointUrl = '$instanceUrl$compositeUrl$objAPIName'; //FinPlan__SMS_Message__c;
+  static String generateInsertUpdateEndpointUrl(String objAPIName, String opType){
+    String endpointUrl = '';
+    if(opType == 'insert'){
+      endpointUrl = '$instanceUrl$compositeUrlForInsert$objAPIName';
+    }
+    else if(opType == 'update'){
+      endpointUrl = '$instanceUrl$customEndpointForUpdate';
+    }
     log.d('Generated URL : $endpointUrl');
     return endpointUrl;
   }
@@ -148,20 +153,17 @@ class SalesforceUtil {
   }
 
   /////////////////////////////////////query method /////////////////////////////////////
-  static Future<Map<String, String>> queryFromSalesForce({required String objAPIName, List<String> fieldList = const [], int count = 10}) async {
-    return await SalesforceUtil._querySFData(objAPIName, fieldList, count);
-    // var v = await SalesforceUtil._querySFData(objAPIName, fieldList, count);
-    // log.d('V is $v');
-    // return v;
+  static Future<Map<String, String>> queryFromSalesForce({required String objAPIName, List<String> fieldList = const [], String whereClause = '', String orderByClause = '', int count = 10}) async {
+    return await SalesforceUtil._querySFData(objAPIName, fieldList, whereClause, orderByClause, count);
   }
 
-  static Future<Map<String, String>> _querySFData(String objAPIName, List<String> fieldList, int count) async {
+  static Future<Map<String, String>> _querySFData(String objAPIName, List<String> fieldList, String whereClause, String orderByClause, int count) async {
     if(accessToken == '') await loginToSalesforce();
     dynamic response;
     Map<String, String> responseData = <String, String>{};
     try{
       response = await http.get(
-        Uri.parse(generateQueryEndpointUrl(objAPIName, fieldList, count)),
+        Uri.parse(generateQueryEndpointUrl(objAPIName, fieldList, whereClause, orderByClause, count)),
         headers: generateHeader(),  
         // body: jsonEncode(generateBody(objAPIName, data)),
       );
@@ -194,7 +196,7 @@ class SalesforceUtil {
     dynamic response;
     try{
       response = await http.post(
-        Uri.parse(generateInsertUpdateEndpointUrl(objAPIName)),
+        Uri.parse(generateInsertUpdateEndpointUrl(objAPIName, 'insert')),
         headers: generateHeader(),
         body: jsonEncode(generateBody(objAPIName, data)),
       );
@@ -212,5 +214,56 @@ class SalesforceUtil {
       log.d('Error occurred while inserting data to Salesforce. Error is : $error');
       return error.toString();
     }
+  }
+
+
+  /////////////////////////////////////update method /////////////////////////////////////
+  // static Future<String> updateSalesforceData(String objAPIName, List<Map<String, dynamic>> data) async { 
+  static Future<String> updateSalesforceData(String objAPIName, List<String> recordIds) async { 
+    if(accessToken == '') await loginToSalesforce();
+    dynamic response;
+    try{
+      response = await http.post(
+        Uri.parse(generateInsertUpdateEndpointUrl(objAPIName, 'update')),
+        headers: generateHeader(),
+        body: jsonEncode(generateUpdateBody(objAPIName, recordIds)),
+      );
+      if(response.statusCode == 200){
+        final Map<dynamic, dynamic> data = json.decode(response.body);
+        log.d('Update Operation : ${data.toString()}');
+      } 
+      else {
+        // Log an error
+        log.d('Response code other than 200 detected : ${response.body}');
+      }
+      return response.body;
+    }
+    catch(error){
+      log.d('Error occurred while updating data to Salesforce. Error is : $error');
+      return error.toString();
+    }
+  }
+
+  // static Map<String, dynamic> generateUpdateBody(String objAPIName, List<Map<String, dynamic>> data){
+  static List<String> generateUpdateBody(String objAPIName, List<String> recordIds){
+    return recordIds;
+    // Map<String, dynamic> body = {};
+    // var allRecords = [];
+    // int count = 0;
+    // for(Map<String, dynamic> fieldValues in data){
+    //   Map<String, dynamic> each = {};
+    //   each['attributes'] = {
+    //     'type': objAPIName,
+    //     'referenceId': 'ref$count'
+    //   };
+    //   for(String fieldAPIName in fieldValues.keys){
+    //     each[fieldAPIName] = fieldValues[fieldAPIName];
+    //   }
+    //   allRecords.add(each);
+    //   count++;
+    // }
+    // body['records'] = allRecords;
+    // log.d('body in generateUpdateBody is => $body');
+    // return body;
   }
 }

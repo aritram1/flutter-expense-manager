@@ -27,7 +27,7 @@ class MyTabs extends StatefulWidget {
 class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final String title = 'Expense Manager';
-  Logger log = Logger();
+  final Logger log = Logger();
 
   @override
   void initState() {
