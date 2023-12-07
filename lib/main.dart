@@ -3,6 +3,7 @@
 // ignore_for_file: library_private_types_in_public_api, use_key_in_widget_constructors
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'tab_data.dart';
 import 'package:logger/logger.dart';
@@ -11,6 +12,7 @@ import './util/salesforce_util.dart';
 
 
 void main() {
+  debugPaintSizeEnabled = false;
   runApp(MyApp());
 }
 
