@@ -27,7 +27,7 @@ class MessageUtil {
       messages = await SmsQuery().querySms(
         kinds: smsKinds, // SmsQueryKind.inbox ,SmsQueryKind.sent, SmsMessageKind.draft
         address: sender, // +254712345789
-        count: count,    // 10
+        // count: count,    // 10
       );
     } 
     else {
@@ -56,8 +56,8 @@ class MessageUtil {
         "FinPlan__Received_At__c": sms.date.toString(),
         "FinPlan__Device__c": deviceName
       };
-      //print('record is $record');
       allRecords.add(record);
+      count++;
     }
     return allRecords;
   }
