@@ -1,7 +1,10 @@
 // main.dart
 
+// ignore_for_file: library_private_types_in_public_api, use_key_in_widget_constructors
+
 import 'package:flutter/material.dart';
 import 'tab_data.dart';
+import 'package:logger/logger.dart';
 
 void main() {
   runApp(MyApp());
@@ -24,6 +27,7 @@ class MyTabs extends StatefulWidget {
 class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final String title = 'Expense Manager';
+  Logger log = Logger();
 
   @override
   void initState() {
@@ -39,7 +43,7 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const [
+        children: [
           TabData(tabIndex: 0, title: 'Credit/Debit'),
           TabData(tabIndex: 1, title: 'Investments'),
           TabData(tabIndex: 2, title: 'Another Category'),

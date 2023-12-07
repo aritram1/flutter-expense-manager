@@ -1,5 +1,5 @@
 // table_widget.dart
-
+import 'package:logger/logger.dart';
 import 'package:flutter/material.dart';
 
 class TableWidget extends StatefulWidget {
@@ -14,7 +14,8 @@ class TableWidget extends StatefulWidget {
 class _TableWidgetState extends State<TableWidget> {
   late List<bool> selectedRows;
   final String _commaOperationName = 'Delete';
-
+  static Logger log = Logger();
+  
   @override
   void initState() {
     super.initState();

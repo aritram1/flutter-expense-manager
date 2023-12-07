@@ -14,6 +14,7 @@ class SalesforceUtil {
   static String tokenEndpoint = 'https://login.salesforce.com/services/oauth2/token';
   static String tokenGrantType = 'password';
   static String compositeUrl = '/services/data/v53.0/composite/tree/';
+  static String queryUrl = '/services/data/v53.0/query?q=';
 
   static String accessToken = '';
   static String instanceUrl = '';
@@ -68,11 +69,34 @@ class SalesforceUtil {
     };
     return header;
   }
-  static String generateEndpointUrl(String objAPIName){
+  static String generateQueryEndpointUrl(String objAPIName, List<String> fieldList, int count){
+    String query = 'SELECT';
+    String fields = '';
+    if(fieldList.isNotEmpty){
+      fields = fieldList.join(',');
+    }
+    else{
+      fields = 'count()';
+    }
+    query = '$query $fields FROM $objAPIName LIMIT $count';
+    log.d('Generated Query : $query');
+    query = query.replaceAll(' ', '+');
+    //query = Uri.encodeComponent('$query $fields FROM $objAPIName LIMIT $count');
+    log.d('Encoded Query : $query');
+    String endpointUrl = '$instanceUrl$queryUrl$query';
+    return endpointUrl;
+  }
+
+  
+  static String generateInsertUpdateEndpointUrl(String objAPIName){
     String endpointUrl = '$instanceUrl$compositeUrl$objAPIName'; //FinPlan__SMS_Message__c;
     log.d('Generated URL : $endpointUrl');
     return endpointUrl;
   }
+
+  
+
+
   static Map<String, dynamic> generateBody(String objAPIName, List<Map<String, dynamic>> fieldNameValuePairs){
     Map<String, dynamic> body = {};
     var allRecords = [];
@@ -123,13 +147,54 @@ class SalesforceUtil {
     return result;
   }
 
+  /////////////////////////////////////query method /////////////////////////////////////
+  static Future<Map<String, String>> queryFromSalesForce({required String objAPIName, List<String> fieldList = const [], int count = 10}) async {
+    return await SalesforceUtil._querySFData(objAPIName, fieldList, count);
+    // var v = await SalesforceUtil._querySFData(objAPIName, fieldList, count);
+    // log.d('V is $v');
+    // return v;
+  }
+
+  static Future<Map<String, String>> _querySFData(String objAPIName, List<String> fieldList, int count) async {
+    if(accessToken == '') await loginToSalesforce();
+    dynamic response;
+    Map<String, String> responseData = <String, String>{};
+    try{
+      response = await http.get(
+        Uri.parse(generateQueryEndpointUrl(objAPIName, fieldList, count)),
+        headers: generateHeader(),  
+        // body: jsonEncode(generateBody(objAPIName, data)),
+      );
+      if (response.statusCode == 200) {
+        final Map<dynamic, dynamic> resp = json.decode(response.body);
+        log.d('Query Operation : ${resp.toString()}');
+
+        // Convert the 'resp' map to a JSON-formatted string
+        String jsonData = json.encode(resp);
+
+        responseData['data'] = jsonData;
+      }
+      else {
+        // Log an error
+        log.d('Response code other than 200 detected : ${response.body}');
+        responseData['error'] = response.body;
+      }
+      return responseData;
+    }
+    catch(error){
+      log.d('Error occurred while querying data from Salesforce. Error is : $error');
+      responseData['error'] = error.toString();
+      return responseData;
+    }
+  }
+  
   /////////////////////////////////////insert method /////////////////////////////////////
   static Future<String> _insertSFData(String objAPIName, List<Map<String, dynamic>> data) async { 
     if(accessToken == '') await loginToSalesforce();
     dynamic response;
     try{
       response = await http.post(
-        Uri.parse(generateEndpointUrl(objAPIName)),
+        Uri.parse(generateInsertUpdateEndpointUrl(objAPIName)),
         headers: generateHeader(),
         body: jsonEncode(generateBody(objAPIName, data)),
       );
