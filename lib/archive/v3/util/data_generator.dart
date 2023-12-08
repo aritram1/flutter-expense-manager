@@ -1,7 +1,7 @@
 // data_generator.dart
 import 'dart:convert';
 import 'package:logger/logger.dart';
-import 'util/salesforce_util.dart';
+import './salesforce_util.dart';
 
 class DataGenerator {
   static Logger log = Logger();
