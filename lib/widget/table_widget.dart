@@ -24,6 +24,9 @@ class _TableWidgetState extends State<TableWidget> {
     selectedRows = List.generate(widget.tableData.length, (index) => false);
   }
 
+  int _sortColumnIndex = 0;
+  bool _sortAscending = true;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -32,13 +35,13 @@ class _TableWidgetState extends State<TableWidget> {
           child: SingleChildScrollView(
             scrollDirection: Axis.vertical,
             child: DataTable(
-              columnSpacing: 16.0, // Adjust the spacing between columns
-              headingRowHeight: 40.0, // Adjust the height of the heading row
+              columnSpacing: 12.0,
+              headingRowHeight: 40.0,
               decoration: BoxDecoration(
-                border: Border.all(width: 1.0, color: Colors.grey), // Customize the table border
+                border: Border.all(width: 1.0, color: Colors.grey),
               ),
               sortAscending: true,
-              sortColumnIndex: 0,
+              // sortColumnIndex: 1, //Sorting TBImplemented
               columns: [
                 DataColumn(
                   label: Padding(
@@ -56,6 +59,7 @@ class _TableWidgetState extends State<TableWidget> {
                     child: Text(COLUMN_NAMES[1]),
                   ),
                   onSort: (columnIndex, ascending) {
+                    _sortColumn(columnIndex, ascending);
                     setState(() {});
                   },
                   numeric: false,
@@ -75,6 +79,11 @@ class _TableWidgetState extends State<TableWidget> {
                 final rowIndex = entry.key;
                 final row = entry.value;
 
+                String col1 = row[0].replaceAll('VPA', '').replaceAll('paytm', '');
+                col1 = col1.length <= 15 ? col1 : col1.substring(0,15);
+                final String col2 = row[1];
+                final String col3 = row[2];
+                
                 return DataRow(
                   selected: selectedRows[rowIndex],
                   onSelectChanged: (selected) {
@@ -88,19 +97,31 @@ class _TableWidgetState extends State<TableWidget> {
                     DataCell(
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text(row[0]),
+                        child: Text(
+                          col1, // Value of the Column data
+                          overflow: TextOverflow.clip,
+                          maxLines: 1,
+                        ),
                       ),
                     ),
                     DataCell(
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text(row[1]),
+                        child: Text(
+                          col2, // Value of the Column data
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                        ),
                       ),
                     ),
                     DataCell(
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text(row[2]),
+                        child: Text(
+                          col3, // Value of the Column data
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                        ),
                       ),
                     ),
                   ],
@@ -110,36 +131,52 @@ class _TableWidgetState extends State<TableWidget> {
           ),
         ),
         ElevatedButton(
-          onPressed: () {
-            _performCommonOperation();
-          },
+          onPressed: _performCommonOperation,
           child: Text(_commaOperationName),
         ),
       ],
     );
   }
 
+  void _sortColumn(int columnIndex, bool ascending) {
+    setState(() {
+      _sortColumnIndex = columnIndex;
+      _sortAscending = ascending;
+
+      widget.tableData.sort((a, b) {
+        var aValue = a[columnIndex];
+        var bValue = b[columnIndex];
+
+        if (columnIndex == 1) {
+          // Assuming columns 1 and 2 are numeric, convert them to integers
+          return ascending ? int.parse(aValue) - int.parse(bValue) : int.parse(bValue) - int.parse(aValue);
+        } else if(columnIndex == 0){
+          // Assuming column 0 is non-numeric (e.g., names), perform a regular string comparison
+          return ascending ? aValue.compareTo(bValue) : bValue.compareTo(aValue);
+        }
+        else{
+          return 1; //default case
+        }
+      });
+    });
+  }
+
   void _performCommonOperation() {
     List<String> recordIds = [];
-    // List<Map<String, dynamic>> fieldValuesMapList = [] ;
+
     for (int i = selectedRows.length - 1; i >= 0; i--) {
       if (selectedRows[i]) {
         recordIds.add(widget.tableData[i][3]);
-        // Map<String, dynamic> fieldValuesMap = {};
-        // fieldValuesMap['Id'] = widget.tableData[i][3];
-        // fieldValuesMap['FinPlan__Approved__c'] = true;
         log.d('Selected=>${widget.tableData[i]}');
         widget.tableData.removeAt(i);
         selectedRows.removeAt(i);
       }
     }
+
     log.d('fieldValues inside _performCommonOperation=>$recordIds');
-    
-    // update in SF
+
     SalesforceUtil.updateSalesforceData('FinPlan__SMS_Message__c', recordIds);
-    
+
     setState(() {});
   }
-
-
 }
