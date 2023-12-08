@@ -1,7 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
-import './widget/table_widget.dart';
+import '../widget/table_widget.dart';
 import './data_generator.dart';
 import 'package:logger/logger.dart';
 

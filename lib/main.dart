@@ -4,10 +4,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
-import 'tab_data.dart';
+import 'util/tab_data.dart';
 import 'package:logger/logger.dart';
-import './util/archive/message_util.dart';
-import './util/salesforce_util.dart';
+import 'util/message_util.dart';
+import 'util/salesforce_util.dart';
 
 
 void main() {
