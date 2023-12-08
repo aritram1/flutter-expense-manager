@@ -9,23 +9,23 @@ class DataGenerator {
   static Future<List<Map<String, dynamic>>> generateTab1Data() async {
     List<Map<String, dynamic>> generatedData = [];
 
-    Map<String, String> response = await SalesforceUtil.queryFromSalesForce(
-      objAPIName: 'FinPlan__SMS_Message__c', 
-      fieldList: ['Id', 'CreatedDate', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c', 'FinPlan__Formula_Amount__c'], 
-      whereClause: 'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true AND FinPlan__Formula_Amount__c > 0',
-      orderByClause: 'CreatedDate desc',
-      count: 120,
-    );
-    String? error = response['error'];
-    String? data = response['data'];
+    try {
+      Map<String, String> response = await SalesforceUtil.queryFromSalesForce(
+        objAPIName: 'FinPlan__SMS_Message__c', 
+        fieldList: ['Id', 'CreatedDate', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c', 'FinPlan__Formula_Amount__c'], 
+        whereClause: 'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true AND FinPlan__Formula_Amount__c > 0',
+        orderByClause: 'CreatedDate desc',
+        count: 120,
+      );
+      String? error = response['error'];
+      String? data = response['data'];
 
-    log.d('Error: $error');
-    log.d('Data: $data');
-    
-    if (error != null) {
-      log.d('Error occurred while querying inside generateTab1Data : ${response['error']}');
-    } else if (data != null) {
-      try {
+      log.d('Error: $error');
+      log.d('Data: $data');
+      
+      if (error != null) {
+        log.d('Error occurred while querying inside generateTab1Data : ${response['error']}');
+      } else if (data != null) {
         Map<String, dynamic> jsonData = json.decode(data);
         if (jsonData['records'] != null) {
           log.d('response in generateTab1Data -> $jsonData');
@@ -47,10 +47,11 @@ class DataGenerator {
             });
           }
         }
-      } catch (error) {
-        log.d('Error 2 : $error');
       }
+    } catch (error) {
+      log.d('Error 2 : $error');
     }
+
     log.d('Inside generateTab1Data=>$generatedData');
     return generatedData;
   }
@@ -78,6 +79,6 @@ class DataGenerator {
     });
     return data;
   }
-  
-  // ... (existing code)
+
+  // Add more methods or modify existing ones based on your requirements
 }

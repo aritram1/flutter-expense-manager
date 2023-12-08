@@ -18,7 +18,7 @@ class TabData extends StatefulWidget {
 }
 
 class _TabDataState extends State<TabData> {
-  late List<dynamic> _tableData = [];
+  List<dynamic> _tableData = [];
 
   @override
   void initState() {
@@ -27,53 +27,37 @@ class _TabDataState extends State<TabData> {
   }
 
   Future<void> _loadTableData() async {
-    switch (widget.tabIndex) {
-      case 0:
-        _tableData = await DataGenerator.generateTab1Data();
-        break;
-      case 1:
-        if (widget.isCardLayout) {
-          _tableData = await DataGenerator.generateTab1Data(); // Adjust this based on your needs
-        } else {
-          _tableData = await DataGenerator.generateTab2Data();
-        }
-        break;
-      case 2:
-        _tableData = await DataGenerator.generateTab3Data();
-        break;
+    try {
+      switch (widget.tabIndex) {
+        case 0:
+          _tableData = await DataGenerator.generateTab1Data();
+          break;
+        case 1:
+          if (widget.isCardLayout) {
+            _tableData = await DataGenerator.generateTab1Data();
+          } else {
+            _tableData = await DataGenerator.generateTab2Data();
+          }
+          break;
+        case 2:
+          _tableData = await DataGenerator.generateTab3Data();
+          break;
+      }
+    } catch (error) {
+      print('Error loading data: $error');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_tableData == null) {
+    if (_tableData == null || _tableData.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
     if (widget.isCardLayout) {
       return buildCardLayoutWithData(_tableData.cast<Map<String, dynamic>>());
     } else {
-      return FutureBuilder<List<dynamic>>(
-        future: fetchData(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: SizedBox(
-                width: 24.0,
-                height: 24.0,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.0,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-                ),
-              ),
-            );
-          } else if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          } else {
-            return buildWithData(snapshot.data ?? []);
-          }
-        },
-      );
+      return buildWithData(_tableData);
     }
   }
 
@@ -91,23 +75,35 @@ class _TabDataState extends State<TabData> {
   }
 
   Widget buildCardLayoutWithData(List<Map<String, dynamic>> cardData) {
-    return ListView.builder(
-      itemCount: cardData.length,
-      itemBuilder: (context, index) {
-        final data = cardData[index];
-        return CardView(
-          paidTo: data['beneficiary'],
-          amount: data['amount'],
-          date: data['date'],
-        );
-      },
-    );
-  }
+  return ListView.builder(
+    itemCount: cardData.length,
+    itemBuilder: (context, index) {
+      final data = cardData[index];
+      return CardView(
+        paidTo: data['beneficiary'],
+        amount: data['amount'],
+        date: data['date'],
+        isCardLayout: true, // Specify that it's a card layout
+      );
+    },
+  );
+}
+
 
   Widget buildWithData(List<dynamic> tableData) {
-    // Adjust this method based on your needs
-    return Container(
-      // Your tabular layout widget goes here
-    );
-  }
+  return ListView.builder(
+    itemCount: tableData.length,
+    itemBuilder: (context, index) {
+      final data = tableData[index];
+      // Assuming data is a list of strings in this example
+      return ListTile(
+        title: Text(data['beneficiary']),  // Adjust the key based on your data structure
+        subtitle: Text(data['amount']),    // Adjust the key based on your data structure
+        trailing: Text(data['date']),       // Adjust the key based on your data structure
+        // Additional widgets or customization can be added here
+      );
+    },
+  );
+}
+
 }

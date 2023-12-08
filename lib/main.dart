@@ -54,7 +54,6 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
             onPressed: handleSMSSync,
             tooltip: 'Sync from Phone',
           ),
-          // Add more action buttons if needed
         ],
       ),
       body: TabBarView(
