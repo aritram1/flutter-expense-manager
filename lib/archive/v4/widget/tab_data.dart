@@ -57,9 +57,9 @@ class TabData extends StatelessWidget {
         onPressed: () {
           // Implement tab-specific floating button logic here
           print('Floating button pressed on $title $tabIndex');
-          // if(tabIndex == 0){
-          //   fetchData(); //TBD
-          // }
+          if(tabIndex == 0){
+            fetchData(); //TBD
+          }
         },
         child: const Icon(Icons.refresh),
       ),
