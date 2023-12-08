@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_phone_app/util/message_util.dart';
 import 'package:flutter_phone_app/util/salesforce_util.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
-import 'widget/messages_list_view.dart';
+import '../../util/archive/widget/messages_list_view.dart';
 
 ///////////////////////////////Main method to run////////////////////////////////////
 void main() {
