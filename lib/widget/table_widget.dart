@@ -1,4 +1,3 @@
-// table_widget.dart
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import '../util/salesforce_util.dart';
@@ -18,14 +17,14 @@ class _TableWidgetState extends State<TableWidget> {
   List<String> COLUMN_NAMES = ['Paid To', 'Amount', 'Date'];
   static final Logger log = Logger();
 
+  int _sortColumnIndex = 0;
+  bool _sortAscending = true;
+
   @override
   void initState() {
     super.initState();
     selectedRows = List.generate(widget.tableData.length, (index) => false);
   }
-
-  int _sortColumnIndex = 0;
-  bool _sortAscending = true;
 
   @override
   Widget build(BuildContext context) {
@@ -35,28 +34,17 @@ class _TableWidgetState extends State<TableWidget> {
           child: SingleChildScrollView(
             scrollDirection: Axis.vertical,
             child: DataTable(
-              columnSpacing: 12.0,
+              columnSpacing: 1.0,
               headingRowHeight: 40.0,
-              decoration: BoxDecoration(
-                border: Border.all(width: 1.0, color: Colors.grey),
-              ),
-              sortAscending: true,
-              // sortColumnIndex: 1, //Sorting TBImplemented
+              sortAscending: _sortAscending,
               columns: [
                 DataColumn(
-                  label: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(COLUMN_NAMES[0]),
-                  ),
-                  onSort: (columnIndex, ascending) {
-                    setState(() {});
-                  },
-                  numeric: false,
-                ),
-                DataColumn(
-                  label: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(COLUMN_NAMES[1]),
+                  label: Container(
+                    width: MediaQuery.of(context).size.width * 0.35,
+                    child: Padding(
+                      padding: const EdgeInsets.all(1.0),
+                      child: Text(COLUMN_NAMES[0]),
+                    ),
                   ),
                   onSort: (columnIndex, ascending) {
                     _sortColumn(columnIndex, ascending);
@@ -65,11 +53,29 @@ class _TableWidgetState extends State<TableWidget> {
                   numeric: false,
                 ),
                 DataColumn(
-                  label: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(COLUMN_NAMES[2]),
+                  label: Container(
+                    width: MediaQuery.of(context).size.width * 0.15,
+                    child: Padding(
+                      padding: const EdgeInsets.all(1.0),
+                      child: Text(COLUMN_NAMES[1]),
+                    ),
                   ),
                   onSort: (columnIndex, ascending) {
+                    _sortColumn(columnIndex, ascending);
+                    setState(() {});
+                  },
+                  numeric: false,
+                ),
+                DataColumn(
+                  label: Container(
+                    width: MediaQuery.of(context).size.width * 0.15,
+                    child: Padding(
+                      padding: const EdgeInsets.all(1.0),
+                      child: Text(COLUMN_NAMES[2]),
+                    ),
+                  ),
+                  onSort: (columnIndex, ascending) {
+                    _sortColumn(columnIndex, ascending);
                     setState(() {});
                   },
                   numeric: true,
@@ -80,10 +86,10 @@ class _TableWidgetState extends State<TableWidget> {
                 final row = entry.value;
 
                 String col1 = row[0].replaceAll('VPA', '').replaceAll('paytm', '');
-                col1 = col1.length <= 15 ? col1 : col1.substring(0,15);
+                col1 = col1.length <= 15 ? col1 : col1.substring(0, 15);
                 final String col2 = row[1];
                 final String col3 = row[2];
-                
+
                 return DataRow(
                   selected: selectedRows[rowIndex],
                   onSelectChanged: (selected) {
@@ -95,32 +101,41 @@ class _TableWidgetState extends State<TableWidget> {
                   },
                   cells: [
                     DataCell(
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          col1, // Value of the Column data
-                          overflow: TextOverflow.clip,
-                          maxLines: 1,
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.35,
+                        child: Padding(
+                          padding: const EdgeInsets.all(1.0),
+                          child: Text(
+                            col1,
+                            overflow: TextOverflow.clip,
+                            maxLines: 2,
+                          ),
                         ),
                       ),
                     ),
                     DataCell(
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          col2, // Value of the Column data
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 2,
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.15,
+                        child: Padding(
+                          padding: const EdgeInsets.all(1.0),
+                          child: Text(
+                            col2,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
+                          ),
                         ),
                       ),
                     ),
                     DataCell(
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          col3, // Value of the Column data
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 2,
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.15,
+                        child: Padding(
+                          padding: const EdgeInsets.all(1.0),
+                          child: Text(
+                            col3,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
+                          ),
                         ),
                       ),
                     ),
@@ -130,9 +145,12 @@ class _TableWidgetState extends State<TableWidget> {
             ),
           ),
         ),
-        ElevatedButton(
-          onPressed: _performCommonOperation,
-          child: Text(_commaOperationName),
+        Visibility(
+          visible: selectedRows.any((selected) => selected),
+          child: ElevatedButton(
+            onPressed: _performCommonOperation,
+            child: Text(_commaOperationName),
+          ),
         ),
       ],
     );
@@ -148,14 +166,11 @@ class _TableWidgetState extends State<TableWidget> {
         var bValue = b[columnIndex];
 
         if (columnIndex == 1) {
-          // Assuming columns 1 and 2 are numeric, convert them to integers
           return ascending ? int.parse(aValue) - int.parse(bValue) : int.parse(bValue) - int.parse(aValue);
-        } else if(columnIndex == 0){
-          // Assuming column 0 is non-numeric (e.g., names), perform a regular string comparison
+        } else if (columnIndex == 0) {
           return ascending ? aValue.compareTo(bValue) : bValue.compareTo(aValue);
-        }
-        else{
-          return 1; //default case
+        } else {
+          return 1;
         }
       });
     });
