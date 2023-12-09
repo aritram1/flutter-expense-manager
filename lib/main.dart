@@ -68,45 +68,44 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-  title: Text(title),
-  actions: [
-    IconButton(
-      icon: const Icon(Icons.sync),
-      onPressed: () async {
-        // Show loading dialog
-        showDialog(
-          context: context,
-          barrierDismissible: false, // Prevent dialog dismissal on tap outside
-          builder: (BuildContext dialogContext) {
-            return const Dialog(
-              child: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CircularProgressIndicator(),
-                    SizedBox(width: 16.0),
-                    Text("Syncing..."),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
+        title: Text(title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.sync),
+            onPressed: () async {
+              // Show loading dialog
+              showDialog(
+                context: context,
+                barrierDismissible: false, // Prevent dialog dismissal on tap outside
+                builder: (BuildContext dialogContext) {
+                  return const Dialog(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(width: 16.0),
+                          Text("Syncing..."),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
 
-        // Perform the sync operation
-        String result = await handleSMSSync();
-        log.d('Handle Sync Message Result => $result');
+              // Perform the sync operation
+              String result = await handleSMSSync();
+              log.d('Handle Sync Message Result => $result');
 
-        // Close the loading dialog
-        Navigator.of(context).pop();
-      },
-      tooltip: 'Sync from Phone',
-    ),
-    // Add more action buttons if needed
-  ],
-)
-,
+              // Close the loading dialog
+              Navigator.of(context).pop();
+            },
+            tooltip: 'Sync from Phone',
+          ),
+          // Add more action buttons if needed
+        ],
+      ),
       body: TabBarView(
         controller: _tabController,
         children: const [
