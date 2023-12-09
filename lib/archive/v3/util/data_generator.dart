@@ -39,7 +39,7 @@ class DataGenerator {
             String amount = (recordMap['FinPlan__Formula_Amount__c'] != null) ? recordMap['FinPlan__Formula_Amount__c'].toString() : 'N/A' ;
             
             
-            String date = recordMap['CreatedDate'].substring(5,10);
+            String date = recordMap['FinPlan__Received_At_formula__c'].substring(5,10);
             String formattedDate = '${date.split('-')[1]}/${date.split('-')[0]}';
             
             generatedData.add([beneficiary, amount, formattedDate, id]);

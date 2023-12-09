@@ -1,7 +1,7 @@
+// ignore: depend_on_referenced_packages
 import 'dart:convert';
 import 'dart:core';
 import 'package:http/http.dart' as http;
-// ignore: depend_on_referenced_packages
 import 'package:logger/logger.dart';
 
 class SalesforceUtil {
@@ -70,13 +70,13 @@ class SalesforceUtil {
     };
     return header;
   }
-  static String generateQueryEndpointUrl(String objAPIName, List<String> fieldList, String whereClauseString, String orderByClauseString, int count){
-    String query = 'SELECT';
+  static String generateQueryEndpointUrl(String objAPIName, List<String> fieldList, String whereClauseString, String orderByClauseString, int? count){
     String fields = fieldList.isNotEmpty ? fieldList.join(',') : 'count()';
     String whereClause = whereClauseString != '' ? 'WHERE $whereClauseString' : '' ;
     String orderByClause =  orderByClauseString != '' ? 'ORDER BY $orderByClauseString' : '';
+    String limitCount = (count != null && count > 0) ? 'LIMIT $count' : '';
 
-    query = '$query $fields FROM $objAPIName $whereClause $orderByClause LIMIT $count';
+    String query = 'SELECT $fields FROM $objAPIName $whereClause $orderByClause $limitCount';
     log.d('Generated Query : $query');
 
     query = query.replaceAll(' ', '+');
@@ -153,11 +153,11 @@ class SalesforceUtil {
   }
 
   /////////////////////////////////////query method /////////////////////////////////////
-  static Future<Map<String, String>> queryFromSalesForce({required String objAPIName, List<String> fieldList = const [], String whereClause = '', String orderByClause = '', int count = 10}) async {
+  static Future<Map<String, String>> queryFromSalesForce({required String objAPIName, List<String> fieldList = const [], String whereClause = '', String orderByClause = '', int? count}) async {
     return await SalesforceUtil._querySFData(objAPIName, fieldList, whereClause, orderByClause, count);
   }
 
-  static Future<Map<String, String>> _querySFData(String objAPIName, List<String> fieldList, String whereClause, String orderByClause, int count) async {
+  static Future<Map<String, String>> _querySFData(String objAPIName, List<String> fieldList, String whereClause, String orderByClause, int? count) async {
     if(accessToken == '') await loginToSalesforce();
     dynamic response;
     Map<String, String> responseData = <String, String>{};

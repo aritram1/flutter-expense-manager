@@ -11,10 +11,10 @@ class DataGenerator {
 
     Map<String, String> response = await SalesforceUtil.queryFromSalesForce(
       objAPIName: 'FinPlan__SMS_Message__c', 
-      fieldList: ['Id', 'CreatedDate', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c', 'FinPlan__Formula_Amount__c'], 
+      fieldList: ['Id', 'FinPlan__Received_At_formula__c', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c', 'FinPlan__Formula_Amount__c'], 
       whereClause: 'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true AND FinPlan__Formula_Amount__c > 0',
-      orderByClause: 'CreatedDate desc',
-      count : 120
+      orderByClause: 'FinPlan__Received_At_formula__c desc',
+      // count : 120
       );
     String? error = response['error'];
     String? data = response['data'];
@@ -39,7 +39,7 @@ class DataGenerator {
             String amount = (recordMap['FinPlan__Formula_Amount__c'] != null) ? recordMap['FinPlan__Formula_Amount__c'].toString() : 'N/A' ;
             
             
-            String date = recordMap['CreatedDate'].substring(5,10);
+            String date = recordMap['FinPlan__Received_At_formula__c'].substring(5,10);
             String formattedDate = '${date.split('-')[1]}/${date.split('-')[0]}';
             
             generatedData.add([beneficiary, amount, formattedDate, id]);
