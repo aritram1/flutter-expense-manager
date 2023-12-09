@@ -2,6 +2,8 @@
 
 // ignore_for_file: library_private_types_in_public_api, use_key_in_widget_constructors
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'widget/tab_data.dart';
@@ -39,44 +41,86 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
     _tabController = TabController(length: 3, vsync: this);
   }
 
-  void handleSMSSync() async {
+  Future<String> handleSMSSync() async {
+    String resultString = '';
     // Your logic for handling SMS sync goes here
     log.d('Syncing SMS data...');
     List<SmsMessage> messages = await MessageUtil.getMessages();
     List<Map<String, dynamic>> processedMessages = await MessageUtil.convert(messages);
-    String result = await SalesforceUtil.saveToSalesForce('FinPlan__SMS_Message__c', processedMessages);
-    log.d('RESULT IS->$result');
-    // Add your syncing logic here
+    String response = await SalesforceUtil.saveToSalesForce('FinPlan__SMS_Message__c', processedMessages);
+    log.d('response IS->$response');
+
+    try{
+      Map<String, dynamic> resultMap = jsonDecode(response);
+      if (resultMap['hasErrors'] == true && resultMap['results'].isNotEmpty) {
+        resultString = resultMap['results'][0]['errors'][0]['message'];
+      } else {
+        resultString = 'Success';
+      }
+    }
+    catch(error){
+      resultString = error.toString();
+    }
+    return resultString;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.sync),
-            onPressed: handleSMSSync,
-            tooltip: 'Sync from Phone',
-          ),
-          // Add more action buttons if needed
-        ],
-      ),
+  title: Text(title),
+  actions: [
+    IconButton(
+      icon: const Icon(Icons.sync),
+      onPressed: () async {
+        // Show loading dialog
+        showDialog(
+          context: context,
+          barrierDismissible: false, // Prevent dialog dismissal on tap outside
+          builder: (BuildContext dialogContext) {
+            return const Dialog(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(width: 16.0),
+                    Text("Syncing..."),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+
+        // Perform the sync operation
+        String result = await handleSMSSync();
+        log.d('Handle Sync Message Result => $result');
+
+        // Close the loading dialog
+        Navigator.of(context).pop();
+      },
+      tooltip: 'Sync from Phone',
+    ),
+    // Add more action buttons if needed
+  ],
+)
+,
       body: TabBarView(
         controller: _tabController,
-        children: [
-          TabData(tabIndex: 0, title: 'Credit/Debit'),
-          TabData(tabIndex: 1, title: 'Investments'),
-          TabData(tabIndex: 2, title: 'Another Category'),
+        children: const [
+          TabData(tabIndex: 0, title: 'Transactions'),
+          TabData(tabIndex: 1, title: 'View Expenses'),
+          TabData(tabIndex: 2, title: 'Investments'),
         ],
       ),
       bottomNavigationBar: TabBar(
         controller: _tabController,
         tabs: const [
-          Tab(text: 'Credit/Debit'),
+          Tab(text: 'Transactions'),
+          Tab(text: 'View Expenses'),
           Tab(text: 'Investments'),
-          Tab(text: 'Another'),
         ],
       ),
     );

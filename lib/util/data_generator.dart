@@ -14,7 +14,7 @@ class DataGenerator {
       fieldList: ['Id', 'FinPlan__Received_At_formula__c', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c', 'FinPlan__Formula_Amount__c'], 
       whereClause: 'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true AND FinPlan__Formula_Amount__c > 0',
       orderByClause: 'FinPlan__Received_At_formula__c desc',
-      // count : 120
+      //count : 120
       );
     String? error = response['error'];
     String? data = response['data'];
@@ -77,6 +77,19 @@ class DataGenerator {
       ];  
     });
     return data;
+  }
+
+  static Future<String> addExpenseToSalesforce(String amount, String paidTo, String details, DateTime selectedDate) async {
+    List<Map<String, dynamic>> data = [];
+    Map<String, dynamic> each = {};
+    each['FinPlan__Amount_Value__c'] = amount;
+    each['FinPlan__Beneficiary__c'] = paidTo;
+    each['FinPlan__Content__c'] = details;
+    each['FinPlan__Received_At__c'] = selectedDate.toString();
+    each['FinPlan__sender__c'] = 'N/A';
+    
+    data.add(each);
+    return await SalesforceUtil.saveToSalesForce('FinPlan__SMS_Message__c', data);
   }
 
   

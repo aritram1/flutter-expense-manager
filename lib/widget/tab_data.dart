@@ -1,45 +1,41 @@
-// ignore_for_file: avoid_print
+// tab_data.dart
+// ignore_for_file: library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
 import 'table_widget.dart';
-import '../util/data_generator.dart';
 import 'package:logger/logger.dart';
+import '../widget/expense_entry_dialog.dart';
+import '../util/data_generator.dart'; // Import the DataGenerator
 
-class TabData extends StatelessWidget {
+class TabData extends StatefulWidget {
   final int tabIndex;
   final String title;
-  final Logger log = Logger();
-
-  TabData({Key? key, required this.tabIndex, required this.title})
+  
+  const TabData({Key? key, required this.tabIndex, required this.title})
       : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<List<String>>>(
-      future: fetchData(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: SizedBox(
-              width: 24.0,
-              height: 24.0,
-              child: CircularProgressIndicator(
-                strokeWidth: 2.0,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-              ),
-            ),
-          );
-        } else if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        } else {
-          return buildWithData(snapshot.data ?? []);
-        }
-      },
-    );
+  _TabDataState createState() => _TabDataState();
+}
+
+class _TabDataState extends State<TabData> {
+
+  List<List<String>> tableData = [];
+  final Logger log = Logger();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchData();
+  }
+
+  Future<void> _fetchData() async {
+    tableData = await fetchData();
+    setState(() {}); // Trigger a rebuild
   }
 
   Future<List<List<String>>> fetchData() async {
-    switch (tabIndex) {
+    switch (widget.tabIndex) {
       case 0:
         return await DataGenerator.generateTab1Data();
       case 1:
@@ -51,19 +47,41 @@ class TabData extends StatelessWidget {
     }
   }
 
-  Widget buildWithData(List<List<String>> tableData) {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Implement tab-specific floating button logic here
-          print('Floating button pressed on $title $tabIndex');
-          if(tabIndex == 0){
-            fetchData(); //TBD
-          }
+          // Show data entry screen
+          _showDataEntryDialog();
         },
         child: const Icon(Icons.add),
       ),
-      body: TableWidget(tableData: tableData),
+      body: tableData.isNotEmpty
+            ? TableWidget(tableData: tableData)
+            : const Center(
+                child: CircularProgressIndicator(),
+              ),
+    );
+  }
+
+  Future<void> _showDataEntryDialog() async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return DataEntryDialog(
+          onSave: (amount, paidTo, details, selectedDate) {
+            // Handle data entry logic here
+            log.d('Amount: $amount');
+            log.d('Paid To: $paidTo');
+            log.d('Details: $details');
+            log.d('Selected Date: $selectedDate');
+
+            // You can process the data or save it as needed
+            _fetchData(); // Refresh the table data
+          },
+        );
+      },
     );
   }
 }
