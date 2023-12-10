@@ -55,16 +55,18 @@ class DataGenerator {
   } 
 
 
-  static Future<List<List<String>>> generateTab2Data(DateTime selectedDate) async {
+  static Future<List<List<String>>> generateTab2Data(DateTime startDate, DateTime endDate) async {
     log.d('here 1');
-    log.d('Inside generate tab2 data, selected date is => $selectedDate');
-    String formattedDate = selectedDate.toString().split(' ')[0];
+    log.d('Inside generate tab2 data, startDate date is => $startDate');
+    log.d('Inside generate tab2 data, endDate date is => $endDate');
+    String formattedStartDate = startDate.toString().split(' ')[0];
+    String formattedEndDate = endDate.toString().split(' ')[0];
     List<List<String>> generatedData = [];
     log.d('here 2');
     Map<String, String> response = await SalesforceUtil.queryFromSalesForce(
       objAPIName: 'FinPlan__SMS_Message__c', 
       fieldList: ['Id', 'FinPlan__Received_At_formula__c', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c', 'FinPlan__Formula_Amount__c'], 
-      whereClause: 'FinPlan__Transaction_Date__c = $formattedDate',//'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true AND FinPlan__Formula_Amount__c > 0',
+      whereClause: 'FinPlan__Transaction_Date__c >= $formattedStartDate AND FinPlan__Transaction_Date__c <= $formattedEndDate', //'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true AND FinPlan__Formula_Amount__c > 0',
       orderByClause: 'FinPlan__Received_At_formula__c desc',
       //count : 120
       );

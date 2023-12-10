@@ -1,19 +1,15 @@
-// tab_data.dart
-// ignore_for_file: library_private_types_in_public_api
-
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import '../widget/datepicker_widget.dart'; // Import the SecondTabPanel
+import '../widget/datepicker_widget.dart';
 import 'table_widget.dart';
 import '../widget/expense_entry_dialog.dart';
-import '../util/data_generator.dart'; // Import the DataGenerator
+import '../util/data_generator.dart';
 
 class TabData extends StatefulWidget {
   final int tabIndex;
   final String title;
 
-  const TabData({Key? key, required this.tabIndex, required this.title})
-      : super(key: key);
+  const TabData({Key? key, required this.tabIndex, required this.title}) : super(key: key);
 
   @override
   _TabDataState createState() => _TabDataState();
@@ -22,7 +18,8 @@ class TabData extends StatefulWidget {
 class _TabDataState extends State<TabData> {
   List<List<String>> tableData = [];
   final Logger log = Logger();
-  DateTime selectedDate = DateTime.now();
+  DateTime selectedStartDate = DateTime.now();
+  DateTime selectedEndDate = DateTime.now();
 
   @override
   void initState() {
@@ -37,10 +34,9 @@ class _TabDataState extends State<TabData> {
   Future<List<List<String>>> fetchData() async {
     switch (widget.tabIndex) {
       case 0:
-        // tableData = await DataGenerator.generateTab1Data();
         return await DataGenerator.generateTab1Data();
       case 1:
-        return await DataGenerator.generateTab2Data(selectedDate);
+        return await DataGenerator.generateTab2Data(selectedStartDate, selectedEndDate);
       case 2:
         return DataGenerator.generateTab3Data();
       default:
@@ -52,41 +48,27 @@ class _TabDataState extends State<TabData> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: UniqueKey(),
-        floatingActionButton: () {
-          switch (widget.tabIndex) {
-            // case 0:
-            //   return FloatingActionButton(
-            //     onPressed: () {
-            //       _showDataEntryDialog();
-            //     },
-            //     child: const Icon(Icons.add),
-            //   );
-            case 1:
-              return FloatingActionButton(
-                onPressed: () {
-                  recordNewExpenseDialogue();
-                },
-                child: const Icon(Icons.add),
-              );
-            // case 2:
-            //   return FloatingActionButton(
-            //     onPressed: () {
-            //       recordNewExpenseDialogue();
-            //     },
-            //     child: const Icon(Icons.add),
-            //   );
-            default:
-              return Container(); // or any default widget if needed
-          }
-        }(),
-
+      floatingActionButton: () {
+        switch (widget.tabIndex) {
+          case 1:
+            return FloatingActionButton(
+              onPressed: () {
+                recordNewExpenseDialogue();
+              },
+              child: const Icon(Icons.add),
+            );
+          default:
+            return Container();
+        }
+      }(),
       body: widget.tabIndex == 1
           ? Column(
               children: [
                 DatepickerPanel(
                   key: UniqueKey(),
-                  onDateSelected: handleDateSelection,
-                  selectedDate: selectedDate,
+                  onDateRangeSelected: handleDateRangeSelection,
+                  startDate: selectedStartDate,
+                  endDate: selectedEndDate,
                 ),
                 Expanded(
                   child: FutureBuilder<List<List<String>>>(
@@ -101,7 +83,7 @@ class _TabDataState extends State<TabData> {
                           child: Text('Error loading data in the tab ${snapshot.error.toString()}'),
                         );
                       } else {
-                        return TableWidget(tableData: snapshot.data ?? []); // a blank array is passed to initiate `tableData`
+                        return TableWidget(tableData: snapshot.data ?? [], tabIndex: widget.tabIndex);
                       }
                     },
                   ),
@@ -120,7 +102,7 @@ class _TabDataState extends State<TabData> {
                     child: Text('Error loading data'),
                   );
                 } else {
-                  return TableWidget(tableData: snapshot.data ?? []);
+                  return TableWidget(tableData: snapshot.data ?? [], tabIndex: widget.tabIndex);
                 }
               },
             ),
@@ -133,11 +115,11 @@ class _TabDataState extends State<TabData> {
       builder: (BuildContext context) {
         return DataEntryDialog(
           onSave: (amount, paidTo, details, txnDate) {
-            // Handle data entry logic here
             log.d('Amount: $amount');
             log.d('Paid To: $paidTo');
             log.d('Details: $details');
-            log.d('Selected Date: $txnDate');
+            log.d('Selected Start Date: $selectedStartDate');
+            log.d('Selected End Date: $selectedEndDate');
 
             _fetchData(); // Refresh the table data
           },
@@ -146,12 +128,12 @@ class _TabDataState extends State<TabData> {
     );
   }
 
-  Future<void> handleDateSelection(DateTime date) async {
+  Future<void> handleDateRangeSelection(DateTime startDate, DateTime endDate) async {
     setState(() {
-      selectedDate = date;
+      selectedStartDate = startDate;
+      selectedEndDate = endDate;
     });
 
-    // Refresh the table data based on the selected date
     await _fetchData();
   }
 }

@@ -1,6 +1,3 @@
-// expense_entry_dialog.dart
-// ignore_for_file: library_private_types_in_public_api
-
 import 'package:flutter/material.dart';
 import '../util/data_generator.dart';
 import 'package:logger/logger.dart';
@@ -19,52 +16,36 @@ class _DataEntryDialogState extends State<DataEntryDialog> {
   final TextEditingController paidToController = TextEditingController();
   final TextEditingController detailsController = TextEditingController();
   DateTime selectedDate = DateTime.now();
-  static Logger log = Logger();
-
-  @override
-  void dispose() {
-    amountController.dispose();
-    paidToController.dispose();
-    detailsController.dispose();
-    super.dispose();
-  }
+  final Logger log = Logger();
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Data Entry'),
-      content: SingleChildScrollView(
-        child: Column(
-          children: [
-            TextField(
-              controller: amountController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Amount'),
-            ),
-            TextField(
-              controller: paidToController,
-              decoration: const InputDecoration(labelText: 'Paid To'),
-            ),
-            TextField(
-              controller: detailsController,
-              decoration: const InputDecoration(labelText: 'Details'),
-            ),
-            const SizedBox(height: 8.0),
-            Row(
-              children: [
-                const Text('Select Date:'),
-                const SizedBox(width: 8.0),
-                TextButton(
-                  onPressed: () => _selectDate(context),
-                  child: Text(
-                    '${selectedDate.toLocal()}'.split(' ')[0],
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+      title: const Text('Enter Expense Data'),
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: amountController,
+            decoration: const InputDecoration(labelText: 'Amount'),
+            keyboardType: TextInputType.number,
+          ),
+          TextField(
+            controller: paidToController,
+            decoration: const InputDecoration(labelText: 'Paid To'),
+          ),
+          TextField(
+            controller: detailsController,
+            decoration: const InputDecoration(labelText: 'Details'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await _selectDate(context);
+            },
+            child: const Text('Select Date'),
+          ),
+        ],
       ),
       actions: [
         TextButton(
@@ -73,28 +54,9 @@ class _DataEntryDialogState extends State<DataEntryDialog> {
           },
           child: const Text('Cancel'),
         ),
-        ElevatedButton(
+        TextButton(
           onPressed: () {
-            // Validate input fields
-            if (_validateFields()) {
-              // Handle data entry logic here
-              saveNewExpenseToSalesforce(
-                amountController.text,
-                paidToController.text,
-                detailsController.text,
-                selectedDate,
-              );
-
-              // Close the dialog
-              Navigator.of(context).pop();
-            } else {
-              // Show validation error
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Please fill in all fields.'),
-                ),
-              );
-            }
+            _saveData();
           },
           child: const Text('Save'),
         ),
@@ -109,22 +71,25 @@ class _DataEntryDialogState extends State<DataEntryDialog> {
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
     );
-    if (picked != null && picked != selectedDate) {
+    if (picked != null) {
+      log.d('selected date $picked');
       setState(() {
         selectedDate = picked;
       });
     }
   }
 
-  bool _validateFields() {
-    return amountController.text.isNotEmpty &&
-        paidToController.text.isNotEmpty &&
-        detailsController.text.isNotEmpty;
-  }
+  void _saveData() {
+    String amount = amountController.text;
+    String paidTo = paidToController.text;
+    String details = detailsController.text;
 
-  // Your custom Salesforce save logic
-  void saveNewExpenseToSalesforce(String amount, String paidTo, String details, DateTime selectedDate) async {
-    String result = await DataGenerator.addExpenseToSalesforce(amount, paidTo, details, selectedDate);
-    log.d('Result from expense entry dialogue : $result');
+    if (amount.isNotEmpty && paidTo.isNotEmpty && details.isNotEmpty) {
+      widget.onSave(amount, paidTo, details, selectedDate);
+      Navigator.of(context).pop();
+    } else {
+      // Handle empty fields
+      log.d('All fields are required');
+    }
   }
 }

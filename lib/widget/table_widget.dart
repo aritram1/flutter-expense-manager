@@ -4,8 +4,9 @@ import '../util/salesforce_util.dart';
 
 class TableWidget extends StatefulWidget {
   final List<List<String>> tableData;
+  final int tabIndex; // Add tabIndex property
 
-  const TableWidget({Key? key, required this.tableData}) : super(key: key);
+  const TableWidget({Key? key, required this.tableData, required this.tabIndex}) : super(key: key);
 
   @override
   _TableWidgetState createState() => _TableWidgetState();
@@ -162,11 +163,27 @@ class _TableWidgetState extends State<TableWidget> {
 
   Widget _buildEmptyTableMessage() {
     if (widget.tableData.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.all(16.0),
+      String message;
+      switch (widget.tabIndex) {
+        case 0:
+          message = 'Nothing to approve';
+          break;
+        case 1:
+          message = 'No transactions are available between the dates';
+          break;
+        case 2:
+          message = 'Tab 3 : No data found';
+          break;
+        // Add more cases if needed
+        default:
+          message = 'Default Message : No data found';
+      }
+
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Text(
-          'Nothing to Approve',
-          style: TextStyle(fontSize: 16),
+          message,
+          style: const TextStyle(fontSize: 16),
         ),
       );
     } else {
