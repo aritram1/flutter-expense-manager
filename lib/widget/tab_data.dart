@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import '../widget/datepicker_widget.dart';
-import 'table_widget.dart';
+import '../widget/table_widget.dart';
 import '../widget/expense_entry_dialog.dart';
 import '../util/data_generator.dart';
 
@@ -115,12 +115,7 @@ class _TabDataState extends State<TabData> {
       builder: (BuildContext context) {
         return DataEntryDialog(
           onSave: (amount, paidTo, details, txnDate) {
-            log.d('Amount: $amount');
-            log.d('Paid To: $paidTo');
-            log.d('Details: $details');
-            log.d('Selected Start Date: $selectedStartDate');
-            log.d('Selected End Date: $selectedEndDate');
-
+            log.d('Amount: $amount Paid To: $paidTo Details: $details Start Date: $selectedStartDate End Date: $selectedEndDate');
             _fetchData(); // Refresh the table data
           },
         );
@@ -133,7 +128,6 @@ class _TabDataState extends State<TabData> {
       selectedStartDate = startDate;
       selectedEndDate = endDate;
     });
-
     await _fetchData();
   }
 }

@@ -7,7 +7,7 @@ class DatepickerPanel extends StatefulWidget {
   final DateTime endDate;
   final Function(DateTime, DateTime) onDateRangeSelected;
 
-  Logger log = Logger();
+  final Logger log = Logger();
 
   DatepickerPanel({
     Key? key,

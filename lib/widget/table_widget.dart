@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import '../util/salesforce_util.dart';
+import '../util/data_generator.dart';
 
 class TableWidget extends StatefulWidget {
   final List<List<String>> tableData;
@@ -225,9 +225,7 @@ class _TableWidgetState extends State<TableWidget> {
       }
     }
 
-    log.d('Inside handleApproveSMS recordIds=>$recordIds');
-
-    String response = await SalesforceUtil.updateSalesforceData('FinPlan__SMS_Message__c', recordIds);
+    String response = await DataGenerator.approveSelectedMessages('FinPlan__SMS_Message__c', recordIds);
     log.d('Response for handleApproveSMS $response');
 
     setState(() {

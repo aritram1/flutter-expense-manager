@@ -148,5 +148,10 @@ class DataGenerator {
   static Future<String> deleteAllMessages(String objAPIName) async {
     return await SalesforceUtil.deleteSalesforceData('FinPlan__SMS_Message__c', []); //signature (String objAPIName, List RecordIds)
   }
+
+  static Future<String> approveSelectedMessages(String objAPIName, List<String> recordIds) async {
+    String response = await SalesforceUtil.updateSalesforceData('FinPlan__SMS_Message__c', recordIds);
+    return response;
+  } 
   
 }
