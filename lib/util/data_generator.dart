@@ -67,7 +67,7 @@ class DataGenerator {
     Map<String, String> response = await SalesforceUtil.queryFromSalesForce(
       objAPIName: 'FinPlan__SMS_Message__c', 
       fieldList: ['Id', 'FinPlan__Received_At_formula__c', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c', 'FinPlan__Formula_Amount__c'], 
-      whereClause: 'FinPlan__Transaction_Date__c >= $formattedStartDate AND FinPlan__Transaction_Date__c <= $formattedEndDate', //'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true AND FinPlan__Formula_Amount__c > 0',
+      whereClause: 'FinPlan__Transaction_Date__c >= $formattedStartDate AND FinPlan__Transaction_Date__c <= $formattedEndDate AND FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true AND FinPlan__Formula_Amount__c > 0',
       orderByClause: 'FinPlan__Received_At_formula__c desc',
       //count : 120
       );
@@ -86,22 +86,22 @@ class DataGenerator {
       try{
         Map<String, dynamic> jsonData = json.decode(data);
         if (jsonData['records'] != null) {
-          log.d('response in generateTab1Data -> $jsonData');
+          log.d('response in generateTab2Data -> $jsonData');
           List<dynamic> records = jsonData['records'];
+          log.d('records $records');
           for (var record in records) {
             Map<String, dynamic> recordMap = Map.castFrom(record);
             String id = recordMap['Id'];
+            log.d('here 4.1');
             String beneficiary = recordMap['FinPlan__Beneficiary__c'];
+            log.d('here 4.2');
             String amount = (recordMap['FinPlan__Formula_Amount__c'] != null) ? recordMap['FinPlan__Formula_Amount__c'].toString() : 'N/A' ;
             log.d('here 5');
             
             String date = recordMap['FinPlan__Received_At_formula__c'].substring(5,10);
             String formattedDate = '${date.split('-')[1]}/${date.split('-')[0]}';
             log.d('here 6');
-            log.d('beneficiary $beneficiary');
-            log.d('amount $amount');
-            log.d('formattedDate $formattedDate');
-            log.d('id $id');
+            log.d('beneficiary $beneficiary || amount $amount || formattedDate $formattedDate || id $id');
             
             generatedData.add([beneficiary, amount, formattedDate, id]);
           }
