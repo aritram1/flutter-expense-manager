@@ -2,6 +2,7 @@
 // ignore_for_file: library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
+import 'package:flutter_phone_app/widget/datepicker_widget.dart';
 import 'table_widget.dart';
 import 'package:logger/logger.dart';
 import '../widget/expense_entry_dialog.dart';
@@ -10,7 +11,7 @@ import '../util/data_generator.dart'; // Import the DataGenerator
 class TabData extends StatefulWidget {
   final int tabIndex;
   final String title;
-  
+
   const TabData({Key? key, required this.tabIndex, required this.title})
       : super(key: key);
 
@@ -19,9 +20,9 @@ class TabData extends StatefulWidget {
 }
 
 class _TabDataState extends State<TabData> {
-
   List<List<String>> tableData = [];
   final Logger log = Logger();
+  DateTime selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -30,16 +31,19 @@ class _TabDataState extends State<TabData> {
   }
 
   Future<void> _fetchData() async {
-    tableData = await fetchData();
-    setState(() {}); // Trigger a rebuild
+    if (widget.tabIndex == 1) {
+      tableData = await DataGenerator.generateTab2Data(selectedDate);
+    } else {
+      tableData = await fetchData();
+    }
+
+    setState(() {});
   }
 
   Future<List<List<String>>> fetchData() async {
     switch (widget.tabIndex) {
       case 0:
         return await DataGenerator.generateTab1Data();
-      case 1:
-        return DataGenerator.generateTab2Data();
       case 2:
         return DataGenerator.generateTab3Data();
       default:
@@ -57,11 +61,26 @@ class _TabDataState extends State<TabData> {
         },
         child: const Icon(Icons.add),
       ),
-      body: tableData.isNotEmpty
-            ? TableWidget(tableData: tableData)
-            : const Center(
-                child: CircularProgressIndicator(),
-              ),
+      body: widget.tabIndex == 1
+          ? Column(
+              children: [
+                SecondTabPanel(
+                  onDateSelected: handleDateSelection,
+                ),
+                Expanded(
+                  child: tableData.isNotEmpty
+                      ? TableWidget(tableData: tableData)
+                      : const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                ),
+              ],
+            )
+          : tableData.isNotEmpty
+              ? TableWidget(tableData: tableData)
+              : const Center(
+                  child: CircularProgressIndicator(),
+                ),
     );
   }
 
@@ -83,5 +102,14 @@ class _TabDataState extends State<TabData> {
         );
       },
     );
+  }
+
+  Future<void> handleDateSelection(DateTime date) async {
+    setState(() {
+      selectedDate = date;
+    });
+
+    // Refresh the table data based on the selected date
+    await _fetchData();
   }
 }

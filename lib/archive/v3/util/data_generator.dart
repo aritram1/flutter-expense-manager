@@ -47,7 +47,7 @@ class DataGenerator {
         }
       }
       catch(error){
-        log.d('Error 2 : $error');
+        log.d('Error in generateTab1Data : $error');
       }
     }
     log.d('Inside generateTab1Data=>$generatedData');
