@@ -149,7 +149,7 @@ class _TableWidgetState extends State<TableWidget> {
                 ),
         ),
         Visibility(
-          visible: selectedRows.any((selected) => selected),
+          visible: showApproveButton(),
           child: ElevatedButton(
             onPressed: () async {
               handleApproveSMS();
@@ -159,6 +159,11 @@ class _TableWidgetState extends State<TableWidget> {
         ),
       ],
     );
+  }
+
+  // Method to determine whether to show the approved button or not
+  bool showApproveButton() {
+    return selectedRows.any((selected) => selected) && widget.tabIndex == 0;
   }
 
   Widget _buildEmptyTableMessage() {
@@ -220,7 +225,7 @@ class _TableWidgetState extends State<TableWidget> {
       }
     }
 
-    log.d('fieldValues inside _performCommonOperation=>$recordIds');
+    log.d('Inside handleApproveSMS recordIds=>$recordIds');
 
     String response = await SalesforceUtil.updateSalesforceData('FinPlan__SMS_Message__c', recordIds);
     log.d('Response for handleApproveSMS $response');
