@@ -58,12 +58,13 @@ class DataGenerator {
   static Future<List<List<String>>> generateTab2Data(DateTime selectedDate) async {
     log.d('here 1');
     log.d('Inside generate tab2 data, selected date is => $selectedDate');
+    String formattedDate = selectedDate.toString().split(' ')[0];
     List<List<String>> generatedData = [];
     log.d('here 2');
     Map<String, String> response = await SalesforceUtil.queryFromSalesForce(
       objAPIName: 'FinPlan__SMS_Message__c', 
       fieldList: ['Id', 'FinPlan__Received_At_formula__c', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c', 'FinPlan__Formula_Amount__c'], 
-      whereClause: '',//'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true AND FinPlan__Formula_Amount__c > 0',
+      whereClause: 'FinPlan__Received_At_formula__c = $selectedDate',//'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true AND FinPlan__Formula_Amount__c > 0',
       orderByClause: 'FinPlan__Received_At_formula__c desc',
       //count : 120
       );
@@ -136,5 +137,9 @@ class DataGenerator {
     return await SalesforceUtil.saveToSalesForce('FinPlan__SMS_Message__c', data);
   }
 
+
+  static Future<String> deleteAllMessages(String objAPIName) async {
+    return await SalesforceUtil.deleteSalesforceData('FinPlan__SMS_Message__c', []); //signature (String objAPIName, List RecordIds)
+  }
   
 }

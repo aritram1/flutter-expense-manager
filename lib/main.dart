@@ -64,12 +64,67 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
     return resultString;
   }
 
+  Future<String> handleSMSDelete() async {
+    String resultString = '';
+    // Your logic for handling SMS sync goes here
+    log.d('Deleting SMS data...');
+    String response = await SalesforceUtil.saveToSalesForce('FinPlan__SMS_Message__c', processedMessages);
+    log.d('response IS->$response');
+
+    try{
+      Map<String, dynamic> resultMap = jsonDecode(response);
+      if (resultMap['hasErrors'] == true && resultMap['results'].isNotEmpty) {
+        resultString = resultMap['results'][0]['errors'][0]['message'];
+      } else {
+        resultString = 'Success';
+      }
+    }
+    catch(error){
+      resultString = error.toString();
+    }
+    return resultString;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () async {
+              // Show loading dialog
+              showDialog(
+                context: context,
+                barrierDismissible: false, // Prevent dialog dismissal on tap outside
+                builder: (BuildContext dialogContext) {
+                  return const Dialog(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(width: 16.0),
+                          Text("Deleting..."),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+
+              // Perform the sync operation
+              String result = await handleSMSDelete();
+              log.d('Handle Delete Message Result => $result');
+
+              // Close the loading dialog
+              Navigator.of(context).pop();
+            },
+            tooltip: 'Delete All Messages',
+          ),
+          
           IconButton(
             icon: const Icon(Icons.sync),
             onPressed: () async {

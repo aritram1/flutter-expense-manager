@@ -1,9 +1,13 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 
 class SecondTabPanel extends StatelessWidget {
   final Function(DateTime) onDateSelected;
+  Logger log = Logger();
 
-  const SecondTabPanel({Key? key, required this.onDateSelected})
+  SecondTabPanel({Key? key, required this.onDateSelected})
       : super(key: key);
 
   @override
@@ -34,6 +38,7 @@ class SecondTabPanel extends StatelessWidget {
       lastDate: DateTime(2101),
     );
     if (picked != null) {
+      log.d('selected date $picked');
       onDateSelected(picked);
     }
   }

@@ -14,7 +14,10 @@ class SalesforceUtil {
   static String tokenEndpoint = 'https://login.salesforce.com/services/oauth2/token';
   static String tokenGrantType = 'password';
   static String compositeUrlForInsert = '/services/data/v53.0/composite/tree/';
-  static String customEndpointForUpdate = '/services/apexrest/FinPlan/api/update/sms/';
+  static String customEndpointForApproveMessages = '/services/apexrest/FinPlan/api/sms/approve/';
+  static String customEndpointForDeleteMessages = '/services/apexrest/FinPlan/api/sms/delete/*';
+  
+
   static String queryUrl = '/services/data/v53.0/query?q=';
 
   static String accessToken = '';
@@ -93,7 +96,10 @@ class SalesforceUtil {
       endpointUrl = '$instanceUrl$compositeUrlForInsert$objAPIName';
     }
     else if(opType == 'update'){
-      endpointUrl = '$instanceUrl$customEndpointForUpdate';
+      endpointUrl = '$instanceUrl$customEndpointForApproveMessages';
+    }
+    else if(opType == 'delete'){
+      endpointUrl = '$instanceUrl$customEndpointForDeleteMessages';
     }
     log.d('Generated URL : $endpointUrl');
     return endpointUrl;
@@ -257,5 +263,35 @@ class SalesforceUtil {
     Map<String, dynamic> response = {};
     response['input'] = dataMap;
     return response;
+  }
+
+  static Future<String> deleteSalesforceData(String objAPIName, List<String> recordIds) async { 
+    if(accessToken == '') await loginToSalesforce();
+    dynamic response;
+    String responseString = '';
+    log.d('here11');
+    try{
+      response = await http.post(
+        Uri.parse(generateInsertUpdateEndpointUrl(objAPIName, 'delete')),
+        headers: generateHeader(),
+        // body: generateBody(recordIds)
+      );
+      log.d('here21');
+      if(response.statusCode == 200){
+        log.d('here31 ${response.body}');
+        responseString = json.decode(response.body);
+        log.d('here41 $responseString');
+        log.d('Delete Operation succeeded : $responseString');
+      } 
+      else {
+        // Log an error
+        log.d('Response code other than 200 detected : ${response.body}');
+      }
+      return responseString;
+    }
+    catch(error){
+      log.d('Error occurred while Deleting data from Salesforce. Error is : $error');
+      return error.toString();
+    }
   }
 }
