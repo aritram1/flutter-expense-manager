@@ -148,7 +148,9 @@ class _TableWidgetState extends State<TableWidget> {
         Visibility(
           visible: selectedRows.any((selected) => selected),
           child: ElevatedButton(
-            onPressed: _performCommonOperation,
+            onPressed: () async {
+              handleApproveSMS();
+            },
             child: Text(_commaOperationName),
           ),
         ),
@@ -176,22 +178,27 @@ class _TableWidgetState extends State<TableWidget> {
     });
   }
 
-  void _performCommonOperation() {
+  void handleApproveSMS() async {
     List<String> recordIds = [];
 
-    for (int i = selectedRows.length - 1; i >= 0; i--) {
+    for (int i = 0; i < selectedRows.length; i++) {
       if (selectedRows[i]) {
         recordIds.add(widget.tableData[i][3]);
-        log.d('Selected=>${widget.tableData[i]}');
-        widget.tableData.removeAt(i);
-        selectedRows.removeAt(i);
       }
     }
 
     log.d('fieldValues inside _performCommonOperation=>$recordIds');
 
-    SalesforceUtil.updateSalesforceData('FinPlan__SMS_Message__c', recordIds);
-
-    setState(() {});
+    String response = await SalesforceUtil.updateSalesforceData('FinPlan__SMS_Message__c', recordIds);
+    log.d('Response for handleApproveSMS $response');
+    
+    setState(() {
+      for (int i = 0; i < selectedRows.length; i++) {
+        if (selectedRows[i]) {
+          widget.tableData.removeAt(i);
+          selectedRows.removeAt(i);
+        }
+      }
+    });
   }
 }

@@ -2,7 +2,7 @@
 import 'dart:convert';
 import 'package:logger/logger.dart';
 import './salesforce_util.dart';
-
+import 'package:device_info/device_info.dart';
 class DataGenerator {
   static Logger log = Logger();
 
@@ -64,7 +64,7 @@ class DataGenerator {
     Map<String, String> response = await SalesforceUtil.queryFromSalesForce(
       objAPIName: 'FinPlan__SMS_Message__c', 
       fieldList: ['Id', 'FinPlan__Received_At_formula__c', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c', 'FinPlan__Formula_Amount__c'], 
-      whereClause: 'FinPlan__Received_At_formula__c = $selectedDate',//'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true AND FinPlan__Formula_Amount__c > 0',
+      whereClause: 'FinPlan__Transaction_Date__c = $formattedDate',//'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true AND FinPlan__Formula_Amount__c > 0',
       orderByClause: 'FinPlan__Received_At_formula__c desc',
       //count : 120
       );
@@ -127,12 +127,17 @@ class DataGenerator {
   static Future<String> addExpenseToSalesforce(String amount, String paidTo, String details, DateTime selectedDate) async {
     List<Map<String, dynamic>> data = [];
     Map<String, dynamic> each = {};
+
+    AndroidDeviceInfo androidInfo = await DeviceInfoPlugin().androidInfo;
+    String deviceName = androidInfo.model;
+
     each['FinPlan__Amount_Value__c'] = amount;
     each['FinPlan__Beneficiary__c'] = paidTo;
     each['FinPlan__Content__c'] = details;
     each['FinPlan__Received_At__c'] = selectedDate.toString();
-    each['FinPlan__sender__c'] = 'N/A';
-    
+    each['FinPlan__Sender__c'] = 'N/A';
+    each['FinPlan__Device__c'] = deviceName;
+
     data.add(each);
     return await SalesforceUtil.saveToSalesForce('FinPlan__SMS_Message__c', data);
   }

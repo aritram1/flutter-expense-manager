@@ -5,9 +5,11 @@ import 'package:logger/logger.dart';
 
 class SecondTabPanel extends StatelessWidget {
   final Function(DateTime) onDateSelected;
+  final DateTime selectedDate;
+
   Logger log = Logger();
 
-  SecondTabPanel({Key? key, required this.onDateSelected})
+  SecondTabPanel({Key? key, required this.onDateSelected, required this.selectedDate})
       : super(key: key);
 
   @override

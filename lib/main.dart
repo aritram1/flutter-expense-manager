@@ -5,6 +5,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import './util/data_generator.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'widget/tab_data.dart';
 import 'package:logger/logger.dart';
@@ -64,25 +65,12 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
     return resultString;
   }
 
+  // Method to help mass deletion of SMS messages by calling the SF API `/api/sms/delete/*`
   Future<String> handleSMSDelete() async {
-    String resultString = '';
-    // Your logic for handling SMS sync goes here
     log.d('Deleting SMS data...');
-    String response = await SalesforceUtil.saveToSalesForce('FinPlan__SMS_Message__c', processedMessages);
-    log.d('response IS->$response');
-
-    try{
-      Map<String, dynamic> resultMap = jsonDecode(response);
-      if (resultMap['hasErrors'] == true && resultMap['results'].isNotEmpty) {
-        resultString = resultMap['results'][0]['errors'][0]['message'];
-      } else {
-        resultString = 'Success';
-      }
-    }
-    catch(error){
-      resultString = error.toString();
-    }
-    return resultString;
+    String response = await DataGenerator.deleteAllMessages('');
+    log.d('Delete response IS->$response'); 
+    return response;
   }
 
   @override

@@ -21,7 +21,6 @@ class _DataEntryDialogState extends State<DataEntryDialog> {
   DateTime selectedDate = DateTime.now();
   static Logger log = Logger();
 
-
   @override
   void dispose() {
     amountController.dispose();
@@ -76,16 +75,26 @@ class _DataEntryDialogState extends State<DataEntryDialog> {
         ),
         ElevatedButton(
           onPressed: () {
-            // Handle data entry logic here
-            saveToSalesforce(
-              amountController.text,
-              paidToController.text,
-              detailsController.text,
-              selectedDate,
-            );
+            // Validate input fields
+            if (_validateFields()) {
+              // Handle data entry logic here
+              saveNewExpenseToSalesforce(
+                amountController.text,
+                paidToController.text,
+                detailsController.text,
+                selectedDate,
+              );
 
-            // Close the dialog
-            Navigator.of(context).pop();
+              // Close the dialog
+              Navigator.of(context).pop();
+            } else {
+              // Show validation error
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Please fill in all fields.'),
+                ),
+              );
+            }
           },
           child: const Text('Save'),
         ),
@@ -98,7 +107,7 @@ class _DataEntryDialogState extends State<DataEntryDialog> {
       context: context,
       initialDate: selectedDate,
       firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      lastDate: DateTime.now(),
     );
     if (picked != null && picked != selectedDate) {
       setState(() {
@@ -107,10 +116,15 @@ class _DataEntryDialogState extends State<DataEntryDialog> {
     }
   }
 
+  bool _validateFields() {
+    return amountController.text.isNotEmpty &&
+        paidToController.text.isNotEmpty &&
+        detailsController.text.isNotEmpty;
+  }
+
   // Your custom Salesforce save logic
-  void saveToSalesforce(String amount, String paidTo, String details, DateTime selectedDate) async {
+  void saveNewExpenseToSalesforce(String amount, String paidTo, String details, DateTime selectedDate) async {
     String result = await DataGenerator.addExpenseToSalesforce(amount, paidTo, details, selectedDate);
     log.d('Result from expense entry dialogue : $result');
   }
-
 }

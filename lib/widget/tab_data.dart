@@ -31,19 +31,16 @@ class _TabDataState extends State<TabData> {
   }
 
   Future<void> _fetchData() async {
-    if (widget.tabIndex == 1) {
-      tableData = await DataGenerator.generateTab2Data(selectedDate);
-    } else {
-      tableData = await fetchData();
-    }
-
-    setState(() {});
+    await fetchData();
   }
 
   Future<List<List<String>>> fetchData() async {
     switch (widget.tabIndex) {
       case 0:
+        // tableData = await DataGenerator.generateTab1Data();
         return await DataGenerator.generateTab1Data();
+      case 1:
+        return await DataGenerator.generateTab2Data(selectedDate);
       case 2:
         return DataGenerator.generateTab3Data();
       default:
@@ -65,7 +62,9 @@ class _TabDataState extends State<TabData> {
           ? Column(
               children: [
                 SecondTabPanel(
+                  key: UniqueKey(),
                   onDateSelected: handleDateSelection,
+                  selectedDate: selectedDate,
                 ),
                 Expanded(
                   child: FutureBuilder<List<List<String>>>(
@@ -118,7 +117,6 @@ class _TabDataState extends State<TabData> {
             log.d('Details: $details');
             log.d('Selected Date: $txnDate');
 
-            // You can process the data or save it as needed
             _fetchData(); // Refresh the table data
           },
         );
