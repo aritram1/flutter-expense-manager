@@ -1,21 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
-class DataEntryDialog extends StatefulWidget {
+class AddNewExpenseDialog extends StatefulWidget {
   final Function(String, String, String, DateTime) onSave;
 
-  const DataEntryDialog({Key? key, required this.onSave}) : super(key: key);
+  const AddNewExpenseDialog({Key? key, required this.onSave}) : super(key: key);
 
   @override
-  _DataEntryDialogState createState() => _DataEntryDialogState();
+  _AddNewExpenseDialogState createState() => _AddNewExpenseDialogState();
 }
 
-class _DataEntryDialogState extends State<DataEntryDialog> {
+class _AddNewExpenseDialogState extends State<AddNewExpenseDialog> {
   final TextEditingController amountController = TextEditingController();
   final TextEditingController paidToController = TextEditingController();
   final TextEditingController detailsController = TextEditingController();
-  DateTime selectedDate = DateTime.now();
+  late DateTime selectedDate; // Declare as late
+
   final Logger log = Logger();
+
+  @override
+  void initState() {
+    super.initState();
+    selectedDate = DateTime.now(); // Initialize in initState
+  }
 
   @override
   Widget build(BuildContext context) {

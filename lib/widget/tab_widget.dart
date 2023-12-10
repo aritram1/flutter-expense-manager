@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import '../widget/datepicker_widget.dart';
+import '../widget/date_picker_panel_widget.dart';
 import '../widget/table_widget.dart';
-import '../widget/expense_entry_dialog.dart';
+import '../widget/add_new_expense.dart';
 import '../util/data_generator.dart';
 
 class TabData extends StatefulWidget {
