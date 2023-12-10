@@ -51,17 +51,39 @@ class _TabDataState extends State<TabData> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Show data entry screen
-          _showDataEntryDialog();
-        },
-        child: const Icon(Icons.add),
-      ),
+      key: UniqueKey(),
+        floatingActionButton: () {
+          switch (widget.tabIndex) {
+            // case 0:
+            //   return FloatingActionButton(
+            //     onPressed: () {
+            //       _showDataEntryDialog();
+            //     },
+            //     child: const Icon(Icons.add),
+            //   );
+            case 1:
+              return FloatingActionButton(
+                onPressed: () {
+                  recordNewExpenseDialogue();
+                },
+                child: const Icon(Icons.add),
+              );
+            // case 2:
+            //   return FloatingActionButton(
+            //     onPressed: () {
+            //       recordNewExpenseDialogue();
+            //     },
+            //     child: const Icon(Icons.add),
+            //   );
+            default:
+              return Container(); // or any default widget if needed
+          }
+        }(),
+
       body: widget.tabIndex == 1
           ? Column(
               children: [
-                SecondTabPanel(
+                DatepickerPanel(
                   key: UniqueKey(),
                   onDateSelected: handleDateSelection,
                   selectedDate: selectedDate,
@@ -75,11 +97,11 @@ class _TabDataState extends State<TabData> {
                           child: CircularProgressIndicator(),
                         );
                       } else if (snapshot.hasError) {
-                        return const Center(
-                          child: Text('Error loading data'),
+                        return Center(
+                          child: Text('Error loading data in the tab ${snapshot.error.toString()}'),
                         );
                       } else {
-                        return TableWidget(tableData: snapshot.data ?? []);
+                        return TableWidget(tableData: snapshot.data ?? []); // a blank array is passed to initiate `tableData`
                       }
                     },
                   ),
@@ -105,7 +127,7 @@ class _TabDataState extends State<TabData> {
     );
   }
 
-  Future<void> _showDataEntryDialog() async {
+  Future<void> recordNewExpenseDialogue() async {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {

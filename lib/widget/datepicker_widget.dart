@@ -1,17 +1,20 @@
-// ignore_for_file: must_be_immutable
-
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
-class SecondTabPanel extends StatelessWidget {
+class DatepickerPanel extends StatefulWidget {
   final Function(DateTime) onDateSelected;
   final DateTime selectedDate;
 
   Logger log = Logger();
 
-  SecondTabPanel({Key? key, required this.onDateSelected, required this.selectedDate})
+  DatepickerPanel({Key? key, required this.onDateSelected, required this.selectedDate})
       : super(key: key);
 
+  @override
+  _DatepickerPanelState createState() => _DatepickerPanelState();
+}
+
+class _DatepickerPanelState extends State<DatepickerPanel> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -23,7 +26,7 @@ class SecondTabPanel extends StatelessWidget {
           TextButton(
             onPressed: () => _selectDate(context),
             child: Text(
-              '${DateTime.now().toLocal()}'.split(' ')[0],
+              '${widget.selectedDate.toLocal()}'.split(' ')[0],
               style: const TextStyle(fontSize: 16),
             ),
           ),
@@ -35,13 +38,14 @@ class SecondTabPanel extends StatelessWidget {
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: widget.selectedDate,
       firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      lastDate: DateTime.now(),
     );
     if (picked != null) {
-      log.d('selected date $picked');
-      onDateSelected(picked);
+      widget.log.d('selected date $picked');
+      widget.onDateSelected(picked);
+      setState(() {}); // Trigger a rebuild of the widget when the date changes
     }
   }
 }
