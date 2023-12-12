@@ -1,6 +1,8 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import '../widget/date_picker_panel_widget.dart';
+import '../widget/date_picker_panel.dart';
 import '../widget/table_widget.dart';
 import '../widget/add_new_expense.dart';
 import '../util/data_generator.dart';
@@ -113,7 +115,7 @@ class _TabDataState extends State<TabData> {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
-        return DataEntryDialog(
+        return AddNewExpenseDialog(
           onSave: (amount, paidTo, details, txnDate) {
             log.d('Amount: $amount Paid To: $paidTo Details: $details Start Date: $selectedStartDate End Date: $selectedEndDate');
             _fetchData(); // Refresh the table data
