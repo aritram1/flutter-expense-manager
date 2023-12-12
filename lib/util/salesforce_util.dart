@@ -120,10 +120,10 @@ class SalesforceUtil {
     int count = 0;
     for(Map<String, dynamic> eachRecord in fieldNameValuePairs){
       Map<String, dynamic> each = {};
-      each['attributes'] = {
-        'type': objAPIName,
-        'referenceId': 'ref$count'
-      };
+      // each['attributes'] = {
+      //   'type': objAPIName,
+      //   'referenceId': 'ref$count'
+      // };
       for(String fieldAPIName in eachRecord.keys){
         each[fieldAPIName] = eachRecord[fieldAPIName];
       }
