@@ -14,7 +14,9 @@ class SalesforceUtil {
   static String tokenEndpoint = 'https://login.salesforce.com/services/oauth2/token';
   static String tokenGrantType = 'password';
   static String compositeUrlForInsert = '/services/data/v53.0/composite/tree/';
-  static String customEndpointForApproveMessages = '/services/apexrest/FinPlan/api/sms/approve/';
+  
+  static String customEndpointForSyncMessages = '/services/apexrest/FinPlan/api/sms/sync/*';
+  static String customEndpointForApproveMessages = '/services/apexrest/FinPlan/api/sms/approve/*';
   static String customEndpointForDeleteMessages = '/services/apexrest/FinPlan/api/sms/delete/*';
   
 
@@ -94,6 +96,10 @@ class SalesforceUtil {
     String endpointUrl = '';
     if(opType == 'insert'){
       endpointUrl = '$instanceUrl$compositeUrlForInsert$objAPIName';
+    }
+    else if(opType == 'sync'){
+      endpointUrl = '$instanceUrl$customEndpointForSyncMessages';
+      log.d('Sync url is => $endpointUrl');
     }
     else if(opType == 'update'){
       endpointUrl = '$instanceUrl$customEndpointForApproveMessages';
@@ -202,10 +208,11 @@ class SalesforceUtil {
     dynamic response;
     try{
       response = await http.post(
-        Uri.parse(generateInsertUpdateEndpointUrl(objAPIName, 'insert')),
+        Uri.parse(generateInsertUpdateEndpointUrl(objAPIName, 'sync')),//(objAPIName, 'insert')),
         headers: generateHeader(),
         body: jsonEncode(generateBody(objAPIName, data)),
       );
+      log.d('response.statuscode ${response.statusCode}' );
       if(response.statusCode == 201){
         final Map<dynamic, dynamic> data = json.decode(response.body);
         log.d('Insert Operation : ${data.toString()}');
