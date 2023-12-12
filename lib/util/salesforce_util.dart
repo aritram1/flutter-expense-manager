@@ -213,7 +213,7 @@ class SalesforceUtil {
         body: jsonEncode(generateBody(objAPIName, data)),
       );
       log.d('response.statuscode ${response.statusCode}' );
-      if(response.statusCode == 201){
+      if(response.statusCode == 201 || response.statusCode == 200){
         final Map<dynamic, dynamic> data = json.decode(response.body);
         log.d('Insert Operation : ${data.toString()}');
       } 

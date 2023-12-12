@@ -27,7 +27,7 @@ class MessageUtil {
       messages = await SmsQuery().querySms(
         kinds: smsKinds, // SmsQueryKind.inbox ,SmsQueryKind.sent, SmsMessageKind.draft
         address: sender, // +254712345789
-        count: 3,    // 10
+        // count: 100,    // 10
       );
     } 
     else {
@@ -47,10 +47,10 @@ class MessageUtil {
     int count = 0;
     for (SmsMessage sms in messages) {
       Map<String, dynamic> record = {
-        "attributes": {
-          "type": "FinPlan__SMS_Message__c",
-          "referenceId": "ref$count"
-        },
+        // "attributes": {
+        //   "type": "FinPlan__SMS_Message__c",
+        //   "referenceId": "ref$count"
+        // },
         "FinPlan__Content__c": "${sms.body != null && sms.body!.length > 255 ? sms.body?.substring(0, 255) : sms.body}",
         "FinPlan__Sender__c": "${sms.sender}",
         "FinPlan__Received_At__c": sms.date.toString(),
