@@ -44,7 +44,7 @@ class _TableWidgetState extends State<TableWidget> {
                     sortAscending: _sortAscending,
                     columns: [
                       DataColumn(
-                        label: Container(
+                        label: SizedBox(
                           width: MediaQuery.of(context).size.width * 0.35,
                           child: Padding(
                             padding: const EdgeInsets.all(1.0),
@@ -58,7 +58,7 @@ class _TableWidgetState extends State<TableWidget> {
                         numeric: false,
                       ),
                       DataColumn(
-                        label: Container(
+                        label: SizedBox(
                           width: MediaQuery.of(context).size.width * 0.15,
                           child: Padding(
                             padding: const EdgeInsets.all(1.0),
@@ -72,7 +72,7 @@ class _TableWidgetState extends State<TableWidget> {
                         numeric: false,
                       ),
                       DataColumn(
-                        label: Container(
+                        label: SizedBox(
                           width: MediaQuery.of(context).size.width * 0.15,
                           child: Padding(
                             padding: const EdgeInsets.all(1.0),
@@ -106,7 +106,7 @@ class _TableWidgetState extends State<TableWidget> {
                         },
                         cells: [
                           DataCell(
-                            Container(
+                            SizedBox(
                               width: MediaQuery.of(context).size.width * 0.35,
                               child: Padding(
                                 padding: const EdgeInsets.all(1.0),
@@ -119,7 +119,7 @@ class _TableWidgetState extends State<TableWidget> {
                             ),
                           ),
                           DataCell(
-                            Container(
+                            SizedBox(
                               width: MediaQuery.of(context).size.width * 0.15,
                               child: Padding(
                                 padding: const EdgeInsets.all(1.0),
@@ -132,7 +132,7 @@ class _TableWidgetState extends State<TableWidget> {
                             ),
                           ),
                           DataCell(
-                            Container(
+                            SizedBox(
                               width: MediaQuery.of(context).size.width * 0.15,
                               child: Padding(
                                 padding: const EdgeInsets.all(1.0),

@@ -139,7 +139,7 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
     String resultString = '';
     // Your logic for handling SMS sync goes here
     log.d('Syncing SMS data...');
-    List<SmsMessage> messages = await MessageUtil.getMessages();
+    List<SmsMessage> messages = await MessageUtil.getMessages(count : 200);
     List<Map<String, dynamic>> processedMessages = await MessageUtil.convert(messages);
     String response = await SalesforceUtil.saveToSalesForce('FinPlan__SMS_Message__c', processedMessages);
     log.d('response IS->$response');

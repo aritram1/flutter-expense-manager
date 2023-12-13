@@ -24,11 +24,20 @@ class MessageUtil {
     }
 
     if (permission.isGranted) {
-      messages = await SmsQuery().querySms(
-        kinds: smsKinds, // SmsQueryKind.inbox ,SmsQueryKind.sent, SmsMessageKind.draft
-        address: sender, // +254712345789
-        // count: 100,    // 10
-      );
+      if(count != null){
+        messages = await SmsQuery().querySms(
+          kinds: smsKinds, // SmsQueryKind.inbox ,SmsQueryKind.sent, SmsMessageKind.draft
+          address: sender, // +1234567890
+          count: count,    // 10
+        );
+      }
+      else{
+        messages = await SmsQuery().querySms(
+          kinds: smsKinds, // SmsQueryKind.inbox ,SmsQueryKind.sent, SmsMessageKind.draft
+          address: sender, // +1234567890
+        );
+      }
+      
     } 
     else {
       await Permission.sms.request();
