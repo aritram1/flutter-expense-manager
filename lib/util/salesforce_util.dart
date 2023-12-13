@@ -131,7 +131,7 @@ class SalesforceUtil {
       count++;
     }
     body['records'] = allRecords;
-    log.d(body);
+    // log.d(body);
     return body;
   }
 
@@ -144,6 +144,7 @@ class SalesforceUtil {
     
     // check the size of the list and if more than 200, need to split to batch of 200 to 
     // avoid composite API limit (i.e. 200 records at a time)
+    // TBD : Optimization can be done on this part? > 200 records part.
     if(data.length <= 200){
       String currentResult = await SalesforceUtil._insertSFData(objAPIName, data);
       return currentResult;
@@ -154,7 +155,7 @@ class SalesforceUtil {
         counter++;
         if(counter == 200){
           String currentResult = await SalesforceUtil._insertSFData(objAPIName, eachList);
-          log.d('currentresult=>$currentResult');
+          log.d('currentresult =>$currentResult');
           result += currentResult;
           counter = 0;
           eachList = [];

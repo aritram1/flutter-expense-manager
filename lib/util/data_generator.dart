@@ -55,7 +55,7 @@ class DataGenerator {
     return generatedData;
   } 
 
-
+ /*
   static Future<List<List<String>>> generateTab2Data(DateTime startDate, DateTime endDate) async {
     log.d('here 1');
     log.d('Inside generate tab2 data, startDate date is => $startDate');
@@ -114,6 +114,68 @@ class DataGenerator {
     log.d('Inside generateTab2Data=>$generatedData');
     return generatedData;
   } 
+ */
+
+  
+  static Future<List<List<String>>> generateTab2Data(DateTime startDate, DateTime endDate) async {
+    log.d('here 1');
+    log.d('Inside generate tab2 data, startDate date is => $startDate');
+    log.d('Inside generate tab2 data, endDate date is => $endDate');
+    String formattedStartDate = startDate.toString().split(' ')[0];
+    String formattedEndDate = endDate.toString().split(' ')[0];
+    List<List<String>> generatedData = [];
+    log.d('here 2');
+    Map<String, String> response = await SalesforceUtil.queryFromSalesForce(
+      objAPIName: 'FinPlan__Bank_Transaction__c', 
+      fieldList: ['Id', 'FinPlan__Beneficiary_Name__c','FinPlan__Transaction_Date__c', 'FinPlan__Amount__c','FinPlan__Type__c'],
+      whereClause: 'FinPlan__Transaction_Date__c >= $formattedStartDate AND FinPlan__Transaction_Date__c <= $formattedEndDate ',
+      orderByClause: 'FinPlan__Transaction_Date__c desc',
+      //count : 120
+      );
+      log.d('here 3');
+    String? error = response['error'];
+    String? data = response['data'];
+
+    log.d('Error: $error');
+    log.d('Data: $data');
+    log.d('here 4');
+    if(error != null){
+      log.d('Error occurred while querying inside generateTab2Data : ${response['error']}');
+      //return null;
+    }
+    else if (data != null) {
+      try{
+        Map<String, dynamic> jsonData = json.decode(data);
+        if (jsonData['records'] != null) {
+          log.d('response in generateTab2Data -> $jsonData');
+          List<dynamic> records = jsonData['records'];
+          log.d('records $records');
+          for (var record in records) {
+            Map<String, dynamic> recordMap = Map.castFrom(record);
+            String id = recordMap['Id'];
+            log.d('here 4.1');
+            String beneficiary = recordMap['FinPlan__Beneficiary_Name__c'];
+            log.d('here 4.2');
+            String amount = recordMap['FinPlan__Amount__c'].toString();
+            log.d('here 5');
+            
+            String rawDate = recordMap['FinPlan__Transaction_Date__c']; //.substring(5,10);
+            String formattedDate = '${rawDate.split('-')[2]}/${rawDate.split('-')[1]}';
+            log.d('here 6');
+            log.d('beneficiary $beneficiary || amount $amount || rawDate $rawDate || id $id');
+            
+            generatedData.add([beneficiary, amount, formattedDate, id]);
+          }
+        }
+      }
+      catch(error){
+        log.d('Error inside generateTab2Data : $error');
+      }
+    }
+    log.d('Inside generateTab2Data=>$generatedData');
+    return generatedData;
+  } 
+ 
 
   static List<List<String>> generateTab3Data() {
     // Replace this with your data generation logic
