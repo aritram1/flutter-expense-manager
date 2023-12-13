@@ -12,7 +12,7 @@ class DataGenerator {
 
     Map<String, String> response = await SalesforceUtil.queryFromSalesForce(
       objAPIName: 'FinPlan__SMS_Message__c', 
-      fieldList: ['Id', 'FinPlan__Received_At_formula__c', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c', 'FinPlan__Formula_Amount__c'], 
+      fieldList: ['Id', 'FinPlan__Received_At_formula__c', 'FinPlan__Transaction_Date__c', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c', 'FinPlan__Formula_Amount__c'], 
       whereClause: 'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true AND FinPlan__Formula_Amount__c > 0',
       orderByClause: 'FinPlan__Received_At_formula__c desc',
       //count : 120
@@ -38,9 +38,8 @@ class DataGenerator {
             String id = recordMap['Id'];
             String beneficiary = recordMap['FinPlan__Beneficiary__c'];
             String amount = (recordMap['FinPlan__Formula_Amount__c'] != null) ? recordMap['FinPlan__Formula_Amount__c'].toString() : 'N/A' ;
-            
-            
-            String date = recordMap['FinPlan__Received_At_formula__c'].substring(5,10);
+            log.d('generatetab1data->${recordMap['FinPlan__Transaction_Date__c']}');
+            String date = recordMap['FinPlan__Transaction_Date__c'].substring(5,10);
             String formattedDate = '${date.split('-')[1]}/${date.split('-')[0]}';
             
             generatedData.add([beneficiary, amount, formattedDate, id]);
@@ -157,11 +156,10 @@ class DataGenerator {
             String beneficiary = recordMap['FinPlan__Beneficiary_Name__c'];
             log.d('here 4.2');
             String amount = recordMap['FinPlan__Amount__c'].toString();
-            log.d('here 5');
-            
+            log.d('here 4.3');
             String rawDate = recordMap['FinPlan__Transaction_Date__c']; //.substring(5,10);
             String formattedDate = '${rawDate.split('-')[2]}/${rawDate.split('-')[1]}';
-            log.d('here 6');
+            log.d('here 4.4');
             log.d('beneficiary $beneficiary || amount $amount || rawDate $rawDate || id $id');
             
             generatedData.add([beneficiary, amount, formattedDate, id]);

@@ -18,7 +18,7 @@ class SalesforceUtil {
   static String customEndpointForSyncMessages = '/services/apexrest/FinPlan/api/sms/sync/*';
   static String customEndpointForApproveMessages = '/services/apexrest/FinPlan/api/sms/approve/*';
   static String customEndpointForDeleteMessages = '/services/apexrest/FinPlan/api/sms/delete/*';
-  
+  static String customEndpointForDeleteTransactions = '/services/apexrest/FinPlan/api/transactions/delete/*';
 
   static String queryUrl = '/services/data/v53.0/query?q=';
 
@@ -104,8 +104,11 @@ class SalesforceUtil {
     else if(opType == 'update'){
       endpointUrl = '$instanceUrl$customEndpointForApproveMessages';
     }
-    else if(opType == 'delete'){
+    else if(opType == 'delete_messages'){
       endpointUrl = '$instanceUrl$customEndpointForDeleteMessages';
+    }
+    else if(opType == 'delete_transactions'){
+      endpointUrl = '$instanceUrl$customEndpointForDeleteTransactions';
     }
     log.d('Generated URL : $endpointUrl');
     return endpointUrl;
@@ -135,7 +138,7 @@ class SalesforceUtil {
     return body;
   }
 
-  /////////////////////////////////////insert method /////////////////////////////////////
+  /////////////////////////////////////save to salesforce method /////////////////////////////////////
   static Future<String> saveToSalesForce(String objAPIName, List<Map<String, dynamic>> data) async {
     
     List<Map<String, dynamic>> eachList = [];
@@ -203,7 +206,7 @@ class SalesforceUtil {
     }
   }
   
-  /////////////////////////////////////insert method /////////////////////////////////////
+  /////////////////////////////////////_insert method /////////////////////////////////////
   static Future<String> _insertSFData(String objAPIName, List<Map<String, dynamic>> data) async { 
     if(accessToken == '') await loginToSalesforce();
     dynamic response;
@@ -230,9 +233,8 @@ class SalesforceUtil {
     }
   }
 
-
   /////////////////////////////////////update method /////////////////////////////////////
-  // static Future<String> updateSalesforceData(String objAPIName, List<Map<String, dynamic>> data) async { 
+  // static Future<String> updateSalesforceDataOld(String objAPIName, List<Map<String, dynamic>> data) async { 
   static Future<String> updateSalesforceData(String objAPIName, List<String> recordIds) async { 
     if(accessToken == '') await loginToSalesforce();
     dynamic response;
@@ -264,6 +266,7 @@ class SalesforceUtil {
     }
   }
 
+  /////////////////////////////////////generateBody method /////////////////////////////////////
   // static Map<String, dynamic> generateUpdateBody(String objAPIName, List<Map<String, dynamic>> data){
   static Map<String, dynamic> generateUpdateBody(String objAPIName, List<String> recordIds){
     Map<String, dynamic> dataMap = {};
@@ -273,6 +276,7 @@ class SalesforceUtil {
     return response;
   }
 
+  /////////////////////////////////////delete SMS data via custom REST API /////////////////////////////////////
   static Future<String> deleteSalesforceData(String objAPIName, List<String> recordIds) async { 
     if(accessToken == '') await loginToSalesforce();
     dynamic response;
@@ -280,7 +284,7 @@ class SalesforceUtil {
     log.d('here11');
     try{
       response = await http.post(
-        Uri.parse(generateInsertUpdateEndpointUrl(objAPIName, 'delete')),
+        Uri.parse(generateInsertUpdateEndpointUrl(objAPIName, 'delete_messages')),
         headers: generateHeader(),
         // body: generateBody(recordIds)
       );
@@ -302,4 +306,24 @@ class SalesforceUtil {
       return error.toString();
     }
   }
+
+  /////////////////////////////////////delete transactions data via custom REST API /////////////////////////////////////
+  static Future<String> callTransactionsDeleteAPI(String objAPIName) async{
+    if(accessToken == '') await loginToSalesforce();
+    dynamic response;
+    try{
+      response = await http.post(
+        Uri.parse(generateInsertUpdateEndpointUrl(objAPIName, 'delete_transactions')),
+        headers: generateHeader(),
+        // body: jsonEncode(generateUpdateBody(objAPIName, recordIds)),
+      );
+      log.d('callTransactionsDeleteAPI response=> ${response.statusCode} ${response.body}');
+      return response.body;
+    }
+    catch(error){
+      log.d('Error occurred while updating data to Salesforce. Error is : $error');
+      return error.toString();
+    }
+  }
+
 }
