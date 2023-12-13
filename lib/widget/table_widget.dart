@@ -1,5 +1,3 @@
-// ignore_for_file: library_private_types_in_public_api, non_constant_identifier_names
-
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import '../util/data_generator.dart';
@@ -23,6 +21,8 @@ class _TableWidgetState extends State<TableWidget> {
   int _sortColumnIndex = 0;
   bool _sortAscending = true;
 
+  bool isApproving = false; // Flag to track whether the approval process is ongoing
+
   @override
   void initState() {
     super.initState();
@@ -31,134 +31,149 @@ class _TableWidgetState extends State<TableWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Stack(
       children: [
-        Expanded(
-          child: widget.tableData.isEmpty
-              ? _buildEmptyTableMessage()
-              : SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  child: DataTable(
-                    columnSpacing: 1.0,
-                    headingRowHeight: 40.0,
-                    sortAscending: _sortAscending,
-                    columns: [
-                      DataColumn(
-                        label: SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.35,
-                          child: Padding(
-                            padding: const EdgeInsets.all(1.0),
-                            child: Text(COLUMN_NAMES[0]),
-                          ),
-                        ),
-                        onSort: (columnIndex, ascending) {
-                          _sortColumn(columnIndex, ascending);
-                          setState(() {});
-                        },
-                        numeric: false,
-                      ),
-                      DataColumn(
-                        label: SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.15,
-                          child: Padding(
-                            padding: const EdgeInsets.all(1.0),
-                            child: Text(COLUMN_NAMES[1]),
-                          ),
-                        ),
-                        onSort: (columnIndex, ascending) {
-                          _sortColumn(columnIndex, ascending);
-                          setState(() {});
-                        },
-                        numeric: false,
-                      ),
-                      DataColumn(
-                        label: SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.15,
-                          child: Padding(
-                            padding: const EdgeInsets.all(1.0),
-                            child: Text(COLUMN_NAMES[2]),
-                          ),
-                        ),
-                        onSort: (columnIndex, ascending) {
-                          _sortColumn(columnIndex, ascending);
-                          setState(() {});
-                        },
-                        numeric: true,
-                      ),
-                    ],
-                    rows: widget.tableData.asMap().entries.map((entry) {
-                      final rowIndex = entry.key;
-                      final row = entry.value;
-
-                      String col1 = row[0].replaceAll('VPA', '').replaceAll('paytm', '');
-                      col1 = col1.length <= 15 ? col1 : col1.substring(0, 15);
-                      final String col2 = row[1];
-                      final String col3 = row[2];
-
-                      return DataRow(
-                        selected: selectedRows[rowIndex],
-                        onSelectChanged: (selected) {
-                          if (selected != null) {
-                            setState(() {
-                              selectedRows[rowIndex] = selected;
-                            });
-                          }
-                        },
-                        cells: [
-                          DataCell(
-                            SizedBox(
+        Column(
+          children: [
+            Expanded(
+              child: widget.tableData.isEmpty
+                  ? _buildEmptyTableMessage()
+                  : SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: DataTable(
+                        columnSpacing: 1.0,
+                        headingRowHeight: 40.0,
+                        sortAscending: _sortAscending,
+                        columns: [
+                          DataColumn(
+                            label: SizedBox(
                               width: MediaQuery.of(context).size.width * 0.35,
                               child: Padding(
                                 padding: const EdgeInsets.all(1.0),
-                                child: Text(
-                                  col1,
-                                  overflow: TextOverflow.clip,
-                                  maxLines: 2,
-                                ),
+                                child: Text(COLUMN_NAMES[0]),
                               ),
                             ),
+                            onSort: (columnIndex, ascending) {
+                              _sortColumn(columnIndex, ascending);
+                              setState(() {});
+                            },
+                            numeric: false,
                           ),
-                          DataCell(
-                            SizedBox(
+                          DataColumn(
+                            label: SizedBox(
                               width: MediaQuery.of(context).size.width * 0.15,
                               child: Padding(
                                 padding: const EdgeInsets.all(1.0),
-                                child: Text(
-                                  col2,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 2,
-                                ),
+                                child: Text(COLUMN_NAMES[1]),
                               ),
                             ),
+                            onSort: (columnIndex, ascending) {
+                              _sortColumn(columnIndex, ascending);
+                              setState(() {});
+                            },
+                            numeric: false,
                           ),
-                          DataCell(
-                            SizedBox(
+                          DataColumn(
+                            label: SizedBox(
                               width: MediaQuery.of(context).size.width * 0.15,
                               child: Padding(
                                 padding: const EdgeInsets.all(1.0),
-                                child: Text(
-                                  col3,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 2,
-                                ),
+                                child: Text(COLUMN_NAMES[2]),
                               ),
                             ),
+                            onSort: (columnIndex, ascending) {
+                              _sortColumn(columnIndex, ascending);
+                              setState(() {});
+                            },
+                            numeric: true,
                           ),
                         ],
-                      );
-                    }).toList(),
-                  ),
-                ),
+                        rows: widget.tableData.asMap().entries.map((entry) {
+                          final rowIndex = entry.key;
+                          final row = entry.value;
+
+                          String col1 = row[0].replaceAll('VPA', '').replaceAll('paytm', '');
+                          col1 = col1.length <= 15 ? col1 : col1.substring(0, 15);
+                          final String col2 = row[1];
+                          final String col3 = row[2];
+
+                          return DataRow(
+                            selected: selectedRows[rowIndex],
+                            onSelectChanged: (selected) {
+                              if (selected != null) {
+                                setState(() {
+                                  selectedRows[rowIndex] = selected;
+                                });
+                              }
+                            },
+                            cells: [
+                              DataCell(
+                                SizedBox(
+                                  width: MediaQuery.of(context).size.width * 0.35,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(1.0),
+                                    child: Text(
+                                      col1,
+                                      overflow: TextOverflow.clip,
+                                      maxLines: 2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                SizedBox(
+                                  width: MediaQuery.of(context).size.width * 0.15,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(1.0),
+                                    child: Text(
+                                      col2,
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              DataCell(
+                                SizedBox(
+                                  width: MediaQuery.of(context).size.width * 0.15,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(1.0),
+                                    child: Text(
+                                      col3,
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                      ),
+                    ),
+            ),
+            Visibility(
+              visible: showApproveButton(),
+              child: ElevatedButton(
+                onPressed: () async {
+                  await handleApproveSMS();
+                },
+                child: isApproving
+                    ? const CircularProgressIndicator() 
+                    : Text(_commaOperationName),
+              ),
+            ),
+          ],
         ),
-        Visibility(
-          visible: showApproveButton(),
-          child: ElevatedButton(
-            onPressed: () async {
-              handleApproveSMS();
-            },
-            child: Text(_commaOperationName),
+        if (isApproving)
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withOpacity(0.3), // Colors.blue.withOpacity(0.5),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
           ),
-        ),
       ],
     );
   }
@@ -218,7 +233,12 @@ class _TableWidgetState extends State<TableWidget> {
     });
   }
 
-  void handleApproveSMS() async {
+  Future<void> handleApproveSMS() async {
+    // Set the flag to true when starting the approval process
+    setState(() {
+      isApproving = true;
+    });
+
     List<String> recordIds = [];
 
     for (int i = 0; i < selectedRows.length; i++) {
@@ -231,6 +251,9 @@ class _TableWidgetState extends State<TableWidget> {
     log.d('Response for handleApproveSMS $response');
 
     setState(() {
+      // Reset the flag when the approval process is completed
+      isApproving = false;
+
       for (int i = 0; i < selectedRows.length; i++) {
         if (selectedRows[i]) {
           widget.tableData.removeAt(i);
