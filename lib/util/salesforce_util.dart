@@ -158,13 +158,19 @@ class SalesforceUtil {
         counter++;
         if(counter == 200){
           String currentResult = await SalesforceUtil._insertSFData(objAPIName, eachList);
-          log.d('  =>$currentResult');
-          result += currentResult;
+          log.d('currentresult =>$currentResult');
+          if(result != ''){
+            result = '$result,$currentResult'; // same as (result = result + ',' + currentResult)
+          }
+          else{
+            result = currentResult;
+          }
           counter = 0;
           eachList = [];
         }     
       }
     }
+    result = '[$result]'; // same as (result = '[' + result + ']')
     return result;
   }
 

@@ -139,8 +139,8 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
     String resultString = '';
     // Your logic for handling SMS sync goes here
     log.d('Syncing SMS data...');
-    // List<SmsMessage> messages = await MessageUtil.getMessages(count : 200); // Change this while debugging
-    List<SmsMessage> messages = await MessageUtil.getMessages(); // Change this while debugging
+     List<SmsMessage> messages = await MessageUtil.getMessages(count : 600); // Change this while debugging
+    // List<SmsMessage> messages = await MessageUtil.getMessages(); // Change this while debugging
     List<Map<String, dynamic>> processedMessages = await MessageUtil.convert(messages);
     String transactionsDeleteResponse = await SalesforceUtil.callTransactionsDeleteAPI('FinPlan__Bank_Transaction__c | FinPlan__Investment_Transaction__c'); //TBD just a placeholder
     log.d('transactionsDeleteResponse response IS->$transactionsDeleteResponse');
@@ -148,12 +148,19 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
     log.d('handleSMSSync response IS->$response');
 
     try{
-      Map<String, dynamic> resultMap = jsonDecode(response);
-      if (resultMap['hasErrors'] == true && resultMap['results'].isNotEmpty) {
-        resultString = resultMap['results'][0]['errors'][0]['message'];
-      } else {
-        resultString = 'Success';
+      List<dynamic> resultList = jsonDecode(response);
+      List<Map<String, String>> castedResultList = resultList.map((e) => Map<String, String>.from(e)).toList();
+
+      for (Map<String, String> each in castedResultList) {
+        log.d('Each batch result => $each');
+        resultString = '$resultString$each';
       }
+      
+      // if (resultMap['hasErrors'] == true && resultMap['results'].isNotEmpty) {
+      //   resultString = resultMap['results'][0]['errors'][0]['message'];
+      // } else {
+      //   resultString = 'Success';
+      // }
     }
     catch(error){
       resultString = error.toString();

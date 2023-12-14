@@ -155,16 +155,12 @@ class DataGenerator {
           for (var record in records) {
             Map<String, dynamic> recordMap = Map.castFrom(record);
             String id = recordMap['Id'];
-            log.d('here 4.1');
             String beneficiary = recordMap['FinPlan__Beneficiary_Name__c'];
-            log.d('here 4.2');
             String amount = recordMap['FinPlan__Amount__c'].toString();
-            log.d('here 4.3');
             String rawDate = recordMap['FinPlan__Transaction_Date__c']; //.substring(5,10);
             String formattedDate = '${rawDate.split('-')[2]}/${rawDate.split('-')[1]}';
-            log.d('here 4.4');
-            log.d('beneficiary $beneficiary || amount $amount || rawDate $rawDate || id $id');
-            
+
+            log.d('beneficiary $beneficiary || amount $amount || rawDate $rawDate || id $id');            
             generatedData.add([beneficiary, amount, formattedDate, id]);
           }
         }
