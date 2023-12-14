@@ -43,9 +43,10 @@ class MessageUtil {
       await Permission.sms.request();
     }
     log.d('Inbox message count : ${messages.length}');
-    return messages;
+    return sort(messages);
   }
 
+  // Method to convert the SMS Messages to a format that will be used for insert method later
   static Future<List<Map<String, dynamic>>> convert(List<SmsMessage> messages) async{
     
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
@@ -63,11 +64,21 @@ class MessageUtil {
         "FinPlan__Content__c": "${sms.body != null && sms.body!.length > 255 ? sms.body?.substring(0, 255) : sms.body}",
         "FinPlan__Sender__c": "${sms.sender}",
         "FinPlan__Received_At__c": sms.date.toString(),
-        "FinPlan__Device__c": deviceName
+        "FinPlan__Device__c": deviceName,
+        "FinPlan__Created_From__c" : "Sync" // Explicitly set as 'Sync' so it does not fire up the trigger on SMS Object
       };
       allRecords.add(record);
       count++;
     }
     return allRecords;
+  }
+
+  // Method to sort the messages as per received at value, records are to be arranged by date asc
+  static List<SmsMessage> sort(List<SmsMessage> msgList){
+    List<SmsMessage> sortedMsgList = [];
+    for(int i = msgList.length-1; i >= 0; i--){
+      sortedMsgList.add(msgList[i]);
+    }
+    return sortedMsgList;
   }
 }

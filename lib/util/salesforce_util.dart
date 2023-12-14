@@ -158,7 +158,7 @@ class SalesforceUtil {
         counter++;
         if(counter == 200){
           String currentResult = await SalesforceUtil._insertSFData(objAPIName, eachList);
-          log.d('currentresult =>$currentResult');
+          log.d('  =>$currentResult');
           result += currentResult;
           counter = 0;
           eachList = [];
@@ -221,7 +221,7 @@ class SalesforceUtil {
         final Map<dynamic, dynamic> data = json.decode(response.body);
         log.d('Insert Operation : ${data.toString()}');
       } 
-      else {
+      else {  
         // Log an error
         log.d('Response code other than 201 detected : ${response.body}');
       }
