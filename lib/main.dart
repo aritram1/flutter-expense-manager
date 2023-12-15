@@ -139,8 +139,8 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
     String resultString = '';
     // Your logic for handling SMS sync goes here
     log.d('Syncing SMS data...');
-    List<SmsMessage> messages = await MessageUtil.getMessages(count : 400); // Change this while debugging
-    // List<SmsMessage> messages = await MessageUtil.getMessages(); // Change this while debugging
+    // List<SmsMessage> messages = await MessageUtil.getMessages(count : 400); // Change this while debugging
+    List<SmsMessage> messages = await MessageUtil.getMessages(); // Change this while debugging
     List<Map<String, dynamic>> processedMessages = await MessageUtil.convert(messages);
     String transactionsDeleteResponse = await SalesforceUtil.callTransactionsDeleteAPI('FinPlan__Bank_Transaction__c | FinPlan__Investment_Transaction__c'); //TBD just a placeholder
     log.d('transactionsDeleteResponse response IS->$transactionsDeleteResponse');

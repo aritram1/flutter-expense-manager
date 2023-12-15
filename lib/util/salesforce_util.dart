@@ -6,13 +6,23 @@ import 'package:logger/logger.dart';
 
 class SalesforceUtil {
 
-  static String clientId ='3MVG9wt4IL4O5wvIBCa0yrhLb82rC8GGk03G2F26xbcntt9nq1JXS75mWYnnuS2rxwlghyQczUFgX4whptQeT';
-  static String clientSecret ='3E0A6C0002E99716BD15C7C35F005FFFB716B8AA2DE28FBD49220EC238B2FFC7';
-  static String userName = 'aritram1@gmail.com.financeplanner';
-  static String pwdWithToken =  'financeplanner123W8oC4taee0H2GzxVbAqfVB14';
+  // static String clientId ='3MVG9wt4IL4O5wvIBCa0yrhLb82rC8GGk03G2F26xbcntt9nq1JXS75mWYnnuS2rxwlghyQczUFgX4whptQeT';
+  // static String clientSecret ='3E0A6C0002E99716BD15C7C35F005FFFB716B8AA2DE28FBD49220EC238B2FFC7';
+  // static String userName = 'aritram1@gmail.com.financeplanner';
+  // static String pwdWithToken =  'financeplanner123W8oC4taee0H2GzxVbAqfVB14';
   
-  static String tokenEndpoint = 'https://login.salesforce.com/services/oauth2/token';
-  static String tokenGrantType = 'password';
+  // static String tokenEndpoint = 'https://login.salesforce.com/services/oauth2/token';
+  // static String tokenGrantType = 'password';
+
+
+  static String clientId ='TESTVALUE';
+  static String clientSecret ='TESTVALUE';
+  static String userName = 'TESTVALUE';
+  static String pwdWithToken =  'TESTVALUE';
+  
+  static String tokenEndpoint = 'TESTVALUE';
+  static String tokenGrantType = 'TESTVALUE';
+
   static String compositeUrlForInsert = '/services/data/v53.0/composite/tree/';
   
   static String customEndpointForSyncMessages = '/services/apexrest/FinPlan/api/sms/sync/*';
@@ -75,6 +85,7 @@ class SalesforceUtil {
     };
     return header;
   }
+  
   static String generateQueryEndpointUrl(String objAPIName, List<String> fieldList, String whereClauseString, String orderByClauseString, int? count){
     String fields = fieldList.isNotEmpty ? fieldList.join(',') : 'count()';
     String whereClause = whereClauseString != '' ? 'WHERE $whereClauseString' : '' ;
@@ -118,13 +129,13 @@ class SalesforceUtil {
 
 
   static Map<String, dynamic> generateBody(String objAPIName, List<Map<String, dynamic>> fieldNameValuePairs){
-    Map<String, dynamic> body = {};
-    var allRecords = [];
-    int count = 0;
-    for(Map<String, dynamic> eachRecord in fieldNameValuePairs){
-      Map<String, dynamic> each = {};
-      // each['attributes'] = {
-      //   'type': objAPIName,
+      Map<String, dynamic> body = {};
+      var allRecords = [];
+      int count = 0;
+      for(Map<String, dynamic> eachRecord in fieldNameValuePairs){
+        Map<String, dynamic> each = {};
+        // each['attributes'] = {
+        //   'type': objAPIName,
       //   'referenceId': 'ref$count'
       // };
       for(String fieldAPIName in eachRecord.keys){
