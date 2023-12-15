@@ -1,10 +1,13 @@
 // ignore: depend_on_referenced_packages
+// ignore_for_file: prefer_interpolation_to_compose_strings, avoid_print
+
 import 'dart:convert';
 import 'dart:core';
+import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 
-class SalesforceUtil79{
+class SalesforceUtil2{
 
   static String clientId ='3MVG9wt4IL4O5wvIBCa0yrhLb82rC8GGk03G2F26xbcntt9nq1JXS75mWYnnuS2rxwlghyQczUFgX4whptQeT';
   static String clientSecret ='3E0A6C0002E99716BD15C7C35F005FFFB716B8AA2DE28FBD49220EC238B2FFC7';
@@ -14,6 +17,7 @@ class SalesforceUtil79{
   static String tokenEndpoint = 'https://login.salesforce.com/services/oauth2/token';
   static String tokenGrantType = 'password';
   static String compositeUrlForInsert = '/services/data/v53.0/composite/tree/';
+  static String compositeUrlForUpdate = '/services/data/v59.0/composite/sobjects/';
   
   static String customEndpointForSyncMessages = '/services/apexrest/FinPlan/api/sms/sync/*';
   static String customEndpointForApproveMessages = '/services/apexrest/FinPlan/api/sms/approve/*';
@@ -27,42 +31,125 @@ class SalesforceUtil79{
   static bool isLoggedIn() => (accessToken != '');
   static Logger log = Logger();
 
-  static Future<Map<String, String>> loginToSalesforce() async{
+  static Future<Map<String, dynamic>> loginToSalesforce() async{
     Map<String, String> response = await _login();
     return response;
   }
 
-  static Future<Map<String, String>> insertToSalesforce(String objAPIName, List<Map<String, dynamic>> fieldNameValuePairs) async{
+  static Future<Map<String, dynamic>> insertToSalesforce(String objAPIName, List<Map<String, dynamic>> fieldNameValuePairs) async{
     if(!isLoggedIn()) await loginToSalesforce();
-    Map<String, String> response = {};
-    response = await _insertToSalesforce(objAPIName, fieldNameValuePairs);
-    return response;
-  }
-  
-  static Future<Map<String, String>> updateToSalesforce(String objAPIName, List<Map<String, dynamic>> fieldNameValuePairs) async{
-    if(!isLoggedIn()) await loginToSalesforce();
-    Map<String, String> response = {};
-    response = await _updateToSalesforce(objAPIName, fieldNameValuePairs);
-    return response;
+    Map<String, dynamic> insertResponse = getResponseTemplate();
+    // check the size of the list and split in a batch of 200
+    List<Map<String, dynamic>> eachBatch = [];
+    int count = 0;
+    int batchSize;
+    String key;
+    dynamic value;
+    while(fieldNameValuePairs.isNotEmpty){
+      batchSize = min(fieldNameValuePairs.length, 200);
+      key = 'batch$count';
+      for(int i=0; i<batchSize; i++){
+        eachBatch.add(fieldNameValuePairs.removeLast());
+      }
+      Map<String, String> resp = await _insertToSalesforce(objAPIName, eachBatch);
+      print('Response is==>$resp');
+      if(resp.containsKey('data')){
+        value = resp['data'];
+        insertResponse['data'][key] = value;
+      }
+      else if(resp.containsKey('error')){
+        value = resp['error'];
+        insertResponse['error'][key] = value;
+      }
+      eachBatch = [];
+      count++;
+    }
+    print('Result from insertResponse $insertResponse');
+    return insertResponse;
   }
 
-  static Future<Map<String, String>> deleteFromSalesforce(String objAPIName, List<String> recordIds) async{
+  // completed
+  static Future<Map<String, String>> _insertToSalesforce(String objAPIName, List<Map<String, dynamic>> fieldNameValuePairs) async{
+    Map<String, String> _insertResponse = {};
+    if(!isLoggedIn()) await loginToSalesforce();
+    try{
+      dynamic resp = await http.post(
+        Uri.parse(generateEndpointUrl(opType : 'insert', objAPIName : objAPIName)), // required param is opType
+        headers: generateHeader(),
+        body: jsonEncode(generateBody(opType : 'insert', objAPIName : objAPIName, fieldNameValuePairs : fieldNameValuePairs)),
+      );
+      if(resp.statusCode == 201 || resp.statusCode == 200){
+        final Map<String, dynamic> body = json.decode(resp.body);
+        if(!body['hasErrors']){
+          int count = body['results'].length;
+          _insertResponse['data'] = '$count $objAPIName records are inserted';
+        }
+        else{
+          _insertResponse['error'] = 'Error occurred in _insertToSalesforce!';
+        }
+      } 
+      else {  
+        print('Response code other than 200/201 detected ${resp.statusCode}');
+        _insertResponse['error'] = json.decode(resp.body).toString();
+      }
+    }
+    catch(error){
+      _insertResponse['error'] = error.toString();
+    }
+    print('Response from _insertResponse $_insertResponse');
+    return _insertResponse;
+  }
+  
+  
+  static Future<Map<String, dynamic>> updateToSalesforce(String objAPIName, List<Map<String, dynamic>> fieldNameValuePairs) async{
+    if(!isLoggedIn()) await loginToSalesforce();
+    Map<String, dynamic> updateResponse = getResponseTemplate();
+    // check the size of the list and split in a batch of 200
+    List<Map<String, dynamic>> eachBatch = [];
+    int count = 0;
+    int batchSize;
+    String key;
+    dynamic value;
+    while(fieldNameValuePairs.isNotEmpty){
+      batchSize = min(fieldNameValuePairs.length, 200);
+      key = 'batch$count';
+      for(int i=0; i<batchSize; i++){
+        eachBatch.add(fieldNameValuePairs.removeLast());
+      }
+      Map<String, String> resp = await _updateToSalesforce(objAPIName, eachBatch);
+      print('Response is==>$resp');
+      if(resp.containsKey('data')){
+        value = resp['data'];
+        updateResponse['data'][key] = value;
+      }
+      else if(resp.containsKey('error')){
+        value = resp['error'];
+        updateResponse['error'][key] = value;
+      }
+      eachBatch = [];
+      count++;
+    }
+    print('Result from updateResponse $updateResponse');
+    return updateResponse;
+  }
+
+  static Future<Map<String, dynamic>> deleteFromSalesforce(String objAPIName, List<String> recordIds) async{
     if(!isLoggedIn()) await loginToSalesforce();
     Map<String, String> response = {};
     response = await _deleteFromSalesforce(objAPIName, recordIds);
     return response;
   }
 
-  static Future<Map<String, String>> queryFromSalesforce({ required String objAPIName, List<String> fieldList = const [], String whereClause = '', String orderByClause = '', int? count}) async {
+  static Future<Map<String, dynamic>> queryFromSalesforce({ required String objAPIName, List<String> fieldList = const [], String whereClause = '', String orderByClause = '', int? count}) async {
     if(!isLoggedIn()) await loginToSalesforce();
     Map<String, String> response = {};
     response = await _queryFromSalesforce(objAPIName, fieldList, whereClause, orderByClause, count);
     return response;
   }
 
-  static Future<Map<String, String>> callSalesforceAPI(String op) async{
+  static Future<Map<String, dynamic>> callSalesforceAPI(String op) async{
     if(!isLoggedIn()) await loginToSalesforce();
-    Map<String, String> response = {};
+    Map<String, dynamic> response = {};
     if(op == 'approve_messages'){
       response = await _callApproveMessageAPI();
     }
@@ -78,30 +165,65 @@ class SalesforceUtil79{
     return response;
   }
 
-  static Future<Map<String, String>> _callApproveMessageAPI() async{
+  static Future<Map<String, dynamic>> _callApproveMessageAPI() async{
     Map<String, String> response = {};
     return response;
   }
 
-  static Future<Map<String, String>> _callDeleteMessageAPI() async{
+  static Future<Map<String, dynamic>> _callDeleteMessageAPI() async{
     Map<String, String> response = {};
     return response;
   }
 
-  static Future<Map<String, String>> _callSyncMessageAPI() async{
+  static Future<Map<String, dynamic>> _callSyncMessageAPI() async{
     Map<String, String> response = {};
     return response;
   }
-  static Future<Map<String, String>> _callDeleteTransactionsAPI() async{
+  static Future<Map<String, dynamic>> _callDeleteTransactionsAPI() async{
     Map<String, String> response = {};
     return response;
   }
 
-  static Future<Map<String, String>> _insertToSalesforce(String objAPIName, List<Map<String, dynamic>> fieldNameValuePairs) async{
-    return {};
-  }
+  // private methods 
+  
   static Future<Map<String, String>> _updateToSalesforce(String objAPIName, List<Map<String, dynamic>> fieldNameValuePairs) async{
-    return {};
+    Map<String, String> _updateResponse = {};
+    if(!isLoggedIn()) await loginToSalesforce();
+    try{
+      dynamic resp = await http.patch(
+        Uri.parse(generateEndpointUrl(opType : 'update', objAPIName : objAPIName)), // required param is opType
+        headers: generateHeader(),
+        body: jsonEncode(generateBody(opType : 'update', objAPIName : objAPIName, fieldNameValuePairs : fieldNameValuePairs)),
+      );
+      if(resp.statusCode == 201 || resp.statusCode == 200){
+        final List<dynamic> body = json.decode(resp.body);
+        int successCount = 0;
+        String errors = '';
+        for(dynamic rec in body){
+          if(rec['success']){
+            successCount++;
+          }
+          else{
+            errors = errors + rec['errors'].toString();
+          }
+        }
+        if(errors == ''){
+          _updateResponse['data'] = '$successCount $objAPIName records are updated';
+        }
+        else{
+          _updateResponse['error'] = errors;
+        }
+      } 
+      else {  
+        print('Response code other than 200/201 detected ${resp.statusCode}');
+        _updateResponse['error'] = json.decode(resp.body).toString();
+      }
+    }
+    catch(error){
+      _updateResponse['error'] = error.toString();
+    }
+    print('Response from _updateResponse $_updateResponse');
+    return _updateResponse;
   }
   static Future<Map<String, String>> _deleteFromSalesforce(String objAPIName, List<String> recordIds) async{
     return {};
@@ -115,9 +237,9 @@ class SalesforceUtil79{
     dynamic loginResponse;
     try{
       loginResponse = await http.post(
-        Uri.parse(generateEndpointUrl('login')),
-        headers: (generateHeader()),
-        body: generateBody('login'),
+        Uri.parse(generateEndpointUrl(opType : 'login')),
+        headers: generateHeader(),
+        body: generateBody(opType: 'login'),
       );
       if (loginResponse.statusCode == 200) { 
         final Map<String, dynamic> data = json.decode(loginResponse.body);
@@ -126,40 +248,46 @@ class SalesforceUtil79{
       } 
       else {
         // Log an error
-        log.d('Response code other than 200 detected : ${loginResponse.body}');
+        print('Response code other than 200 detected : ${loginResponse.body}');
       }
       // responseMap.add('data') = response.body;
     }
     catch(error){
-      log.d('Error occurred while logging into Salesforce. Error is : $error');
+      print('Error occurred while logging into Salesforce. Error is : $error');
       // responseMap.add('error') = error.toString();
     }
     return responseMap;
   }
 
-  /////////////////////////////// generateheader method ///////////////////////////////////
+  /////////////////////////////// generate type of methods ///////////////////////////////////
   static Map<String, String> generateHeader(){
     final Map<String, String> header = {};
-    header['Content-Type'] = 'application/x-www-form-urlencoded';
-    if(accessToken != ''){
+    
+    if(!isLoggedIn()){
+      header['Content-Type'] = 'application/x-www-form-urlencoded';
+    }
+    else{
+      header['Content-Type'] = 'application/json';
       header['Authorization'] = 'Bearer $accessToken';
     }
     return header;
   }
 
-  /////////////////////////////// generate endpoint methods ///////////////////////////////////
-  static String generateEndpointUrl(String opType){
+  static String generateEndpointUrl({required String opType, String objAPIName = ''}){
     String endpointUrl = '';
-    if(opType == 'login'){
+    if(opType == 'login'){ // completed
       endpointUrl = '$tokenEndpoint?client_id=$clientId&client_secret=$clientSecret&username=$userName&password=$pwdWithToken&grant_type=$tokenGrantType';
     }
-    if(opType == 'insert'){
-      // endpointUrl = '$instanceUrl$compositeUrlForInsert$objAPIName';
+    if(opType == 'insert'){ // completed
+      endpointUrl = '$instanceUrl$compositeUrlForInsert$objAPIName';
+    }
+    else if(opType == 'update'){ // completed 
+      endpointUrl = '$instanceUrl$compositeUrlForUpdate';
     }
     else if(opType == 'sync'){
       endpointUrl = '$instanceUrl$customEndpointForSyncMessages';
     }
-    else if(opType == 'update'){
+    else if(opType == 'approve_messages'){
       endpointUrl = '$instanceUrl$customEndpointForApproveMessages';
     }
     else if(opType == 'delete_messages'){
@@ -168,7 +296,7 @@ class SalesforceUtil79{
     else if(opType == 'delete_transactions'){
       endpointUrl = '$instanceUrl$customEndpointForDeleteTransactions';
     }
-    log.d('Generated URL : $endpointUrl');
+    print('Generated endpoint : $endpointUrl');
     return endpointUrl;
   }
 
@@ -179,26 +307,27 @@ class SalesforceUtil79{
     String limitCount = (count != null && count > 0) ? 'LIMIT $count' : '';
 
     String query = 'SELECT $fields FROM $objAPIName $whereClause $orderByClause $limitCount';
-    log.d('Generated Query : $query');
+    print('Generated Query : $query');
 
     query = query.replaceAll(' ', '+');
-    log.d('Encoded Query : $query');
+    print('Encoded Query : $query');
     
     final String endpointUrl = '$instanceUrl$queryUrl$query';
     return endpointUrl;
   }
 
-  /// Generate body ///////
-  static Map<String, dynamic> generateBody(String opType, {String objAPIName = '', List<Map<String, dynamic>> fieldNameValuePairs = const [], List<String> recordIds = const []}){
+  static Map<String, dynamic> generateBody({required String opType, String objAPIName = '', List<Map<String, dynamic>> fieldNameValuePairs = const [], List<String> recordIds = const []}){
     Map<String, dynamic> body = {};
-    if(opType == 'login'){
-
-    }
-    else if(opType == 'insert' || opType == 'sync'){
+    if(opType == 'login'){}
+    else if(opType == 'insert'){
       var allRecords = [];
       int count = 0;
       for(Map<String, dynamic> eachRecord in fieldNameValuePairs){
         Map<String, dynamic> each = {};
+        each['attributes'] = {
+          'type': objAPIName,
+          'referenceId': 'ref$count'
+        };
         for(String fieldAPIName in eachRecord.keys){
           each[fieldAPIName] = eachRecord[fieldAPIName];
         }
@@ -206,8 +335,70 @@ class SalesforceUtil79{
         count++;
       }
       body['records'] = allRecords;
+      // log.d('body=>' + body.toString());
     }
-    else if(opType == 'update'){}
+    else if(opType == 'update'){
+      var allRecords = [];
+      int count = 0;
+      for(Map<String, dynamic> eachRecord in fieldNameValuePairs){
+        Map<String, dynamic> each = {};
+        each['attributes'] = {
+          'type': objAPIName,
+          'referenceId': 'ref$count'
+        };
+        for(String fieldAPIName in eachRecord.keys){
+          each[fieldAPIName] = eachRecord[fieldAPIName];
+        }
+        allRecords.add(each);
+        count++;
+      }
+      body['records'] = allRecords;
+      body['allOrNone'] = false;
+      print('Body is=> $body');
+
+      // {
+      //   records: [
+      //     {
+      //       attributes: {type: Account, referenceId: ref0}, 
+      //       id: 0015i000013UxzOAAS, 
+      //       accountNumber: 4000, 
+      //       phone: 4000
+      //     }, 
+      //     {
+      //       attributes: {type: Account, referenceId: ref1}, 
+      //       id: 0015i000013UxzXAAS, 
+      //       accountNumber: 1000, 
+      //       phone: 1000
+      //     }, 
+      //     {
+      //       attributes: {type: Account, referenceId: ref2}, 
+      //       id: 0015i000013UxzYAAS, 
+      //       accountNumber: 0, 
+      //       phone: 0
+      //     }], 
+      //   allOrNone: false
+      // }
+
+
+      // log.d('body=>' + body.toString());
+
+      // {
+      //           "allOrNone" : false,
+      //           "records" : [{
+      //               "attributes" : {"type" : "Account"},
+      //               "id" : "001xx000003DGb2AAG",
+      //               "NumberOfEmployees" : 27000
+      //           },{
+      //               "attributes" : {"type" : "Contact"},
+      //               "id" : "003xx000004TmiQAAS",
+      //               "Title" : "Lead Engineer"
+      //           }]
+      // }
+
+
+
+    }
+    else if(opType == 'sync'){}
     else if(opType == 'delete_messages'){}
     else if(opType == 'delete_transactions'){}
     if(opType == 'approve_messages'){
@@ -215,9 +406,15 @@ class SalesforceUtil79{
       dataMap['data'] = recordIds;
       body['input'] = dataMap;
     }
-    log.d(body);
+    // print(body);
     return body;
   }
+
+  // may not be required
+  static Map<String, dynamic> getResponseTemplate(){
+      return {'data' : {},'error' : {}};
+    }
+
 
   
 
