@@ -18,18 +18,32 @@ main() async{
   // dynamic insertResponse = await SalesforceUtil2.insertToSalesforce('Account', allInsert);
   // print('Insert response =>$insertResponse');
 
-  // update
-  List<String> idList = ['0015i000013UxzYAAS','0015i000013UxzXAAS', '0015i000013UxzOAAS'];
-  List<Map<String, String>> allUpdate = [];
-  for(int i=0;i<3;i++){
-    Map<String, String> each = {};
-    each['id'] = idList[i];
-    each['accountNumber'] = '${1000*i*i}';
-    each['phone'] = '${1000*i*i}';
-    allUpdate.add(each);
-  }
-  dynamic updateResponse = await SalesforceUtil2.updateToSalesforce('Account', allUpdate);
-  print('updateResponse =>$updateResponse');
+  // // update
+  // List<String> idList = ['0015i000013UxzYAAS','0015i000013UxzXAAS', '0015i000013UxzOAAS'];
+  // List<Map<String, String>> allUpdate = [];
+  // for(int i=0;i<3;i++){
+  //   Map<String, String> each = {};
+  //   each['id'] = idList[i];
+  //   each['accountNumber'] = '${1000*i*i}';
+  //   each['phone'] = '${1000*i*i}';
+  //   allUpdate.add(each);
+  // }
+  // dynamic updateResponse = await SalesforceUtil2.updateToSalesforce('Account', allUpdate);
+  // print('updateResponse =>$updateResponse');
 
+  // delete
+  // List<String> idList = ['0015i000013UxzXAAS','0015i000013UxzOAAS', '0015i000013UxzYAAS'];
+  // dynamic deleteResponse = await SalesforceUtil2.deleteFromSalesforce('Account', idList);
+  // print('deleteResponse =>$deleteResponse');
 
+  // Query
+  String whereClause = "name like 'Account%'";
+  Map<String, dynamic> queryResponse = await SalesforceUtil2.queryFromSalesforce(
+      objAPIName: 'Account', 
+      fieldList: ['Id', 'Website','Name', 'Phone'],
+      whereClause: whereClause,
+      orderByClause: 'Name desc',
+      count : 2
+  );
+  print('queryResponse =>$queryResponse');
 }
