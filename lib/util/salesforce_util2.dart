@@ -172,18 +172,12 @@ class SalesforceUtil2{
     Map<String, String> resp = await _queryFromSalesforce(objAPIName, fieldList, whereClause, orderByClause, count);
     
     print('queryFromSalesforce Response is==>$resp');
-    // if(resp.containsKey('data')){
-    //   value = resp['data'];
-    //   deleteResponse['data'][key] = value;
-    // }
-    // else if(resp.containsKey('error')){
-    //   value = resp['error'];
-    //   deleteResponse['error'][key] = value;
-    // }
-    // eachBatch = [];
-    // count++;
-    // }
-
+    if(resp.containsKey('data')){
+      queryResponse['data'] = resp;
+    }
+    else if(resp.containsKey('error')){
+      queryResponse['error'] = resp;
+    }
     print('Result from queryResponse $queryResponse');
     return queryResponse;
   }
@@ -322,17 +316,18 @@ class SalesforceUtil2{
       );
       print('response.statusCode ${resp.statusCode}');
       if (resp.statusCode == 200) {
-        print('I am here');
-        final Map<dynamic, dynamic> body = json.decode(resp.body);
-        log.d('Query Operation : $body');
-        print('I am here2');
-
+        final Map<String, dynamic> body = json.decode(resp.body);
+        print('Query Operation : $body');
+        int count = body['totalSize'];
+        bool done = body['done'];
+        List<dynamic> records = body['records'];
+        print('count : $count, done : $done , records $records');
         
 
         // Convert the 'resp' map to a JSON-formatted string
         // String jsonData = json.encode(resp);
 
-        // responseData['data'] = jsonData;
+        responseData['data'] = records.toString();
       }
       else {
         // Log an error
