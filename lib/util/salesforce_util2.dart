@@ -1,9 +1,8 @@
 // ignore: depend_on_referenced_packages
-// ignore_for_file: prefer_interpolation_to_compose_strings, avoid_print
+// ignore_for_file: prefer_interpolation_to_compose_strings, avoid_print, constant_identifier_names
 
 import 'dart:convert';
 import 'dart:core';
-import 'dart:ffi';
 import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
@@ -27,247 +26,238 @@ class SalesforceUtil2{
 
   static String queryUrl = '/services/data/v53.0/query?q=';
 
+  static Logger log = Logger();
+
   static String accessToken = '';
   static String instanceUrl = '';
   static bool isLoggedIn() => (accessToken != '');
-  static Logger log = Logger();
+  static String getAccessToken() => (accessToken);
+  static String getInstanceUrl() => (instanceUrl);
 
+  // Method to Login to Salesforce
   static Future<Map<String, dynamic>> loginToSalesforce() async{
-    Map<String, String> response = await _login();
+    Map<String, dynamic> response = await _login();
     return response;
   }
 
-  static Future<Map<String, dynamic>> insertToSalesforce(String objAPIName, List<Map<String, dynamic>> fieldNameValuePairs) async{
+  // Method to create, update or delete records to/from Salesforce
+  static Future<Map<String, dynamic>> dmlToSalesforce({String opType = '', String objAPIName = '', List<Map<String, dynamic>> fieldNameValuePairs = const [], List<String> recordIds = const [], bool hardDelete = false, int batchSize = 200}) async{
+    
     if(!isLoggedIn()) await loginToSalesforce();
-    Map<String, dynamic> insertResponse = getResponseTemplate();
-    // check the size of the list and split in a batch of 200
-    List<Map<String, dynamic>> eachBatch = [];
-    int count = 0;
-    int batchSize;
-    String key;
-    dynamic value;
-    while(fieldNameValuePairs.isNotEmpty){
-      batchSize = min(fieldNameValuePairs.length, 200);
-      key = 'batch$count';
-      for(int i=0; i<batchSize; i++){
-        eachBatch.add(fieldNameValuePairs.removeLast());
+    
+    Map<String, dynamic> dmlToSalesforceResponse = getGenericResponseTemplate();
+    
+    List<Map<String, dynamic>> eachInsertUpdateBatch = [];
+    List<String> eachDeleteBatch = [];
+    
+    int eachBatchSize;
+    int batchCount = 0;
+    Map<String, dynamic> resp;
+
+    if(opType == 'delete'){
+      while(recordIds.isNotEmpty){
+        eachBatchSize = min(recordIds.length, batchSize); // check the size of the list and split in a batch of 200
+        for(int i=0; i<eachBatchSize; i++){
+          eachDeleteBatch.add(recordIds.removeLast());
+        }
+        resp = await _deleteFromSalesforce(objAPIName, eachDeleteBatch, batchCount , hardDelete);
+        // print('resp in delete : $resp');
+
+        // Process the responses
+        dmlToSalesforceResponse['data'] = dmlToSalesforceResponse['data'].add(resp['records']);
+        dmlToSalesforceResponse['errors'] = dmlToSalesforceResponse['errors'].add(resp['errors']);
+
+        eachDeleteBatch = [];
+        batchCount++;
       }
-      Map<String, String> resp = await _insertToSalesforce(objAPIName, eachBatch);
-      print('Response is==>$resp');
-      if(resp.containsKey('data')){
-        value = resp['data'];
-        insertResponse['data'][key] = value;
-      }
-      else if(resp.containsKey('error')){
-        value = resp['error'];
-        insertResponse['error'][key] = value;
-      }
-      eachBatch = [];
-      count++;
     }
-    print('Result from insertResponse $insertResponse');
-    return insertResponse;
+    else if(opType == 'insert' || opType == 'update'){
+      while(fieldNameValuePairs.isNotEmpty){
+        eachBatchSize = min(fieldNameValuePairs.length, batchSize); // check the size of the list and split in a batch of 200
+        for(int i=0; i<eachBatchSize; i++){
+          eachInsertUpdateBatch.add(fieldNameValuePairs.removeLast());
+        }
+        resp = await _dmlToSalesforce(opType, objAPIName, eachInsertUpdateBatch, batchCount : batchCount);
+        // print('resp in insert update : $resp');
+       
+        // Process the response
+        if(resp.containsKey('data') && resp['data'].isNotEmpty){
+          List<dynamic> existingData = dmlToSalesforceResponse['data'];
+          for(dynamic each in resp['data']){
+            existingData.add(each);
+          }
+          dmlToSalesforceResponse['data'] = existingData;
+        }
+        if(resp.containsKey('errors') && resp['errors'].isNotEmpty){
+          List<dynamic> existingErrors = dmlToSalesforceResponse['errors'];
+          for(dynamic each in resp['errors']){
+            existingErrors.add(each);
+          }
+          dmlToSalesforceResponse['errors'] = existingErrors;
+        }
+        eachInsertUpdateBatch = [];
+        batchCount++;
+      }
+    }
+    // print('Final value of dmlToSalesforceResponse=>' + dmlToSalesforceResponse.toString());
+    return dmlToSalesforceResponse;
   }
 
-  // completed
-  static Future<Map<String, String>> _insertToSalesforce(String objAPIName, List<Map<String, dynamic>> fieldNameValuePairs) async{
-    Map<String, String> _insertResponse = {};
-    if(!isLoggedIn()) await loginToSalesforce();
+  // private method - gets called from `login` method
+  static Future<Map<String, dynamic>> _login() async{
+    Map<String, dynamic> loginResponse = {};
     try{
       dynamic resp = await http.post(
-        Uri.parse(generateEndpointUrl(opType : 'insert', objAPIName : objAPIName)), // required param is opType
+        Uri.parse(generateEndpointUrl(opType : 'login')),
         headers: generateHeader(),
-        body: jsonEncode(generateBody(opType : 'insert', objAPIName : objAPIName, fieldNameValuePairs : fieldNameValuePairs)),
+        body: generateBody(opType: 'login'),
       );
-      if(resp.statusCode == 201 || resp.statusCode == 200){
-        final Map<String, dynamic> body = json.decode(resp.body);
-        if(!body['hasErrors']){
-          int count = body['results'].length;
-          _insertResponse['data'] = '$count $objAPIName records are inserted. ';
-        }
-        else{
-          _insertResponse['error'] = 'Error occurred in _insertToSalesforce! ';
-        }
+      log.d('I am here');
+      final Map<String, dynamic> body = json.decode(resp.body);
+      if (resp.statusCode == 200) {
+        instanceUrl = body['instance_url'];
+        accessToken = body['access_token'];
+        loginResponse['data'] = body;
       } 
-      else {  
-        print('Response code other than 200/201 detected ${resp.statusCode}');
-        _insertResponse['error'] = json.decode(resp.body).toString();
+      else {
+        // Log an error
+        // print('Response code other than 200 detected : ${resp.body}');
+        loginResponse['error'] = body.toString();
+      }
+      // responseMap.add('data') = response.body;
+    }
+    catch(error){
+      // print('Error occurred while logging into Salesforce. Error is : $error');
+      loginResponse['error'] = error.toString();
+    }
+    return loginResponse;
+  }
+
+  // private method  - gets called from `dmlToSalesforce` method
+  static Future<Map<String, dynamic>> _dmlToSalesforce(String opType, String objAPIName, List<Map<String, dynamic>> fieldNameValuePairs, {int batchCount = 0}) async{
+    Map<String, dynamic> dmlResponse = getGenericResponseTemplate();
+
+    Map<String, dynamic> body = {};
+    try{
+      if(opType == 'insert'){
+        body = await _insertToSalesforce(objAPIName, fieldNameValuePairs, batchCount);
+        // print('body for insert : $body');
+      }
+      else{
+        body = await _updateToSalesforce(objAPIName, fieldNameValuePairs, batchCount);
+        // print('body for update : $body');
+      }
+
+      // Collate the response for all batches
+      if(body.containsKey('data') && body['data'].isNotEmpty){
+        List<dynamic> existingData = dmlResponse['data'];
+        for(dynamic each in body['data']){
+          existingData.add(each);
+        }
+        dmlResponse['data'] = existingData;
+      }
+      if(body.containsKey('errors') && body['errors'].isNotEmpty){
+        List<dynamic> existingErrors = dmlResponse['errors'];
+        for(dynamic each in body['errors']){
+          existingErrors.add(each);
+        }
+        dmlResponse['errors'] = existingErrors;
       }
     }
     catch(error){
-      _insertResponse['error'] = error.toString();
+      // print('body for error scenario : $body');
+      List<dynamic> catchBlockErrors = [];
+      catchBlockErrors.add(error.toString());
+      dmlResponse['errors'] = catchBlockErrors;
     }
-    print('Response from _insertResponse $_insertResponse');
-    return _insertResponse;
+    // print('DML response for $batchCount : $dmlResponse');
+    return dmlResponse;
   }
-  
-  
-  static Future<Map<String, dynamic>> updateToSalesforce(String objAPIName, List<Map<String, dynamic>> fieldNameValuePairs) async{
+
+  // private method - gets called from private method `_dmlToSalesforce`
+  static Future<Map<String, dynamic>> _insertToSalesforce(String objAPIName, List<Map<String, dynamic>> fieldNameValuePairs, int batchCount) async{
+    Map<String, dynamic> insertResponse = getGenericResponseTemplate(); 
     if(!isLoggedIn()) await loginToSalesforce();
-    Map<String, dynamic> updateResponse = getResponseTemplate();
-    // check the size of the list and split in a batch of 200
-    List<Map<String, dynamic>> eachBatch = [];
-    int count = 0;
-    int batchSize;
-    String key;
-    dynamic value;
-    while(fieldNameValuePairs.isNotEmpty){
-      batchSize = min(fieldNameValuePairs.length, 200);
-      key = 'batch$count';
-      for(int i=0; i<batchSize; i++){
-        eachBatch.add(fieldNameValuePairs.removeLast());
+    Map<String, dynamic> body = {};
+    dynamic resp;
+    try{
+      resp = await http.post(
+        Uri.parse(generateEndpointUrl(opType : 'insert', objAPIName : objAPIName)), // both are required params
+        headers: generateHeader(),
+        body: jsonEncode(generateBody(opType : 'insert', objAPIName : objAPIName, fieldNameValuePairs : fieldNameValuePairs, batchCount : batchCount)),
+      );
+      int statusCode = resp.statusCode;
+      body = json.decode(resp.body);
+      // print('ResponseBody => ${body.toString()}');
+      if(statusCode == 201 && !body['hasErrors']){
+        // print('Inside 201 $body');
+        insertResponse['data'] = body['results'];
       }
-      Map<String, String> resp = await _updateToSalesforce(objAPIName, eachBatch);
-      print('Response is==>$resp');
-      if(resp.containsKey('data')){
-        value = resp['data'];
-        updateResponse['data'][key] = value;
-      }
-      else if(resp.containsKey('error')){
-        value = resp['error'];
-        updateResponse['error'][key] = value;
-      }
-      eachBatch = [];
-      count++;
+      else{ // non 201 code is returned
+        // print('Response code other than 200/201 detected $statusCode');
+        // print('outside 201 $body');
+        if(body['hasErrors']){
+          insertResponse['errors'] = body['results'];
+        }
+      } 
     }
-    print('Result from updateResponse $updateResponse');
-    return updateResponse;
+    catch(error){
+      insertResponse['errors'] = error.toString();
+    }
+    // print('Final insertResponse output : $insertResponse');
+    return insertResponse;
   }
 
-  static Future<Map<String, dynamic>> deleteFromSalesforce(String objAPIName, List<String> recordIds, {bool hardDelete = false}) async{
-    if(!isLoggedIn()) await loginToSalesforce();
-    Map<String, dynamic> deleteResponse = getResponseTemplate();
-    // check the size of the list and split in a batch of 200
-    List<String> eachBatch = [];
-    int count = 0;
-    int batchSize;
-    String key;
-    dynamic value;
-    while(recordIds.isNotEmpty){
-      batchSize = min(recordIds.length, 200);
-      key = 'batch$count';
-      for(int i=0; i<batchSize; i++){
-        eachBatch.add(recordIds.removeLast());
-      }
-      Map<String, String> resp = await _deleteFromSalesforce(objAPIName, eachBatch, hardDelete);
-      print('_deleteFromSalesforce Response is==>$resp');
-      if(resp.containsKey('data')){
-        value = resp['data'];
-        deleteResponse['data'][key] = value;
-      }
-      else if(resp.containsKey('error')){
-        value = resp['error'];
-        deleteResponse['error'][key] = value;
-      }
-      eachBatch = [];
-      count++;
-    }
-    print('Result from deleteResponse $deleteResponse');
-    return deleteResponse;
-  }
-
-  static Future<Map<String, dynamic>> queryFromSalesforce({ required String objAPIName, List<String> fieldList = const [], String whereClause = '', String orderByClause = '', int? count}) async {
-    if(!isLoggedIn()) await loginToSalesforce();
-    Map<String, dynamic> queryResponse = getResponseTemplate();
-    Map<String, String> resp = await _queryFromSalesforce(objAPIName, fieldList, whereClause, orderByClause, count);
-    
-    print('queryFromSalesforce Response is==>$resp');
-    if(resp.containsKey('data')){
-      queryResponse['data'] = resp;
-    }
-    else if(resp.containsKey('error')){
-      queryResponse['error'] = resp;
-    }
-    print('Result from queryResponse $queryResponse');
-    return queryResponse;
-  }
-
-  static Future<Map<String, dynamic>> callSalesforceAPI(String op) async{
-    if(!isLoggedIn()) await loginToSalesforce();
-    Map<String, dynamic> response = {};
-    if(op == 'approve_messages'){
-      response = await _callApproveMessageAPI();
-    }
-    if(op == 'delete_messages'){
-      response = await _callDeleteMessageAPI();
-    }
-    if(op == 'sync'){
-      response = await _callSyncMessageAPI();
-    }
-    if(op == 'delete_transactions'){
-      response = await _callDeleteTransactionsAPI();
-    }
-    return response;
-  }
-
-  static Future<Map<String, dynamic>> _callApproveMessageAPI() async{
-    Map<String, String> response = {};
-    return response;
-  }
-
-  static Future<Map<String, dynamic>> _callDeleteMessageAPI() async{
-    Map<String, String> response = {};
-    return response;
-  }
-
-  static Future<Map<String, dynamic>> _callSyncMessageAPI() async{
-    Map<String, String> response = {};
-    return response;
-  }
-  static Future<Map<String, dynamic>> _callDeleteTransactionsAPI() async{
-    Map<String, String> response = {};
-    return response;
-  }
-
-  // private methods 
-  
-  static Future<Map<String, String>> _updateToSalesforce(String objAPIName, List<Map<String, dynamic>> fieldNameValuePairs) async{
-    Map<String, String> _updateResponse = {};
+  // private method - gets called from private method `_dmlToSalesforce`
+  static Future<Map<String, dynamic>> _updateToSalesforce(String objAPIName, List<Map<String, dynamic>> fieldNameValuePairs, int batchCount) async{
+    Map<String, dynamic> updateResponse = getGenericResponseTemplate();
     if(!isLoggedIn()) await loginToSalesforce();
     try{
       dynamic resp = await http.patch(
         Uri.parse(generateEndpointUrl(opType : 'update', objAPIName : objAPIName)), // required param is opType
         headers: generateHeader(),
-        body: jsonEncode(generateBody(opType : 'update', objAPIName : objAPIName, fieldNameValuePairs : fieldNameValuePairs)),
+        body: jsonEncode(generateBody(opType : 'update', objAPIName : objAPIName, fieldNameValuePairs : fieldNameValuePairs, batchCount : batchCount)),
       );
-      if(resp.statusCode == 201 || resp.statusCode == 200){
-        final List<dynamic> body = json.decode(resp.body);
-        int successCount = 0;
-        String errors = '';
-        for(dynamic rec in body){
-          if(rec['success']){
-            successCount++;
+      final List<dynamic> body = json.decode(resp.body);
+      print('body within _updateToSalesforce $body');
+      for(dynamic rec in body){
+        if(resp.statusCode == 200){
+          if(rec.containsKey('success') && rec['success']){ // i.e. rec['success'] exists and it's value is true
+            dynamic recordId = rec['id'];
+            List<dynamic> existingData = updateResponse['data'];
+            existingData.add(recordId);
+            updateResponse['data'] = existingData;
           }
           else{
-            errors = errors + rec['errors'].toString();
-          }
-        }
-        if(errors == ''){
-          _updateResponse['data'] = '$successCount $objAPIName records are updated. ';
+            dynamic errorMessage;
+            List<dynamic> existingErrors = updateResponse['errors'];
+            for(dynamic e in rec['errors']){
+              errorMessage = '${rec['id']} : ${e['message']}';
+              existingErrors.add(errorMessage);
+            }
+            updateResponse['errors'] = existingErrors;
+          } 
         }
         else{
-          _updateResponse['error'] = errors;
+          print('Response code other than 200 detected ${resp.statusCode}');
+          updateResponse['errors'] = ['${body.toString()} url: $compositeUrlForUpdate}'];
         }
-      } 
-      else {  
-        print('Response code other than 200/201 detected ${resp.statusCode}');
-        _updateResponse['error'] = json.decode(resp.body).toString();
       }
     }
     catch(error){
-      _updateResponse['error'] = error.toString();
+      updateResponse['error'] = error.toString();
     }
-    print('Response from _updateResponse $_updateResponse');
-    return _updateResponse;
+    // print('Response from _updateResponse $updateResponse');
+    return updateResponse;
   }
   
-  
-  static Future<Map<String, String>> _deleteFromSalesforce(String objAPIName, List<String> recordIds, bool hardDelete) async{
-    Map<String, String> _deleteResponse = {};
+  // private method - gets called from private method `_dmlToSalesforce`
+  static Future<Map<String, dynamic>> _deleteFromSalesforce(String objAPIName, List<String> recordIds, int batchCount, bool hardDelete) async{
+    Map<String, dynamic> deleteResponse = getGenericResponseTemplate();
     if(!isLoggedIn()) await loginToSalesforce();
     try{
       dynamic resp = await http.delete(
-        Uri.parse(generateEndpointUrl(opType : 'delete', objAPIName : objAPIName, recordIds : recordIds)), // required param is opType
+        Uri.parse(generateEndpointUrl(opType : 'delete', objAPIName : objAPIName, recordIds : recordIds, batchCount : batchCount, hardDelete : hardDelete)), // required param is opType
         headers: generateHeader(),
         // body: [], //body not required for delete
       );
@@ -284,29 +274,47 @@ class SalesforceUtil2{
           }
         }
         if(errors == ''){
-          _deleteResponse['data'] = '$successCount $objAPIName records are deleted. ';
+          deleteResponse['data'] = '$successCount $objAPIName records are deleted. ';
         }
         else{
-          _deleteResponse['error'] = errors;
+          deleteResponse['error'] = errors;
         }
       }  
       else {  
-        print('Response code other than 200/201 detected ${resp.statusCode}');
+        // print('Response code other than 200/201 detected ${resp.statusCode}');
         // _deleteResponse['error'] = json.decode(resp.body).toString();
       }
     }
     catch(error){
-      _deleteResponse['error'] = error.toString();
+      deleteResponse['error'] = error.toString();
     }
-    print('Response from _deleteResponse $_deleteResponse');
-    return _deleteResponse;  
+    // print('Response from _deleteResponse $deleteResponse');
+    return deleteResponse;  
   }
 
+  // TBC
+  static Future<Map<String, dynamic>> queryFromSalesforce({ required String objAPIName, List<String> fieldList = const [], String whereClause = '', String orderByClause = '', int? count}) async {
+    if(!isLoggedIn()) await loginToSalesforce();
+    Map<String, dynamic> queryResponse = getGenericResponseTemplate();
+    Map<String, dynamic> resp = await _queryFromSalesforce(objAPIName, fieldList, whereClause, orderByClause, count);
+    
+    if(resp.containsKey('data')){
+      queryResponse['data'] = resp;
+    }
+    else if(resp.containsKey('error')){
+      queryResponse['errors'] = resp;
+    }
+    // print('Result from queryResponse $queryResponse');
+    return queryResponse;
+  }
 
-
-  static Future<Map<String, String>> _queryFromSalesforce(String objAPIName, List<String> fieldList, String whereClause, String orderByClause, int? count) async {
-    Map<String, String> _queryResponse = {};
-    if(accessToken == '') await loginToSalesforce();
+  // TBC
+  static Future<Map<String, dynamic>> _queryFromSalesforce(String objAPIName, List<String> fieldList, String whereClause, String orderByClause, int? count) async {
+    
+    if(!isLoggedIn()) await loginToSalesforce();
+    
+    Map<String, dynamic> queryResponse = {};
+    
     Map<String, String> responseData = <String, String>{};
     try{
       dynamic resp = await http.get(
@@ -314,20 +322,14 @@ class SalesforceUtil2{
         headers: generateHeader(),  
         // body: [], //not required for query call
       );
-      print('response.statusCode ${resp.statusCode}');
+      // print('response.statusCode ${resp.statusCode}');
       if (resp.statusCode == 200) {
         final Map<String, dynamic> body = json.decode(resp.body);
-        print('Query Operation : $body');
-        int count = body['totalSize'];
-        bool done = body['done'];
-        List<dynamic> records = body['records'];
-        print('count : $count, done : $done , records $records');
-        
-
-        // Convert the 'resp' map to a JSON-formatted string
-        // String jsonData = json.encode(resp);
-
-        responseData['data'] = records.toString();
+        // int count = body['totalSize'];
+        // bool done = body['done'];
+        // List<dynamic> records = body['records'];
+        // print('count : ${body['totalSize']}, done : ${body['done']} , records retrieved : ${body['records']}');
+        responseData['data'] = body['records'].toString();
       }
       else {
         // Log an error
@@ -343,34 +345,7 @@ class SalesforceUtil2{
     }
   }
   
-  static Future<Map<String, String>> _login() async{
-    Map<String, String> responseMap = {};
-    dynamic loginResponse;
-    try{
-      loginResponse = await http.post(
-        Uri.parse(generateEndpointUrl(opType : 'login')),
-        headers: generateHeader(),
-        body: generateBody(opType: 'login'),
-      );
-      if (loginResponse.statusCode == 200) { 
-        final Map<String, dynamic> data = json.decode(loginResponse.body);
-        instanceUrl = data['instance_url'];
-        accessToken = data['access_token'];
-      } 
-      else {
-        // Log an error
-        print('Response code other than 200 detected : ${loginResponse.body}');
-      }
-      // responseMap.add('data') = response.body;
-    }
-    catch(error){
-      print('Error occurred while logging into Salesforce. Error is : $error');
-      // responseMap.add('error') = error.toString();
-    }
-    return responseMap;
-  }
-
-  /////////////////////////////// generate type of methods ///////////////////////////////////
+  // Generic method to generate header for login and other operations
   static Map<String, String> generateHeader(){
     final Map<String, String> header = {};
     
@@ -384,7 +359,8 @@ class SalesforceUtil2{
     return header;
   }
 
-  static String generateEndpointUrl({required String opType, String objAPIName = '', List<String> recordIds = const []}){
+  // Generic method to generate the endpoint URL for the type of operation
+  static String generateEndpointUrl({required String opType, String objAPIName = '', List<String> recordIds = const [], int batchCount = 0, bool hardDelete = false}){
     String endpointUrl = '';
     if(opType == 'login'){ // completed
       endpointUrl = '$tokenEndpoint?client_id=$clientId&client_secret=$clientSecret&username=$userName&password=$pwdWithToken&grant_type=$tokenGrantType';
@@ -414,70 +390,40 @@ class SalesforceUtil2{
     else if(opType == 'delete_transactions'){
       endpointUrl = '$instanceUrl$customEndpointForDeleteTransactions';
     }
-    print('Generated endpoint : $endpointUrl');
+    // // print('Generated endpoint : $endpointUrl');
     return endpointUrl;
   }
 
-  static String generateQueryEndpointUrl(String objAPIName, List<String> fieldList, String whereClauseString, String orderByClauseString, int? count){
-    String fields = fieldList.isNotEmpty ? fieldList.join(',') : 'count()';
-    String whereClause = whereClauseString != '' ? 'WHERE $whereClauseString' : '' ;
-    String orderByClause =  orderByClauseString != '' ? 'ORDER BY $orderByClauseString' : '';
-    String limitCount = (count != null && count > 0) ? 'LIMIT $count' : '';
-
-    String query = 'SELECT $fields FROM $objAPIName $whereClause $orderByClause $limitCount';
-    print('Generated Query : $query');
-
-    query = query.replaceAll(' ', '+');
-    print('Encoded Query : $query');
-    
-    final String endpointUrl = '$instanceUrl$queryUrl$query';
-    return endpointUrl;
-  }
-
-  static Map<String, dynamic> generateBody({required String opType, String objAPIName = '', List<Map<String, dynamic>> fieldNameValuePairs = const [], List<String> recordIds = const []}){
+  // Generic method to generate the body from the type of operation
+  static Map<String, dynamic> generateBody({required String opType, String objAPIName = '', List<Map<String, dynamic>> fieldNameValuePairs = const [], List<String> recordIds = const [], int batchCount = 0}){
     Map<String, dynamic> body = {};
     if(opType == 'login'){
-      //no body required for login
+      // no body element is required for login
     }
-    else if(opType == 'insert'){
+    else if(opType == 'insert' || opType == 'update'){
       var allRecords = [];
-      int count = 0;
+      // int count = batchCount * MAXM_BATCH_SIZE;
       for(Map<String, dynamic> eachRecord in fieldNameValuePairs){
         Map<String, dynamic> each = {};
         each['attributes'] = {
           'type': objAPIName,
-          'referenceId': 'ref$count'
+          'referenceId': eachRecord['ref'] //'ref$count'
         };
         for(String fieldAPIName in eachRecord.keys){
-          each[fieldAPIName] = eachRecord[fieldAPIName];
+          if(fieldAPIName != 'ref'){
+            each[fieldAPIName] = eachRecord[fieldAPIName];
+          }
         }
         allRecords.add(each);
-        count++;
+        // count++;
       }
       body['records'] = allRecords;
-      // log.d('body=>' + body.toString());
-    }
-    else if(opType == 'update'){
-      var allRecords = [];
-      int count = 0;
-      for(Map<String, dynamic> eachRecord in fieldNameValuePairs){
-        Map<String, dynamic> each = {};
-        each['attributes'] = {
-          'type': objAPIName,
-          'referenceId': 'ref$count'
-        };
-        for(String fieldAPIName in eachRecord.keys){
-          each[fieldAPIName] = eachRecord[fieldAPIName];
-        }
-        allRecords.add(each);
-        count++;
-      }
-      body['records'] = allRecords;
-      body['allOrNone'] = false;
-      print('Body is=> $body');
+      if(opType == 'update'){
+        body['allOrNone'] = 'false';
+      }// log.d('body=>' + body.toString());
     }
     else if(opType == 'delete'){
-      //no body required for delete
+      //no body element is required for delete
     }
     else if(opType == 'sync'){}
     else if(opType == 'delete_messages'){}
@@ -487,18 +433,75 @@ class SalesforceUtil2{
       dataMap['data'] = recordIds;
       body['input'] = dataMap;
     }
-    // print(body);
+    // // print(body);
     return body;
   }
 
-  // may not be required
-  static Map<String, dynamic> getResponseTemplate(){
-      return {'data' : {},'error' : {}};
-    }
+  // Method specific to generate endpoint url for a query operation 
+  static String generateQueryEndpointUrl(String objAPIName, List<String> fieldList, String whereClauseString, String orderByClauseString, int? count){
+    String fields = fieldList.isNotEmpty ? fieldList.join(',') : 'count()';
+    String whereClause = whereClauseString != '' ? 'WHERE $whereClauseString' : '' ;
+    String orderByClause =  orderByClauseString != '' ? 'ORDER BY $orderByClauseString' : '';
+    String limitCount = (count != null && count > 0) ? 'LIMIT $count' : '';
 
+    String query = 'SELECT $fields FROM $objAPIName $whereClause $orderByClause $limitCount';
+    // print('Generated Query : $query');
 
+    query = query.replaceAll(' ', '+');
+    // // print('Encoded Query : $query');
+    
+    final String endpointUrl = '$instanceUrl$queryUrl$query';
+    // // print('endpointUrl : $endpointUrl');
+
+    return endpointUrl;
+  }
+
+  // A simple method to return a template response map which can be used later
+  static Map<String, dynamic> getGenericResponseTemplate(){
+    return {'data' : [], 'errors' : []};
+  }
   
+  // TBC
+  static Future<Map<String, dynamic>> callSalesforceAPI(String op) async{
+    if(!isLoggedIn()) await loginToSalesforce();
+    Map<String, dynamic> response = {};
+    if(op == 'approve_messages'){
+      response = await _callApproveMessageAPI();
+    }
+    if(op == 'delete_messages'){
+      response = await _callDeleteMessageAPI();
+    }
+    if(op == 'sync'){
+      response = await _callSyncMessageAPI();
+    }
+    if(op == 'delete_transactions'){
+      response = await _callDeleteTransactionsAPI();
+    }
+    return response;
+  }
 
+  // TBC
+  static Future<Map<String, dynamic>> _callApproveMessageAPI() async{
+    Map<String, String> response = {};
+    return response;
+  }
 
+  // TBC
+  static Future<Map<String, dynamic>> _callDeleteMessageAPI() async{
+    Map<String, String> response = {};
+    return response;
+  }
+
+  // TBC
+  static Future<Map<String, dynamic>> _callSyncMessageAPI() async{
+    Map<String, String> response = {};
+    return response;
+  }
+  
+  // TBC
+  static Future<Map<String, dynamic>> _callDeleteTransactionsAPI() async{
+    Map<String, String> response = {};
+    return response;
+  }
 
 }
