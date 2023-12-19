@@ -63,9 +63,31 @@ class SalesforceUtil2{
         resp = await _deleteFromSalesforce(objAPIName, eachDeleteBatch, batchCount , hardDelete);
         // print('resp in delete : $resp');
 
-        // Process the responses
-        dmlToSalesforceResponse['data'] = dmlToSalesforceResponse['data'].add(resp['records']);
-        dmlToSalesforceResponse['errors'] = dmlToSalesforceResponse['errors'].add(resp['errors']);
+        // Process the response
+        // TBD - Immi Imme
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        if(resp.containsKey('data') && resp['data'].isNotEmpty){
+          List<dynamic> existingData = dmlToSalesforceResponse['data'];
+          for(dynamic each in resp['data']){
+            existingData.add(each);
+          }
+          dmlToSalesforceResponse['data'] = existingData;
+        }
+        if(resp.containsKey('errors') && resp['errors'].isNotEmpty){
+          List<dynamic> existingErrors = dmlToSalesforceResponse['errors'];
+          for(dynamic each in resp['errors']){
+            existingErrors.add(each);
+          }
+          dmlToSalesforceResponse['errors'] = existingErrors;
+        }
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        
 
         eachDeleteBatch = [];
         batchCount++;
@@ -81,6 +103,11 @@ class SalesforceUtil2{
         // print('resp in insert update : $resp');
        
         // Process the response
+        // TBD - Immi Imme
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         if(resp.containsKey('data') && resp['data'].isNotEmpty){
           List<dynamic> existingData = dmlToSalesforceResponse['data'];
           for(dynamic each in resp['data']){
@@ -95,6 +122,10 @@ class SalesforceUtil2{
           }
           dmlToSalesforceResponse['errors'] = existingErrors;
         }
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         eachInsertUpdateBatch = [];
         batchCount++;
       }
@@ -110,7 +141,7 @@ class SalesforceUtil2{
       dynamic resp = await http.post(
         Uri.parse(generateEndpointUrl(opType : 'login')),
         headers: generateHeader(),
-        body: generateBody(opType: 'login'),
+        // body : not required for login call
       );
       log.d('I am here');
       final Map<String, dynamic> body = json.decode(resp.body);
@@ -219,36 +250,41 @@ class SalesforceUtil2{
         body: jsonEncode(generateBody(opType : 'update', objAPIName : objAPIName, fieldNameValuePairs : fieldNameValuePairs, batchCount : batchCount)),
       );
       final List<dynamic> body = json.decode(resp.body);
-      print('body within _updateToSalesforce $body');
-      for(dynamic rec in body){
-        if(resp.statusCode == 200){
-          if(rec.containsKey('success') && rec['success']){ // i.e. rec['success'] exists and it's value is true
-            dynamic recordId = rec['id'];
-            List<dynamic> existingData = updateResponse['data'];
-            existingData.add(recordId);
-            updateResponse['data'] = existingData;
-          }
-          else{
-            dynamic errorMessage;
-            List<dynamic> existingErrors = updateResponse['errors'];
-            for(dynamic e in rec['errors']){
-              errorMessage = '${rec['id']} : ${e['message']}';
-              existingErrors.add(errorMessage);
-            }
-            updateResponse['errors'] = existingErrors;
-          } 
-        }
-        else{
-          print('Response code other than 200 detected ${resp.statusCode}');
-          updateResponse['errors'] = ['${body.toString()} url: $compositeUrlForUpdate}'];
-        }
-      }
+      print('StatusCode: ${resp.statusCode} || body: $body || updateResponse: $updateResponse');
+      updateResponse = processResponse(statusCode : resp.statusCode, inputBody : body, inputResponse : updateResponse);
     }
     catch(error){
       updateResponse['error'] = error.toString();
     }
     // print('Response from _updateResponse $updateResponse');
     return updateResponse;
+  }
+
+  static dynamic processResponse({required int statusCode, required List<dynamic> inputBody, required Map<String, dynamic> inputResponse}){
+    for(dynamic rec in inputBody){
+      if(statusCode == 200){
+        if(rec.containsKey('success') && rec['success']){ // i.e. rec['success'] exists and it's value is true
+          dynamic recordId = rec['id'];
+          List<dynamic> existingData = inputResponse['data'];
+          existingData.add(recordId);
+          inputResponse['data'] = existingData;
+        }
+        else{
+          dynamic errorMessage;
+          List<dynamic> existingErrors = inputResponse['errors'];
+          for(dynamic e in rec['errors']){
+            errorMessage = '${rec['id']} : ${e['message']}';
+            existingErrors.add(errorMessage);
+          }
+          inputResponse['errors'] = existingErrors;
+        } 
+      }
+      else{
+        print('Response code other than 200 detected : $statusCode');
+        inputResponse['errors'] = ['${inputBody.toString()} url: $compositeUrlForUpdate}'];
+      }
+    }
+    return inputResponse;
   }
   
   // private method - gets called from private method `_dmlToSalesforce`
@@ -257,33 +293,20 @@ class SalesforceUtil2{
     if(!isLoggedIn()) await loginToSalesforce();
     try{
       dynamic resp = await http.delete(
-        Uri.parse(generateEndpointUrl(opType : 'delete', objAPIName : objAPIName, recordIds : recordIds, batchCount : batchCount, hardDelete : hardDelete)), // required param is opType
+        Uri.parse(
+          generateEndpointUrl(
+            opType : 'delete', 
+            objAPIName : objAPIName, 
+            recordIds : recordIds, 
+            batchCount : batchCount, 
+            hardDelete : hardDelete)),
         headers: generateHeader(),
-        // body: [], //body not required for delete
+        // body : not required for delete call
       );
-      if(resp.statusCode == 201 || resp.statusCode == 200){
-        final List<dynamic> body = json.decode(resp.body);
-        int successCount = 0;
-        String errors = '';
-        for(dynamic rec in body){
-          if(rec['success']){
-            successCount++;
-          }
-          else{
-            errors = errors + rec['errors'].toString();
-          }
-        }
-        if(errors == ''){
-          deleteResponse['data'] = '$successCount $objAPIName records are deleted. ';
-        }
-        else{
-          deleteResponse['error'] = errors;
-        }
-      }  
-      else {  
-        // print('Response code other than 200/201 detected ${resp.statusCode}');
-        // _deleteResponse['error'] = json.decode(resp.body).toString();
-      }
+      final List<dynamic> body = json.decode(resp.body);
+      print('StatusCode: ${resp.statusCode} || body: $body || deleteResponse : $deleteResponse');
+      deleteResponse = processResponse(statusCode : resp.statusCode, inputBody : body, inputResponse: deleteResponse);
+      print('After processResponse $deleteResponse');
     }
     catch(error){
       deleteResponse['error'] = error.toString();
@@ -397,10 +420,7 @@ class SalesforceUtil2{
   // Generic method to generate the body from the type of operation
   static Map<String, dynamic> generateBody({required String opType, String objAPIName = '', List<Map<String, dynamic>> fieldNameValuePairs = const [], List<String> recordIds = const [], int batchCount = 0}){
     Map<String, dynamic> body = {};
-    if(opType == 'login'){
-      // no body element is required for login
-    }
-    else if(opType == 'insert' || opType == 'update'){
+    if(opType == 'insert' || opType == 'update'){
       var allRecords = [];
       // int count = batchCount * MAXM_BATCH_SIZE;
       for(Map<String, dynamic> eachRecord in fieldNameValuePairs){

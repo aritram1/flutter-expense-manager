@@ -7,14 +7,14 @@ import './salesforce_util2.dart';
 
 main() async{
 
-  // ------------------------------------------------------------------------------------------------ // 
-  // Login
+  // // ------------------------------------------------------------------------------------------------ // 
+  // // Login
   // dynamic loginRespone = await SalesforceUtil2.loginToSalesforce();
   // print('Login response =>${SalesforceUtil2.getAccessToken()}');
-  // ------------------------------------------------------------------------------------------------ // 
+  // // ------------------------------------------------------------------------------------------------ // 
   
-  // ------------------------------------------------------------------------------------------------ // 
-  // Insert
+  // // ------------------------------------------------------------------------------------------------ // 
+  // // Insert
   // List<Map<String, String>> toBeInsertedRecords = [];
   // for(int i=0;i<10;i++){
   //   Map<String, String> each = {};
@@ -33,37 +33,42 @@ main() async{
   
   // print('Insert response from testing.dart =>${jsonEncode(insertResponse)}');
 
-  // ------------------------------------------------------------------------------------------------ // 
-  // update
-  List<Map<String, String>> toBeUpdatedRecords = [];
-  List<String> allIds = ['0015i000014KisIAAS','0015i000014KisHAAS','0015i000014KisDAAS','0015i000014KisBAAS','0015i000014KihPAAS', '0015i000014KiaKAAS'];
-  for(int i=0;i<6;i++){
-    Map<String, String> each = {};
-    each['ref'] = 'Ref$i';
-    each['id'] = allIds[i];
-    each['name'] = 'Name is changed $i';
-    each['phone'] = 'phoneischanged$i';
-    each['fax'] = 'faxischanged$i';
+  // // ------------------------------------------------------------------------------------------------ // 
+  // // update
+  // List<Map<String, String>> toBeUpdatedRecords = [];
+  // List<String> allIds = ['0015i000014KisIAAS','0015i000014KisHAAS','0015i000014KisDAAS','0015i000014KisBAAS','0015i000014KihPAAS', '0015i000014KiaKAAS'];
+  // for(int i=0;i<6;i++){
+  //   Map<String, String> each = {};
+  //   each['ref'] = 'Ref$i';
+  //   each['id'] = allIds[i];
+  //   each['name'] = 'Name is changed $i';
+  //   each['phone'] = 'phoneischanged$i';
+  //   each['fax'] = 'faxischanged$i';
     
-    if(i == 0 || i == 3) each['name'] = '';
-    toBeUpdatedRecords.add(each);
-  }
+  //   if(i == 0 || i == 3) each['name'] = '';
+  //   toBeUpdatedRecords.add(each);
+  // }
 
-  dynamic updateResponse = await SalesforceUtil2.dmlToSalesforce(
-      opType: 'update', 
-      objAPIName: 'Account', 
-      fieldNameValuePairs : toBeUpdatedRecords,
-      batchSize: 200);
+  // dynamic updateResponse = await SalesforceUtil2.dmlToSalesforce(
+  //     opType: 'update', 
+  //     objAPIName: 'Account', 
+  //     fieldNameValuePairs : toBeUpdatedRecords,
+  //     batchSize: 200);
   
-  print('update response from testing.dart =>${jsonEncode(updateResponse)}');
+  // print('update response from testing.dart =>${jsonEncode(updateResponse)}');
 
-  // ------------------------------------------------------------------------------------------------ // 
+  // // ------------------------------------------------------------------------------------------------ // 
   // delete
-  // List<String> idList = ['0015i000013UxzXAAS','0015i000013UxzOAAS', '0015i000013UxzYAAS'];
-  // dynamic deleteResponse = await SalesforceUtil2.deleteFromSalesforce('Account', idList);
-  // print('deleteResponse =>$deleteResponse');
+  List<String> idList = ['0015i000014KihNAAS','0015i000014KisHAAS','0015i000014KisDAAS','0015i000014KisBAAS','0015i000014KihPAAS', '0015i000014KiaKAAS'];
+  dynamic deleteResponse = await SalesforceUtil2.dmlToSalesforce(
+    recordIds: idList,
+    opType: 'delete',
+    objAPIName: 'Account'
+  );
+  print('deleteResponse =>${jsonEncode(deleteResponse)}');
 
-  // Query
+  // // ------------------------------------------------------------------------------------------------ // 
+  // // Query
   // String whereClause = "name like 'Account%'";
   // Map<String, dynamic> queryResponse = await SalesforceUtil2.queryFromSalesforce(
   //     objAPIName: 'Account', 
@@ -73,7 +78,4 @@ main() async{
   //     count : 2
   // );
   // print('queryResponse =>$queryResponse');
-
-
-  // generateTab2Data
 }
