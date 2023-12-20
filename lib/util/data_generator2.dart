@@ -159,7 +159,7 @@ class DataGenerator2 {
     return response;
   }
 
-  static Future<Map<String, dynamic>> approveSelectedMessages(String objAPIName, List<String> recordIds) async {
+  static Future<Map<String, dynamic>> approveSelectedMessages({required String objAPIName, required List<String> recordIds}) async {
     dynamic body = {
       'input' : {
         'data': recordIds

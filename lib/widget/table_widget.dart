@@ -1,3 +1,4 @@
+import 'package:ExpenseManager/util/data_generator2.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import '../util/data_generator.dart';
@@ -247,8 +248,8 @@ class _TableWidgetState extends State<TableWidget> {
       }
     }
 
-    String response = await DataGenerator.approveSelectedMessages('FinPlan__SMS_Message__c', recordIds);
-    log.d('Response for handleApproveSMS $response');
+    dynamic response = await DataGenerator2.approveSelectedMessages(objAPIName :'FinPlan__SMS_Message__c', recordIds : recordIds);
+    log.d('Response for handleApproveSMS ${response.toString()}');
 
     setState(() {
       // Reset the flag when the approval process is completed

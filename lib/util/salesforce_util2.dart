@@ -95,7 +95,7 @@ class SalesforceUtil2{
     if(!isLoggedIn()) await loginToSalesforce();
     Map<String, dynamic> queryFromSalesforceResponse = getGenericResponseTemplate();
     Map<String, dynamic> resp = await _queryFromSalesforce(objAPIName, fieldList, whereClause, orderByClause, count);
-    print('Response is for records : ${resp.toString().substring(0,100)}');
+    print('Response is for records : ${resp.toString()}');
     bool done = (resp.containsKey('done') && resp['done']) ? true : false;
     if(done){
       if(resp.containsKey('data')){
@@ -147,7 +147,9 @@ class SalesforceUtil2{
     
     if(!isLoggedIn()) await loginToSalesforce();
   
-    String epUrl = '$instanceUrl$endpointUrl';    
+    String epUrl = '$instanceUrl$endpointUrl'; 
+
+    log.d('epUrl=>' + epUrl);   
     dynamic resp = await _callSalesforceAPI(httpMethod : httpMethod, epUrl : epUrl, body : body);
     
     print('resp.body=> ${resp.body}');
@@ -332,6 +334,7 @@ class SalesforceUtil2{
   static Future<Map<String, dynamic>> _queryFromSalesforce(String objAPIName, List<String> fieldList, String whereClause, String orderByClause, int? count) async {
     
     if(!isLoggedIn()) await loginToSalesforce();
+    log.d('instanceUrl inside _queryFromSalesforce $instanceUrl');
     
     Map<String, dynamic> queryFromSlesforceResponse = {};
     
@@ -342,8 +345,8 @@ class SalesforceUtil2{
         // body: [], //not required for query call
       );
       final Map<String, dynamic> body = json.decode(resp.body);
-      print('_queryFromSalesforce response.statusCode ${resp.statusCode}');
-      print('_queryFromSalesforce body : ${body.toString().substring(0,100)}');
+      log.d('_queryFromSalesforce response.statusCode ${resp.statusCode}');
+      log.d('_queryFromSalesforce body : ${body.toString().substring(0,100)}');
       // print('_queryFromSalesforce body : $body');
       if (resp.statusCode == 200) {
         // print('_queryFromSalesforce resp[done] : ${body['done']}');
@@ -453,13 +456,13 @@ class SalesforceUtil2{
     String limitCount = (count != null && count > 0) ? 'LIMIT $count' : '';
 
     String query = 'SELECT $fields FROM $objAPIName $whereClause $orderByClause $limitCount';
-    // print('Generated Query : $query');
+    print('Generated Query : $query');
 
     query = query.replaceAll(' ', '+');
     // // print('Encoded Query : $query');
     
     final String endpointUrl = '$instanceUrl$queryUrl$query';
-    // // print('endpointUrl : $endpointUrl');
+    log.d('endpointUrl inside generateQueryEndpointUrl: $endpointUrl');
 
     return endpointUrl;
   }
