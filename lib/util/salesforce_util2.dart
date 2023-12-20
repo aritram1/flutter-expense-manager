@@ -1,5 +1,5 @@
 // ignore: depend_on_referenced_packages
-// ignore_for_file: prefer_interpolation_to_compose_strings, avoid_print, constant_identifier_names
+// ignore_for_file: prefer_interpolation_to_compose_strings, avoid_print, constant_identifier_names, 
 
 import 'dart:convert';
 import 'dart:core';
@@ -9,29 +9,28 @@ import 'package:logger/logger.dart';
 
 class SalesforceUtil2{
 
-  static String clientId ='3MVG9wt4IL4O5wvIBCa0yrhLb82rC8GGk03G2F26xbcntt9nq1JXS75mWYnnuS2rxwlghyQczUFgX4whptQeT';
-  static String clientSecret ='3E0A6C0002E99716BD15C7C35F005FFFB716B8AA2DE28FBD49220EC238B2FFC7';
-  static String userName = 'aritram1@gmail.com.financeplanner';
-  static String pwdWithToken =  'financeplanner123W8oC4taee0H2GzxVbAqfVB14';
+  static String clientId              = '3MVG9wt4IL4O5wvIBCa0yrhLb82rC8GGk03G2F26xbcntt9nq1JXS75mWYnnuS2rxwlghyQczUFgX4whptQeT';
+  static String clientSecret          = '3E0A6C0002E99716BD15C7C35F005FFFB716B8AA2DE28FBD49220EC238B2FFC7';
+  static String userName              = 'aritram1@gmail.com.financeplanner';
+  static String pwdWithToken          = 'financeplanner123W8oC4taee0H2GzxVbAqfVB14';
 
-  static String tokenEndpoint = 'https://login.salesforce.com/services/oauth2/token';
-  static String tokenGrantType = 'password';
+  static String tokenEndpoint         = 'https://login.salesforce.com/services/oauth2/token';
+  static String tokenGrantType        = 'password';
 
   static String compositeUrlForInsert = '/services/data/v53.0/composite/tree/';
   static String compositeUrlForUpdate = '/services/data/v59.0/composite/sobjects/';
   static String compositeUrlForDelete = '/services/data/v59.0/composite/sobjects?ids=';
+  static String queryUrl              = '/services/data/v53.0/query?q=';
 
-  static String customEndpointForSyncMessages = '/services/apexrest/FinPlan/api/sms/sync/*';
-  static String customEndpointForApproveMessages = '/services/apexrest/FinPlan/api/sms/approve/*';
-  static String customEndpointForDeleteMessages = '/services/apexrest/FinPlan/api/sms/delete/*';
-  static String customEndpointForDeleteTransactions = '/services/apexrest/FinPlan/api/transactions/delete/*';
-
-  static String queryUrl = '/services/data/v53.0/query?q=';
-
-  static Logger log = Logger();
+  // static String customEndpointForSyncMessages       = '/services/apexrest/FinPlan/api/sms/sync/*';
+  // static String customEndpointForApproveMessages    = '/services/apexrest/FinPlan/api/sms/approve/*';
+  // static String customEndpointForDeleteMessages     = '/services/apexrest/FinPlan/api/sms/delete/*';
+  // static String customEndpointForDeleteTransactions = '/services/apexrest/FinPlan/api/transactions/delete/*';
 
   static String accessToken = '';
   static String instanceUrl = '';
+  static Logger log = Logger();
+
   static bool isLoggedIn() => (accessToken != '');
   static String getAccessToken() => (accessToken);
   static String getInstanceUrl() => (instanceUrl);
@@ -91,6 +90,90 @@ class SalesforceUtil2{
     return dmlToSalesforceResponse;
   }
 
+  // Method to query Salesforce data
+  static Future<Map<String, dynamic>> queryFromSalesforce({ required String objAPIName, List<String> fieldList = const [], String whereClause = '', String orderByClause = '', int? count}) async {
+    if(!isLoggedIn()) await loginToSalesforce();
+    Map<String, dynamic> queryFromSalesforceResponse = getGenericResponseTemplate();
+    Map<String, dynamic> resp = await _queryFromSalesforce(objAPIName, fieldList, whereClause, orderByClause, count);
+    print('Response is for records : ${resp.toString().substring(0,100)}');
+    bool done = (resp.containsKey('done') && resp['done']) ? true : false;
+    if(done){
+      if(resp.containsKey('data')){
+        queryFromSalesforceResponse['data'] = resp;
+      }
+      else if(resp.containsKey('error')){
+        queryFromSalesforceResponse['errors'] = resp;
+      }
+    }
+    else{
+      String nextRecordsUrl = resp['nextRecordsUrl'];
+      print('queryFromSalesforce nextRecordsUrl =>$nextRecordsUrl');
+      print('queryFromSalesforce url =>$instanceUrl$nextRecordsUrl');
+      dynamic restRecordsResponse = await http.get(
+        Uri.parse('$instanceUrl$nextRecordsUrl'),
+        headers: generateHeader(),
+        // body: [], //not required for query call
+      );
+      final Map<String, dynamic> body = json.decode(restRecordsResponse.body);
+      print('Rest query response : ${body.toString()}');
+      bool done = (resp.containsKey('done') && resp['done']) ? true : false;
+      if(done){
+        // Collate the response for all batches
+        if(body.containsKey('data') && body['data'].isNotEmpty){
+          List<dynamic> existingData = queryFromSalesforceResponse['data'];
+          for(dynamic each in body['data']){
+            existingData.add(each);
+          }
+          queryFromSalesforceResponse['data'] = existingData;
+        }
+        if(body.containsKey('errors') && body['errors'].isNotEmpty){
+          List<dynamic> existingErrors = queryFromSalesforceResponse['errors'];
+          for(dynamic each in body['errors']){
+            existingErrors.add(each);
+          }
+          queryFromSalesforceResponse['errors'] = existingErrors;
+        }
+      }
+      else{
+        // Handle when record count is more than 4000
+      }
+    }
+    // print('Result from queryFromSalesforceResponse $queryFromSalesforceResponse');
+    return queryFromSalesforceResponse;
+  }
+
+  // Method to connect to custom REST API
+  static Future<String> callSalesforceAPI({required String endpointUrl, required httpMethod, dynamic body}) async{
+    
+    if(!isLoggedIn()) await loginToSalesforce();
+  
+    String epUrl = '$instanceUrl$endpointUrl';    
+    dynamic resp = await _callSalesforceAPI(httpMethod : httpMethod, epUrl : epUrl, body : body);
+    
+    print('resp.body=> ${resp.body}');
+    
+    return resp.body;
+  }
+  
+  // private method  - gets called from `callSalesforceAPI` method
+  static dynamic _callSalesforceAPI({required String httpMethod, required String epUrl, dynamic body}) async {
+    dynamic resp;
+    if(httpMethod == 'GET'){
+      resp = await http.get(Uri.parse(epUrl), headers: generateHeader());
+    }
+    else if(httpMethod == 'POST'){
+      resp = await http.post(Uri.parse(epUrl), headers: generateHeader(), body: jsonEncode(body));
+    }
+    else if(httpMethod == 'PATCH'){
+      resp = await http.patch(Uri.parse(epUrl), headers: generateHeader(),body: jsonEncode(body)); 
+    }
+    else if(httpMethod == 'DELETE'){
+      resp = await http.delete(Uri.parse(epUrl), headers: generateHeader(), body: jsonEncode(body));
+    }
+    print('epUrl $epUrl');
+    return resp;
+  }
+  
   // private method - gets called from `login` method
   static Future<Map<String, dynamic>> _login() async{
     Map<String, dynamic> loginResponse = {};
@@ -245,59 +328,7 @@ class SalesforceUtil2{
     return deleteResponse;  
   }
 
-  // TBC
-  static Future<Map<String, dynamic>> queryFromSalesforce({ required String objAPIName, List<String> fieldList = const [], String whereClause = '', String orderByClause = '', int? count}) async {
-    if(!isLoggedIn()) await loginToSalesforce();
-    Map<String, dynamic> queryFromSalesforceResponse = getGenericResponseTemplate();
-    Map<String, dynamic> resp = await _queryFromSalesforce(objAPIName, fieldList, whereClause, orderByClause, count);
-    print('Response is for records : ${resp.toString().substring(0,100)}');
-    bool done = (resp.containsKey('done') && resp['done']) ? true : false;
-    if(done){
-      if(resp.containsKey('data')){
-        queryFromSalesforceResponse['data'] = resp;
-      }
-      else if(resp.containsKey('error')){
-        queryFromSalesforceResponse['errors'] = resp;
-      }
-    }
-    else{
-      String nextRecordsUrl = resp['nextRecordsUrl'];
-      print('queryFromSalesforce nextRecordsUrl =>$nextRecordsUrl');
-      print('queryFromSalesforce url =>$instanceUrl$nextRecordsUrl');
-      dynamic restRecordsResponse = await http.get(
-        Uri.parse('$instanceUrl$nextRecordsUrl'),
-        headers: generateHeader(),
-        // body: [], //not required for query call
-      );
-      final Map<String, dynamic> body = json.decode(restRecordsResponse.body);
-      print('Rest query response : ${body.toString()}');
-      bool done = (resp.containsKey('done') && resp['done']) ? true : false;
-      if(done){
-        // Collate the response for all batches
-        if(body.containsKey('data') && body['data'].isNotEmpty){
-          List<dynamic> existingData = queryFromSalesforceResponse['data'];
-          for(dynamic each in body['data']){
-            existingData.add(each);
-          }
-          queryFromSalesforceResponse['data'] = existingData;
-        }
-        if(body.containsKey('errors') && body['errors'].isNotEmpty){
-          List<dynamic> existingErrors = queryFromSalesforceResponse['errors'];
-          for(dynamic each in body['errors']){
-            existingErrors.add(each);
-          }
-          queryFromSalesforceResponse['errors'] = existingErrors;
-        }
-      }
-      else{
-        // Handle when record count is more than 4000
-      }
-    }
-    // print('Result from queryFromSalesforceResponse $queryFromSalesforceResponse');
-    return queryFromSalesforceResponse;
-  }
-
-  // TBC
+  // private method - gets called from private method `queryFromSalesforce`
   static Future<Map<String, dynamic>> _queryFromSalesforce(String objAPIName, List<String> fieldList, String whereClause, String orderByClause, int? count) async {
     
     if(!isLoggedIn()) await loginToSalesforce();
@@ -370,19 +401,7 @@ class SalesforceUtil2{
         endpointUrl = '$instanceUrl$compositeUrlForDelete$ids';
       }
     }
-    else if(opType == 'sync'){
-      endpointUrl = '$instanceUrl$customEndpointForSyncMessages';
-    }
-    else if(opType == 'approve_messages'){
-      endpointUrl = '$instanceUrl$customEndpointForApproveMessages';
-    }
-    else if(opType == 'delete_messages'){
-      endpointUrl = '$instanceUrl$customEndpointForDeleteMessages';
-    }
-    else if(opType == 'delete_transactions'){
-      endpointUrl = '$instanceUrl$customEndpointForDeleteTransactions';
-    }
-    // // print('Generated endpoint : $endpointUrl');
+    // print('Generated endpoint : $endpointUrl');
     return endpointUrl;
   }
 
@@ -445,7 +464,7 @@ class SalesforceUtil2{
     return endpointUrl;
   }
 
-  // A simple method to return a template response map which can be used later
+  // A simple method to return a template response map which can be re-used
   static Map<String, dynamic> getGenericResponseTemplate(){
     return {'data' : [], 'errors' : []};
   }
@@ -497,82 +516,4 @@ class SalesforceUtil2{
     return inputResponse;
   }
   
-  // TBC
-  static Future<Map<String, dynamic>> callSalesforceAPI({required String endpointUrl, required httpMethod, dynamic body, dynamic params}) async{
-    
-    if(!isLoggedIn()) await loginToSalesforce();
-    
-    Map<String, dynamic> callSalesforceAPIResponse = getGenericResponseTemplate();
-
-    Map<String, dynamic> callSalesforceAPIBody = {};
-    
-    String epUrl = '$instanceUrl$endpointUrl';
-    
-    if(httpMethod == 'GET'){
-      dynamic resp = await http.get(
-        Uri.parse(epUrl),
-        headers: generateHeader(),
-        // body: //not required for GET call
-      );
-      callSalesforceAPIBody = json.decode(resp.body);
-    }
-    else if(httpMethod == 'POST'){
-      dynamic resp = await http.post(
-        Uri.parse(epUrl),
-        headers: generateHeader(),
-        body: body
-      );
-      callSalesforceAPIBody = json.decode(resp.body);
-    }
-    else if(httpMethod == 'PATCH'){
-      dynamic resp = await http.patch(
-        Uri.parse(epUrl),
-        headers: generateHeader(),
-        body: body
-      ); 
-      callSalesforceAPIBody = json.decode(resp.body); 
-    }
-    else if(httpMethod == 'DELETE'){
-      dynamic resp = await http.delete(
-        Uri.parse(epUrl),
-        headers: generateHeader(),
-        body: body
-      );
-      callSalesforceAPIBody = json.decode(resp.body);
-    }
-
-    if(callSalesforceAPIBody.containsKey('data') && callSalesforceAPIBody['data'].isNotEmpty){
-      callSalesforceAPIResponse['data'] = callSalesforceAPIBody['data'];
-    }
-    if(callSalesforceAPIBody.containsKey('errors') && callSalesforceAPIBody['errors'].isNotEmpty){
-      callSalesforceAPIResponse['errors'] = callSalesforceAPIBody['errors'];
-    }
-    print('callSalesforceAPIResponse=> ${callSalesforceAPIResponse.toString()}');
-    return callSalesforceAPIResponse;
-  }
-  
-  // TBC
-  static Future<Map<String, dynamic>> _callApproveMessageAPI() async{
-    Map<String, String> response = {};
-    return response;
-  }
-
-  // TBC
-  static Future<Map<String, dynamic>> _callDeleteMessageAPI() async{
-    Map<String, String> response = {};
-    return response;
-  }
-
-  // TBC
-  static Future<Map<String, dynamic>> _callSyncMessageAPI() async{
-    Map<String, String> response = {};
-    return response;
-  }
-  
-  // TBC
-  static Future<Map<String, dynamic>> _callDeleteTransactionsAPI() async{
-    Map<String, String> response = {};
-    return response;
-  }
-
 }

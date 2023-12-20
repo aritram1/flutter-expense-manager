@@ -4,7 +4,13 @@ import 'dart:convert';
 
 import './salesforce_util2.dart';
 
+
 main() async{
+
+  String customEndpointForSyncMessages = '/services/apexrest/FinPlan/api/sms/sync/*';
+  String customEndpointForApproveMessages = '/services/apexrest/FinPlan/api/sms/approve/*';
+  String customEndpointForDeleteMessages = '/services/apexrest/FinPlan/api/sms/delete/*';
+  String customEndpointForDeleteTransactions = '/services/apexrest/FinPlan/api/transactions/delete/*';
 
   // // ------------------------------------------------------------------------------------------------ // 
   // // Login
@@ -14,21 +20,21 @@ main() async{
   
   // // ------------------------------------------------------------------------------------------------ // 
   // // Insert
-  // List<Map<String, String>> toBeInsertedRecords = [];
-  // for(int i=0;i<3000;i++){
-  //   Map<String, String> each = {};
-  //   each['ref'] = 'Ref$i';
-  //   each['name'] = 'Account-$i';
-  //   each['phone'] = '123456$i';
-  //   toBeInsertedRecords.add(each);
-  // }
-  // dynamic insertResponse = await SalesforceUtil2.dmlToSalesforce(
-  //     opType: 'insert', 
-  //     objAPIName: 'Account', 
-  //     fieldNameValuePairs : toBeInsertedRecords,
-  //     batchSize: 200);
+  List<Map<String, String>> toBeInsertedRecords = [];
+  for(int i=0;i<30;i++){
+    Map<String, String> each = {};
+    each['ref'] = 'Ref$i';
+    each['name'] = 'Account-$i';
+    each['phone'] = '123456$i';
+    toBeInsertedRecords.add(each);
+  }
+  dynamic insertResponse = await SalesforceUtil2.dmlToSalesforce(
+      opType: 'insert', 
+      objAPIName: 'Account', 
+      fieldNameValuePairs : toBeInsertedRecords,
+      batchSize: 200);
   
-  // print('Insert response from testing.dart =>${jsonEncode(insertResponse)}');
+  print('Insert response from testing.dart =>${jsonEncode(insertResponse)}');
 
   // // ------------------------------------------------------------------------------------------------ // 
   // // update
@@ -66,12 +72,37 @@ main() async{
 
   // // ------------------------------------------------------------------------------------------------ // 
   // Query
-  Map<String, dynamic> queryResponse = await SalesforceUtil2.queryFromSalesforce(
-      objAPIName: 'Account', 
-      fieldList: ['Id', 'Website','Name', 'Phone'],
-      whereClause: "name like 'Account%'",
-      orderByClause: 'Name desc',
-      count : 2050
-  );
-  // cprint('queryResponse from testing.dart =>${jsonEncode(queryResponse)}');
+  // Map<String, dynamic> queryResponse = await SalesforceUtil2.queryFromSalesforce(
+  //     objAPIName: 'Account', 
+  //     fieldList: ['Id', 'Website','Name', 'Phone'],
+  //     whereClause: "name like 'Account%'",
+  //     orderByClause: 'Name desc',
+  //     count : 2050
+  // );
+  // print('queryResponse from testing.dart =>${jsonEncode(queryResponse)}');
+
+  // // ------------------------------------------------------------------------------------------------ //
+  // callSalesforceAPI - Approve Messages
+  // Map<String, dynamic> body = {
+  //   "input" : {
+  //     "data": ["a0D5i00000He8YtEAJ", "a0D5i00000He8YoEAJ"]
+  //   }
+  // };
+  // String callSalesforceAPIResponse_approveMessages = await SalesforceUtil2.callSalesforceAPI(
+  //   endpointUrl: customEndpointForApproveMessages,
+  //   httpMethod: 'POST',
+  //   body: body
+  // );
+  // print('callSalesforceAPIResponse from testing.dart => $callSalesforceAPIResponse_approveMessages');
+
+  // // ------------------------------------------------------------------------------------------------ //
+  // // callSalesforceAPI - Delete Messages
+  // String callSalesforceAPIResponse_deleteMessages = await SalesforceUtil2.callSalesforceAPI(
+  //   endpointUrl: customEndpointForDeleteMessages,
+  //   httpMethod: 'POST'
+  // );
+  // print('callSalesforceAPIResponse from testing.dart => $callSalesforceAPIResponse_deleteMessages');
+
+  
+
 }
