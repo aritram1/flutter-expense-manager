@@ -13,12 +13,14 @@ class SalesforceUtil2{
   static String clientSecret ='3E0A6C0002E99716BD15C7C35F005FFFB716B8AA2DE28FBD49220EC238B2FFC7';
   static String userName = 'aritram1@gmail.com.financeplanner';
   static String pwdWithToken =  'financeplanner123W8oC4taee0H2GzxVbAqfVB14';
-  
+
   static String tokenEndpoint = 'https://login.salesforce.com/services/oauth2/token';
   static String tokenGrantType = 'password';
+
   static String compositeUrlForInsert = '/services/data/v53.0/composite/tree/';
   static String compositeUrlForUpdate = '/services/data/v59.0/composite/sobjects/';
-  
+  static String compositeUrlForDelete = '/services/data/v59.0/composite/sobjects?ids=';
+
   static String customEndpointForSyncMessages = '/services/apexrest/FinPlan/api/sms/sync/*';
   static String customEndpointForApproveMessages = '/services/apexrest/FinPlan/api/sms/approve/*';
   static String customEndpointForDeleteMessages = '/services/apexrest/FinPlan/api/sms/delete/*';
@@ -64,31 +66,8 @@ class SalesforceUtil2{
         // print('resp in delete : $resp');
 
         // Process the response
-        // TBD - Immi Imme
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        if(resp.containsKey('data') && resp['data'].isNotEmpty){
-          List<dynamic> existingData = dmlToSalesforceResponse['data'];
-          for(dynamic each in resp['data']){
-            existingData.add(each);
-          }
-          dmlToSalesforceResponse['data'] = existingData;
-        }
-        if(resp.containsKey('errors') && resp['errors'].isNotEmpty){
-          List<dynamic> existingErrors = dmlToSalesforceResponse['errors'];
-          for(dynamic each in resp['errors']){
-            existingErrors.add(each);
-          }
-          dmlToSalesforceResponse['errors'] = existingErrors;
-        }
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        dmlToSalesforceResponse = processDMLResponse1(resp : resp, inputResponse : dmlToSalesforceResponse);
         
-
         eachDeleteBatch = [];
         batchCount++;
       }
@@ -103,29 +82,7 @@ class SalesforceUtil2{
         // print('resp in insert update : $resp');
        
         // Process the response
-        // TBD - Immi Imme
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        if(resp.containsKey('data') && resp['data'].isNotEmpty){
-          List<dynamic> existingData = dmlToSalesforceResponse['data'];
-          for(dynamic each in resp['data']){
-            existingData.add(each);
-          }
-          dmlToSalesforceResponse['data'] = existingData;
-        }
-        if(resp.containsKey('errors') && resp['errors'].isNotEmpty){
-          List<dynamic> existingErrors = dmlToSalesforceResponse['errors'];
-          for(dynamic each in resp['errors']){
-            existingErrors.add(each);
-          }
-          dmlToSalesforceResponse['errors'] = existingErrors;
-        }
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        dmlToSalesforceResponse = processDMLResponse1(resp : resp, inputResponse : dmlToSalesforceResponse);
         eachInsertUpdateBatch = [];
         batchCount++;
       }
@@ -250,43 +207,16 @@ class SalesforceUtil2{
         body: jsonEncode(generateBody(opType : 'update', objAPIName : objAPIName, fieldNameValuePairs : fieldNameValuePairs, batchCount : batchCount)),
       );
       final List<dynamic> body = json.decode(resp.body);
-      print('StatusCode: ${resp.statusCode} || body: $body || updateResponse: $updateResponse');
-      updateResponse = processResponse(statusCode : resp.statusCode, inputBody : body, inputResponse : updateResponse);
+      // print('Inside _updateToSalesforce StatusCode: ${resp.statusCode} || body: $body || updateResponse: $updateResponse');
+      updateResponse = processDMLResponse2(statusCode : resp.statusCode, inputBody : body, inputResponse : updateResponse);
     }
     catch(error){
       updateResponse['error'] = error.toString();
     }
-    // print('Response from _updateResponse $updateResponse');
+    // print('Response from _updateToSalesforce $updateResponse');
     return updateResponse;
   }
 
-  static dynamic processResponse({required int statusCode, required List<dynamic> inputBody, required Map<String, dynamic> inputResponse}){
-    for(dynamic rec in inputBody){
-      if(statusCode == 200){
-        if(rec.containsKey('success') && rec['success']){ // i.e. rec['success'] exists and it's value is true
-          dynamic recordId = rec['id'];
-          List<dynamic> existingData = inputResponse['data'];
-          existingData.add(recordId);
-          inputResponse['data'] = existingData;
-        }
-        else{
-          dynamic errorMessage;
-          List<dynamic> existingErrors = inputResponse['errors'];
-          for(dynamic e in rec['errors']){
-            errorMessage = '${rec['id']} : ${e['message']}';
-            existingErrors.add(errorMessage);
-          }
-          inputResponse['errors'] = existingErrors;
-        } 
-      }
-      else{
-        print('Response code other than 200 detected : $statusCode');
-        inputResponse['errors'] = ['${inputBody.toString()} url: $compositeUrlForUpdate}'];
-      }
-    }
-    return inputResponse;
-  }
-  
   // private method - gets called from private method `_dmlToSalesforce`
   static Future<Map<String, dynamic>> _deleteFromSalesforce(String objAPIName, List<String> recordIds, int batchCount, bool hardDelete) async{
     Map<String, dynamic> deleteResponse = getGenericResponseTemplate();
@@ -304,9 +234,9 @@ class SalesforceUtil2{
         // body : not required for delete call
       );
       final List<dynamic> body = json.decode(resp.body);
-      print('StatusCode: ${resp.statusCode} || body: $body || deleteResponse : $deleteResponse');
-      deleteResponse = processResponse(statusCode : resp.statusCode, inputBody : body, inputResponse: deleteResponse);
-      print('After processResponse $deleteResponse');
+      // print('StatusCode: ${resp.statusCode} || body: $body || deleteResponse : $deleteResponse');
+      deleteResponse = processDMLResponse2(statusCode : resp.statusCode, inputBody : body, inputResponse: deleteResponse);
+      // print('After processResponse $deleteResponse');
     }
     catch(error){
       deleteResponse['error'] = error.toString();
@@ -318,17 +248,53 @@ class SalesforceUtil2{
   // TBC
   static Future<Map<String, dynamic>> queryFromSalesforce({ required String objAPIName, List<String> fieldList = const [], String whereClause = '', String orderByClause = '', int? count}) async {
     if(!isLoggedIn()) await loginToSalesforce();
-    Map<String, dynamic> queryResponse = getGenericResponseTemplate();
+    Map<String, dynamic> queryFromSalesforceResponse = getGenericResponseTemplate();
     Map<String, dynamic> resp = await _queryFromSalesforce(objAPIName, fieldList, whereClause, orderByClause, count);
-    
-    if(resp.containsKey('data')){
-      queryResponse['data'] = resp;
+    print('Response is for records : ${resp.toString().substring(0,100)}');
+    bool done = (resp.containsKey('done') && resp['done']) ? true : false;
+    if(done){
+      if(resp.containsKey('data')){
+        queryFromSalesforceResponse['data'] = resp;
+      }
+      else if(resp.containsKey('error')){
+        queryFromSalesforceResponse['errors'] = resp;
+      }
     }
-    else if(resp.containsKey('error')){
-      queryResponse['errors'] = resp;
+    else{
+      String nextRecordsUrl = resp['nextRecordsUrl'];
+      print('queryFromSalesforce nextRecordsUrl =>$nextRecordsUrl');
+      print('queryFromSalesforce url =>$instanceUrl$nextRecordsUrl');
+      dynamic restRecordsResponse = await http.get(
+        Uri.parse('$instanceUrl$nextRecordsUrl'),
+        headers: generateHeader(),
+        // body: [], //not required for query call
+      );
+      final Map<String, dynamic> body = json.decode(restRecordsResponse.body);
+      print('Rest query response : ${body.toString()}');
+      bool done = (resp.containsKey('done') && resp['done']) ? true : false;
+      if(done){
+        // Collate the response for all batches
+        if(body.containsKey('data') && body['data'].isNotEmpty){
+          List<dynamic> existingData = queryFromSalesforceResponse['data'];
+          for(dynamic each in body['data']){
+            existingData.add(each);
+          }
+          queryFromSalesforceResponse['data'] = existingData;
+        }
+        if(body.containsKey('errors') && body['errors'].isNotEmpty){
+          List<dynamic> existingErrors = queryFromSalesforceResponse['errors'];
+          for(dynamic each in body['errors']){
+            existingErrors.add(each);
+          }
+          queryFromSalesforceResponse['errors'] = existingErrors;
+        }
+      }
+      else{
+        // Handle when record count is more than 4000
+      }
     }
-    // print('Result from queryResponse $queryResponse');
-    return queryResponse;
+    // print('Result from queryFromSalesforceResponse $queryFromSalesforceResponse');
+    return queryFromSalesforceResponse;
   }
 
   // TBC
@@ -336,36 +302,40 @@ class SalesforceUtil2{
     
     if(!isLoggedIn()) await loginToSalesforce();
     
-    Map<String, dynamic> queryResponse = {};
+    Map<String, dynamic> queryFromSlesforceResponse = {};
     
-    Map<String, String> responseData = <String, String>{};
     try{
       dynamic resp = await http.get(
         Uri.parse(generateQueryEndpointUrl(objAPIName, fieldList, whereClause, orderByClause, count)),
         headers: generateHeader(),  
         // body: [], //not required for query call
       );
-      // print('response.statusCode ${resp.statusCode}');
+      final Map<String, dynamic> body = json.decode(resp.body);
+      print('_queryFromSalesforce response.statusCode ${resp.statusCode}');
+      print('_queryFromSalesforce body : ${body.toString().substring(0,100)}');
+      // print('_queryFromSalesforce body : $body');
       if (resp.statusCode == 200) {
-        final Map<String, dynamic> body = json.decode(resp.body);
-        // int count = body['totalSize'];
-        // bool done = body['done'];
-        // List<dynamic> records = body['records'];
-        // print('count : ${body['totalSize']}, done : ${body['done']} , records retrieved : ${body['records']}');
-        responseData['data'] = body['records'].toString();
+        // print('_queryFromSalesforce resp[done] : ${body['done']}');
+        // print('_queryFromSalesforce resp[totalSize] : ${body['totalSize']}');
+        // print('_queryFromSalesforce resp[nextRecordsUrl] : ${body['nextRecordsUrl']}');
+
+        queryFromSlesforceResponse['data'] = body['records'];
+        queryFromSlesforceResponse['totalSize'] = body['totalSize'];
+        queryFromSlesforceResponse['done'] = body['done'];
+        queryFromSlesforceResponse['nextRecordsUrl'] = body['nextRecordsUrl'];
       }
       else {
         // Log an error
         log.d('Response code other than 200 detected : ${resp.body}');
-        responseData['error'] = resp.body;
+        queryFromSlesforceResponse['error'] = resp.body;
       }
-      return responseData;
     }
     catch(error){
       log.d('Error occurred while querying data from Salesforce. Error is : $error');
-      responseData['error'] = error.toString();
-      return responseData;
+      queryFromSlesforceResponse['error'] = error.toString();
     }
+    // print('queryFromSlesforceResponse=> $queryFromSlesforceResponse');
+    return queryFromSlesforceResponse;
   }
   
   // Generic method to generate header for login and other operations
@@ -397,7 +367,6 @@ class SalesforceUtil2{
     else if(opType == 'delete'){
       if(recordIds.isNotEmpty){
         String ids = recordIds.join(',');
-        String compositeUrlForDelete = '/services/data/v59.0/composite/sobjects?ids=';
         endpointUrl = '$instanceUrl$compositeUrlForDelete$ids';
       }
     }
@@ -481,25 +450,107 @@ class SalesforceUtil2{
     return {'data' : [], 'errors' : []};
   }
   
-  // TBC
-  static Future<Map<String, dynamic>> callSalesforceAPI(String op) async{
-    if(!isLoggedIn()) await loginToSalesforce();
-    Map<String, dynamic> response = {};
-    if(op == 'approve_messages'){
-      response = await _callApproveMessageAPI();
+  // Part 1 : a method to process the DML response
+  static Map<String, dynamic> processDMLResponse1({required dynamic resp, required Map<String, dynamic> inputResponse}){
+    if(resp.containsKey('data') && resp['data'].isNotEmpty){
+      List<dynamic> existingData = inputResponse['data'];
+      for(dynamic each in resp['data']){
+        existingData.add(each);
+      }
+      inputResponse['data'] = existingData;
     }
-    if(op == 'delete_messages'){
-      response = await _callDeleteMessageAPI();
+    if(resp.containsKey('errors') && resp['errors'].isNotEmpty){
+      List<dynamic> existingErrors = inputResponse['errors'];
+      for(dynamic each in resp['errors']){
+        existingErrors.add(each);
+      }
+      inputResponse['errors'] = existingErrors;
     }
-    if(op == 'sync'){
-      response = await _callSyncMessageAPI();
-    }
-    if(op == 'delete_transactions'){
-      response = await _callDeleteTransactionsAPI();
-    }
-    return response;
+    return inputResponse;
   }
 
+  // Part 2 : a method to process the DML response
+  static dynamic processDMLResponse2({required int statusCode, required List<dynamic> inputBody, required Map<String, dynamic> inputResponse}){
+    for(dynamic rec in inputBody){
+      if(statusCode == 200){
+        if(rec.containsKey('success') && rec['success']){ // i.e. rec['success'] exists and it's value is true
+          dynamic recordId = rec['id'];
+          List<dynamic> existingData = inputResponse['data'];
+          existingData.add(recordId);
+          inputResponse['data'] = existingData;
+        }
+        else{
+          dynamic errorMessage;
+          List<dynamic> existingErrors = inputResponse['errors'];
+          for(dynamic e in rec['errors']){
+            errorMessage = '${rec['id']} : ${e['message']}';
+            existingErrors.add(errorMessage);
+          }
+          inputResponse['errors'] = existingErrors;
+        } 
+      }
+      else{
+        print('Response code other than 200 detected : $statusCode');
+        inputResponse['errors'] = ['${inputBody.toString()} url: $compositeUrlForUpdate}'];
+      }
+    }
+    return inputResponse;
+  }
+  
+  // TBC
+  static Future<Map<String, dynamic>> callSalesforceAPI({required String endpointUrl, required httpMethod, dynamic body, dynamic params}) async{
+    
+    if(!isLoggedIn()) await loginToSalesforce();
+    
+    Map<String, dynamic> callSalesforceAPIResponse = getGenericResponseTemplate();
+
+    Map<String, dynamic> callSalesforceAPIBody = {};
+    
+    String epUrl = '$instanceUrl$endpointUrl';
+    
+    if(httpMethod == 'GET'){
+      dynamic resp = await http.get(
+        Uri.parse(epUrl),
+        headers: generateHeader(),
+        // body: //not required for GET call
+      );
+      callSalesforceAPIBody = json.decode(resp.body);
+    }
+    else if(httpMethod == 'POST'){
+      dynamic resp = await http.post(
+        Uri.parse(epUrl),
+        headers: generateHeader(),
+        body: body
+      );
+      callSalesforceAPIBody = json.decode(resp.body);
+    }
+    else if(httpMethod == 'PATCH'){
+      dynamic resp = await http.patch(
+        Uri.parse(epUrl),
+        headers: generateHeader(),
+        body: body
+      ); 
+      callSalesforceAPIBody = json.decode(resp.body); 
+    }
+    else if(httpMethod == 'DELETE'){
+      dynamic resp = await http.delete(
+        Uri.parse(epUrl),
+        headers: generateHeader(),
+        body: body
+      );
+      callSalesforceAPIBody = json.decode(resp.body);
+    }
+
+    if(callSalesforceAPIBody.containsKey('data') && callSalesforceAPIBody['data'].isNotEmpty){
+      callSalesforceAPIResponse['data'] = callSalesforceAPIBody['data'];
+    }
+    if(callSalesforceAPIBody.containsKey('errors') && callSalesforceAPIBody['errors'].isNotEmpty){
+      callSalesforceAPIResponse['errors'] = callSalesforceAPIBody['errors'];
+    }
+    print('callSalesforceAPIResponse=> ${callSalesforceAPIResponse.toString()}');
+    return callSalesforceAPIResponse;
+  }
+  
   // TBC
   static Future<Map<String, dynamic>> _callApproveMessageAPI() async{
     Map<String, String> response = {};

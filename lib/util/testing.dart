@@ -3,7 +3,6 @@
 import 'dart:convert';
 
 import './salesforce_util2.dart';
-// import './data_generator2.dart';
 
 main() async{
 
@@ -16,20 +15,18 @@ main() async{
   // // ------------------------------------------------------------------------------------------------ // 
   // // Insert
   // List<Map<String, String>> toBeInsertedRecords = [];
-  // for(int i=0;i<10;i++){
+  // for(int i=0;i<3000;i++){
   //   Map<String, String> each = {};
   //   each['ref'] = 'Ref$i';
   //   each['name'] = 'Account-$i';
   //   each['phone'] = '123456$i';
-
-  //   if(i == 0 || i == 3) each['name'] = '';
   //   toBeInsertedRecords.add(each);
   // }
   // dynamic insertResponse = await SalesforceUtil2.dmlToSalesforce(
   //     opType: 'insert', 
   //     objAPIName: 'Account', 
   //     fieldNameValuePairs : toBeInsertedRecords,
-  //     batchSize: 3);
+  //     batchSize: 200);
   
   // print('Insert response from testing.dart =>${jsonEncode(insertResponse)}');
 
@@ -59,23 +56,22 @@ main() async{
 
   // // ------------------------------------------------------------------------------------------------ // 
   // delete
-  List<String> idList = ['0015i000014KihNAAS','0015i000014KisHAAS','0015i000014KisDAAS','0015i000014KisBAAS','0015i000014KihPAAS', '0015i000014KiaKAAS'];
-  dynamic deleteResponse = await SalesforceUtil2.dmlToSalesforce(
-    recordIds: idList,
-    opType: 'delete',
-    objAPIName: 'Account'
-  );
-  print('deleteResponse =>${jsonEncode(deleteResponse)}');
+  // List<String> idList = ['0015i000014KihNAAS','0015i000014KisHAAS','0015i000014KisDAAS','0015i000014KisBAAS','0015i000014KihPAAS', '0015i000014KiaKAAS'];
+  // dynamic deleteResponse = await SalesforceUtil2.dmlToSalesforce(
+  //   recordIds: idList,
+  //   opType: 'delete',
+  //   objAPIName: 'Account'
+  // );
+  // print('delete response from testing.dart =>${jsonEncode(deleteResponse)}');
 
   // // ------------------------------------------------------------------------------------------------ // 
-  // // Query
-  // String whereClause = "name like 'Account%'";
-  // Map<String, dynamic> queryResponse = await SalesforceUtil2.queryFromSalesforce(
-  //     objAPIName: 'Account', 
-  //     fieldList: ['Id', 'Website','Name', 'Phone'],
-  //     whereClause: whereClause,
-  //     orderByClause: 'Name desc',
-  //     count : 2
-  // );
-  // print('queryResponse =>$queryResponse');
+  // Query
+  Map<String, dynamic> queryResponse = await SalesforceUtil2.queryFromSalesforce(
+      objAPIName: 'Account', 
+      fieldList: ['Id', 'Website','Name', 'Phone'],
+      whereClause: "name like 'Account%'",
+      orderByClause: 'Name desc',
+      count : 2050
+  );
+  // cprint('queryResponse from testing.dart =>${jsonEncode(queryResponse)}');
 }
