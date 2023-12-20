@@ -28,8 +28,8 @@ class DataGenerator2 {
     dynamic error = response['error'];
     dynamic data = response['data'];
 
-    log.d('Error: $error');
-    log.d('Data: $data');
+    log.d('Error inside generateTab1Data : ${error.toString()}');
+    log.d('Datainside generateTab1Data: ${data.toString()}');
     
     if(error != null && error.isNotEmpty){
       log.d('Error occurred while querying inside generateTab1Data : ${response['error']}');
@@ -37,10 +37,9 @@ class DataGenerator2 {
     }
     else if (data != null && data.isNotEmpty) {
       try{
-        Map<String, dynamic> jsonData = json.decode(data);
-        if (jsonData['records'] != null) {
-          log.d('response in generateTab1Data -> $jsonData');
-          List<dynamic> records = jsonData['records'];
+        log.d('here 0');
+        dynamic records = data['data'];
+        if(records != null && records.isNotEmpty){
           for (var record in records) {
             Map<String, dynamic> recordMap = Map.castFrom(record);
             String id = recordMap['Id'];
@@ -79,19 +78,19 @@ class DataGenerator2 {
       whereClause: 'FinPlan__Transaction_Date__c >= $formattedStartDate AND FinPlan__Transaction_Date__c <= $formattedEndDate ',
       orderByClause: 'FinPlan__Transaction_Date__c desc',
       //count : 120
-      );
-      log.d('here 3');
-    String? error = response['error'];
-    String? data = response['data'];
+    );
+    log.d('here 3');
+    dynamic error = response['error'];
+    dynamic data = response['data'];
 
     log.d('Error: $error');
     log.d('Data: $data');
     log.d('here 4');
-    if(error != null){
+    if(error != null && error.isNotEmpty){
       log.d('Error occurred while querying inside generateTab2Data : ${response['error']}');
       //return null;
     }
-    else if (data != null) {
+    else if (data != null && data.isNotEmpty) {
       try{
         Map<String, dynamic> jsonData = json.decode(data);
         if (jsonData['records'] != null) {
