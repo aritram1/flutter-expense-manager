@@ -174,7 +174,7 @@ class DataGenerator2 {
 
   static Future<Map<String, dynamic>> syncMessages() async{
     
-    List<SmsMessage> messages = await MessageUtil.getMessages(/* count : 400 */); // Change this while debugging
+    List<SmsMessage> messages = await MessageUtil.getMessages(count : 200); // Change this while debugging
     List<Map<String, dynamic>> processedMessages = await MessageUtil.convert(messages);
     
     // TB Implemented
@@ -182,6 +182,7 @@ class DataGenerator2 {
     // log.d('transactionsDeleteResponse response IS->$transactionsDeleteResponse');
     
     Map<String, dynamic> response = await SalesforceUtil2.dmlToSalesforce(
+        opType: 'insert',
         objAPIName : 'FinPlan__SMS_Message__c', 
         fieldNameValuePairs : processedMessages);
 

@@ -224,15 +224,16 @@ class SalesforceUtil2{
 
       // Collate the response for all batches
       if(body.containsKey('data') && body['data'].isNotEmpty){
+        log.d('I am here line 227 and data is ${body['data']}');
         List<dynamic> existingData = dmlResponse['data'];
-        for(dynamic each in body['data']){
+        for(dynamic each in body['data'] as List<dynamic>){
           existingData.add(each);
         }
         dmlResponse['data'] = existingData;
       }
       if(body.containsKey('errors') && body['errors'].isNotEmpty){
         List<dynamic> existingErrors = dmlResponse['errors'];
-        for(dynamic each in body['errors']){
+        for(dynamic each in body['errors'] as List<dynamic>){
           existingErrors.add(each);
         }
         dmlResponse['errors'] = existingErrors;
@@ -244,7 +245,7 @@ class SalesforceUtil2{
       catchBlockErrors.add(error.toString());
       dmlResponse['errors'] = catchBlockErrors;
     }
-    // print('DML response for $batchCount : $dmlResponse');
+    log.d('DML response for $batchCount : $dmlResponse');
     return dmlResponse;
   }
 
@@ -278,7 +279,7 @@ class SalesforceUtil2{
     catch(error){
       insertResponse['errors'] = error.toString();
     }
-    // print('Final insertResponse output : $insertResponse');
+    print('Final insertResponse output : $insertResponse');
     return insertResponse;
   }
 
@@ -510,7 +511,7 @@ class SalesforceUtil2{
             errorMessage = '${rec['id']} : ${e['message']}';
             existingErrors.add(errorMessage);
           }
-          inputResponse['errors'] = existingErrors;
+          inputResponse['errors'] = [existingErrors];
         } 
       }
       else{
