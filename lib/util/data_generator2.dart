@@ -83,8 +83,8 @@ class DataGenerator2 {
     dynamic error = response['error'];
     dynamic data = response['data'];
 
-    log.d('Error: $error');
-    log.d('Data: $data');
+    log.d('Error: ${error.toString()}');
+    log.d('Data inside : ${data.toString()}');
     log.d('here 4');
     if(error != null && error.isNotEmpty){
       log.d('Error occurred while querying inside generateTab2Data : ${response['error']}');
@@ -92,11 +92,8 @@ class DataGenerator2 {
     }
     else if (data != null && data.isNotEmpty) {
       try{
-        Map<String, dynamic> jsonData = json.decode(data);
-        if (jsonData['records'] != null) {
-          log.d('response in generateTab2Data -> $jsonData');
-          List<dynamic> records = jsonData['records'];
-          log.d('records $records');
+        dynamic records = data['data'];
+        if (records != null && records.isNotEmpty) {
           for (var record in records) {
             Map<String, dynamic> recordMap = Map.castFrom(record);
             String id = recordMap['Id'];
