@@ -25,17 +25,17 @@ class DataGenerator2 {
       orderByClause: 'FinPlan__Received_At_formula__c desc',
       //count : 120
       );
-    String? error = response['error'];
-    String? data = response['data'];
+    dynamic error = response['error'];
+    dynamic data = response['data'];
 
     log.d('Error: $error');
     log.d('Data: $data');
     
-    if(error != null){
+    if(error != null && error.isNotEmpty){
       log.d('Error occurred while querying inside generateTab1Data : ${response['error']}');
       //return null;
     }
-    else if (data != null) {
+    else if (data != null && data.isNotEmpty) {
       try{
         Map<String, dynamic> jsonData = json.decode(data);
         if (jsonData['records'] != null) {

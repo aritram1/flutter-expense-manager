@@ -100,6 +100,7 @@ class SalesforceUtil2{
     if(done){
       if(resp.containsKey('data')){
         queryFromSalesforceResponse['data'] = resp;
+        log.d('I am here ${queryFromSalesforceResponse['data'].toString()}');
       }
       else if(resp.containsKey('error')){
         queryFromSalesforceResponse['errors'] = resp;
@@ -334,6 +335,7 @@ class SalesforceUtil2{
   static Future<Map<String, dynamic>> _queryFromSalesforce(String objAPIName, List<String> fieldList, String whereClause, String orderByClause, int? count) async {
     
     if(!isLoggedIn()) await loginToSalesforce();
+
     log.d('instanceUrl inside _queryFromSalesforce $instanceUrl');
     
     Map<String, dynamic> queryFromSlesforceResponse = {};
@@ -346,7 +348,7 @@ class SalesforceUtil2{
       );
       final Map<String, dynamic> body = json.decode(resp.body);
       log.d('_queryFromSalesforce response.statusCode ${resp.statusCode}');
-      log.d('_queryFromSalesforce body : ${body.toString().substring(0,100)}');
+      log.d('_queryFromSalesforce body : ${body.toString()}');
       // print('_queryFromSalesforce body : $body');
       if (resp.statusCode == 200) {
         // print('_queryFromSalesforce resp[done] : ${body['done']}');

@@ -5,7 +5,7 @@ import 'package:logger/logger.dart';
 import '../widget/date_picker_panel.dart';
 import '../widget/table_widget.dart';
 import '../widget/add_new_expense.dart';
-import '../util/data_generator.dart';
+import '../util/data_generator2.dart';
 
 class TabData extends StatefulWidget {
   final int tabIndex;
@@ -36,11 +36,11 @@ class _TabDataState extends State<TabData> {
   Future<List<List<String>>> fetchData() async {
     switch (widget.tabIndex) {
       case 0:
-        return await DataGenerator.generateTab1Data();
+        return await DataGenerator2.generateTab1Data();
       case 1:
-        return await DataGenerator.generateTab2Data(selectedStartDate, selectedEndDate);
+        return await DataGenerator2.generateTab2Data(selectedStartDate, selectedEndDate);
       case 2:
-        return DataGenerator.generateTab3Data();
+        return DataGenerator2.generateTab3Data();
       default:
         return [];
     }
