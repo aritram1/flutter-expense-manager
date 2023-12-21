@@ -7,17 +7,17 @@ import '../widget/table_widget.dart';
 import '../widget/add_new_expense.dart';
 import '../util/data_generator.dart';
 
-class TabData extends StatefulWidget {
+class TabWidget extends StatefulWidget {
   final int tabIndex;
   final String title;
 
-  const TabData({Key? key, required this.tabIndex, required this.title}) : super(key: key);
+  const TabWidget({Key? key, required this.tabIndex, required this.title}) : super(key: key);
 
   @override
-  _TabDataState createState() => _TabDataState();
+  _TabWidgetState createState() => _TabWidgetState();
 }
 
-class _TabDataState extends State<TabData> {
+class _TabWidgetState extends State<TabWidget> {
   List<List<String>> tableData = [];
   final Logger log = Logger();
   DateTime selectedStartDate = DateTime.now();
@@ -99,11 +99,11 @@ class _TabDataState extends State<TabData> {
   List<String> getTableColumnNames(int tabIndex) {
     switch (tabIndex) {
       case 0:
-        return ['Paid To', 'Amount', 'Date'];
+        return ['Paid To', 'Amount', 'Date']; // Column names to show messages
       case 1:
         return ['Paid To', 'Amount', 'Date']; // Add your column names for tab 1
       case 2:
-        return ['Column1', 'Column2', 'Column3']; // Add your column names for tab 2
+        return ['Name', 'Last Balance', 'Date/Time']; // Add your column names for tab 2
       default:
         return [];
     }
@@ -127,9 +127,9 @@ class _TabDataState extends State<TabData> {
       context: context,
       builder: (BuildContext context) {
         return AddNewExpenseDialog(
-          onSave: (amount, paidTo, details, txnDate) {
+          onSave: (amount, paidTo, details, txnDate) async {
             log.d('Amount: $amount Paid To: $paidTo Details: $details Start Date: $selectedStartDate End Date: $selectedEndDate');
-            fetchData(); // Refresh the table data
+            await fetchData(); // Refresh the table data
           },
         );
       },

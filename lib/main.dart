@@ -117,9 +117,9 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
       body: TabBarView(
         controller: _tabController,
         children: const [
-          TabData(tabIndex: 0, title: 'Transactions'),
-          TabData(tabIndex: 1, title: 'View Expenses'),
-          TabData(tabIndex: 2, title: 'Bank Accounts'),
+          TabWidget(tabIndex: 0, title: 'Transactions'),
+          TabWidget(tabIndex: 1, title: 'View Expenses'),
+          TabWidget(tabIndex: 2, title: 'Bank Accounts'),
         ],
       ),
       bottomNavigationBar: TabBar(
