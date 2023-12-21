@@ -10,7 +10,7 @@ class MessageUtil {
   
   static Logger log = Logger();
 
-  static const int MAXM_MESSAGE_COUNT = 1000;
+  // static const int MAXM_MESSAGE_COUNT = 2000;
 
   ///////////////////////////////Get SMS Messages//////////////////////////////////////
   static Future<List<SmsMessage>> getMessages({List<SmsQueryKind>? kinds, String? sender, int? count}) async {
@@ -37,7 +37,7 @@ class MessageUtil {
         messages = await SmsQuery().querySms(
           kinds: smsKinds, // SmsQueryKind.inbox ,SmsQueryKind.sent, SmsMessageKind.draft
           address: sender, // +1234567890
-          count: MAXM_MESSAGE_COUNT,
+          // count: MAXM_MESSAGE_COUNT,
         );
       }
       
