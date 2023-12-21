@@ -5,9 +5,9 @@ import 'package:logger/logger.dart';
 import '../util/data_generator.dart';
 
 class AddNewExpenseDialog extends StatefulWidget {
-  final Function(String, String, String, DateTime) onSave;
+  final Function() onComplete;
 
-  const AddNewExpenseDialog({Key? key, required this.onSave}) : super(key: key);
+  const AddNewExpenseDialog({Key? key, required this.onComplete}) : super(key: key);
 
   @override
   _AddNewExpenseDialogState createState() => _AddNewExpenseDialogState();
@@ -103,7 +103,7 @@ class _AddNewExpenseDialogState extends State<AddNewExpenseDialog> {
       lastDate: DateTime.now(),
     );
     if (picked != null) {
-      log.d('selected date $picked');
+      // log.d('selected date $picked');
       setState(() {
         selectedDate = picked;
       });
@@ -116,22 +116,21 @@ class _AddNewExpenseDialogState extends State<AddNewExpenseDialog> {
     String details = detailsController.text;
 
     if (amount.isNotEmpty && paidTo.isNotEmpty && details.isNotEmpty) {
-      // // amazhhing way to set a calback method for a widget.
-      // // To be explored more 
-      // widget.onSave(amount, paidTo, details, selectedDate);
-
+      
       Map<String, dynamic> saveDataResponse = await DataGenerator.addExpenseToSalesforce(amount, paidTo, details, selectedDate);
       
-      log.d('saveDataResponse => ${saveDataResponse.toString()}');
+      // log.d('saveDataResponse => ${saveDataResponse.toString()}');
 
       setState(() {
         errorMessage = null;
-      });
+      }); 
 
+      widget.onComplete(); // This will refresh the tab so we get latest data, this is a way of passing callback
+      
       Navigator.of(context).pop();
     } else {
       // Handle empty fields
-      log.d('All fields are required');
+      // log.d('All fields are required');
       
       setState(() {
         errorMessage = 'All fields are required.';

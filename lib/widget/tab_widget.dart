@@ -127,9 +127,9 @@ class _TabWidgetState extends State<TabWidget> {
       context: context,
       builder: (BuildContext context) {
         return AddNewExpenseDialog(
-          onSave: (amount, paidTo, details, txnDate) async {
-            log.d('Amount: $amount Paid To: $paidTo Details: $details Start Date: $selectedStartDate End Date: $selectedEndDate');
-            await fetchData(); // Refresh the table data
+          onComplete: () async { // This `onComplete`is example of a callback that gets called after `AddNewExpenseDialog` widget `complete`s
+            tableData = await fetchData(); // Refresh the table data
+            setState(() {}); // Trigger a rebuild of the widget
           },
         );
       },

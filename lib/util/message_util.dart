@@ -45,7 +45,7 @@ class MessageUtil {
     else {
       await Permission.sms.request();
     }
-    log.d('Inbox message count : ${messages.length}');
+    // log.d('Inbox message count : ${messages.length}');
     return sort(messages);
   }
 
