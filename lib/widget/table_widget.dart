@@ -1,8 +1,6 @@
-import 'package:ExpenseManager/util/data_generator2.dart';
+import 'package:ExpenseManager/util/data_generator.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import '../util/data_generator.dart';
-
 class TableWidget extends StatefulWidget {
   final List<List<String>> tableData;
   final int tabIndex; // Add tabIndex property
@@ -248,7 +246,7 @@ class _TableWidgetState extends State<TableWidget> {
       }
     }
 
-    dynamic response = await DataGenerator2.approveSelectedMessages(objAPIName :'FinPlan__SMS_Message__c', recordIds : recordIds);
+    dynamic response = await DataGenerator.approveSelectedMessages(objAPIName :'FinPlan__SMS_Message__c', recordIds : recordIds);
     log.d('Response for handleApproveSMS ${response.toString()}');
 
     setState(() {

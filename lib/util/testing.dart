@@ -2,7 +2,7 @@
 
 import 'dart:convert';
 
-import './salesforce_util2.dart';
+import 'salesforce_util.dart';
 
 
 main() async{
@@ -28,7 +28,7 @@ main() async{
     each['phone'] = '123456$i';
     toBeInsertedRecords.add(each);
   }
-  dynamic insertResponse = await SalesforceUtil2.dmlToSalesforce(
+  dynamic insertResponse = await SalesforceUtil.dmlToSalesforce(
       opType: 'insert', 
       objAPIName: 'Account', 
       fieldNameValuePairs : toBeInsertedRecords,

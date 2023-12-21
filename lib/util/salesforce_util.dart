@@ -6,26 +6,20 @@ import 'dart:core';
 import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
+import 'package:dotenv/dotenv.dart' as dotenv;
 
-class SalesforceUtil2{
+class SalesforceUtil{
 
-  static String clientId              = '3MVG9wt4IL4O5wvIBCa0yrhLb82rC8GGk03G2F26xbcntt9nq1JXS75mWYnnuS2rxwlghyQczUFgX4whptQeT';
-  static String clientSecret          = '3E0A6C0002E99716BD15C7C35F005FFFB716B8AA2DE28FBD49220EC238B2FFC7';
-  static String userName              = 'aritram1@gmail.com.financeplanner';
-  static String pwdWithToken          = 'financeplanner123W8oC4taee0H2GzxVbAqfVB14';
-
-  static String tokenEndpoint         = 'https://login.salesforce.com/services/oauth2/token';
-  static String tokenGrantType        = 'password';
-
-  static String compositeUrlForInsert = '/services/data/v53.0/composite/tree/';
-  static String compositeUrlForUpdate = '/services/data/v59.0/composite/sobjects/';
-  static String compositeUrlForDelete = '/services/data/v59.0/composite/sobjects?ids=';
-  static String queryUrl              = '/services/data/v53.0/query?q=';
-
-  // static String customEndpointForSyncMessages       = '/services/apexrest/FinPlan/api/sms/sync/*';
-  // static String customEndpointForApproveMessages    = '/services/apexrest/FinPlan/api/sms/approve/*';
-  // static String customEndpointForDeleteMessages     = '/services/apexrest/FinPlan/api/sms/delete/*';
-  // static String customEndpointForDeleteTransactions = '/services/apexrest/FinPlan/api/transactions/delete/*';
+  static String clientId = '';
+  static String clientSecret = '';
+  static String userName = '';
+  static String pwdWithToken = '';
+  static String tokenEndpoint = '';
+  static String tokenGrantType = '';
+  static String compositeUrlForInsert = '';
+  static String compositeUrlForUpdate = '';
+  static String compositeUrlForDelete = '';
+  static String queryUrl              = '';
 
   static String accessToken = '';
   static String instanceUrl = '';
@@ -35,8 +29,24 @@ class SalesforceUtil2{
   static String getAccessToken() => (accessToken);
   static String getInstanceUrl() => (instanceUrl);
 
+  static init() async {
+    // Load environment variables from the .env file and access environment variables
+    await dotenv.load();
+    clientId              = dotenv.env['clientId'] ?? '';
+    clientSecret          = dotenv.env['clientSecret'];
+    userName              = dotenv.env['userName'];
+    pwdWithToken          = dotenv.env['pwdWithToken'];
+    tokenEndpoint         = dotenv.env['tokenEndpoint'];
+    tokenGrantType        = dotenv.env['tokenGrantType'];
+    compositeUrlForInsert = dotenv.env['compositeUrlForInsert'];
+    compositeUrlForUpdate = dotenv.env['compositeUrlForUpdate'];
+    compositeUrlForDelete = dotenv.env['compositeUrlForDelete'];
+    queryUrl              = dotenv.env['queryUrl'];
+  }
+
   // Method to Login to Salesforce
   static Future<Map<String, dynamic>> loginToSalesforce() async{
+    await init();
     Map<String, dynamic> response = await _login();
     return response;
   }
@@ -119,6 +129,7 @@ class SalesforceUtil2{
       print('Rest query response : ${body.toString()}');
       bool done = (resp.containsKey('done') && resp['done']) ? true : false;
       if(done){
+        // Handle when record count is more than 2000
         // Collate the response for all batches
         if(body.containsKey('data') && body['data'].isNotEmpty){
           List<dynamic> existingData = queryFromSalesforceResponse['data'];

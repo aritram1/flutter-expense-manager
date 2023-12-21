@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import './util/data_generator2.dart';
+import 'util/data_generator.dart';
 import './widget/tab_widget.dart';
 
 void main() {
@@ -134,23 +134,16 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
 
   Future<String> handleSMSSync() async {
     log.d('Syncing SMS data...');
-    Map<String, dynamic> result = await DataGenerator2.syncMessages();
-    log.d('Sync response is result $result');
+    Map<String, dynamic> result = await DataGenerator.syncMessages();
+    log.d('Syncing SMS data completed. Response : $result');
     return result.toString();
   }
 
   // Method to help mass deletion of SMS messages by calling the SF API `/api/sms/delete/*`
   Future<String> handleSMSDelete() async {
     log.d('Deleting SMS data...');
-    Map<String, dynamic> response = await DataGenerator2.deleteAllMessages('FinPlan__SMS_Message__c');
-    log.d('Delete response IS->$response'); 
+    Map<String, dynamic> response = await DataGenerator.deleteAllMessages('FinPlan__SMS_Message__c');
+    log.d('Deleting completed. Delete response is -> $response'); 
     return response.toString();
   }
 }
-
-// String callSalesforceAPIResponse_deleteMessages = await SalesforceUtil2.callSalesforceAPI(
-  //   endpointUrl: customEndpointForDeleteMessages,
-  //   httpMethod: 'POST'
-  // );
-  // print('callSalesforceAPIResponse from testing.dart => $callSalesforceAPIResponse_deleteMessages');
-

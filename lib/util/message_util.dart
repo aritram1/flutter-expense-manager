@@ -57,15 +57,11 @@ class MessageUtil {
     int count = 0;
     for (SmsMessage sms in messages) {
       Map<String, dynamic> record = {
-        // "attributes": {
-        //   "type": "FinPlan__SMS_Message__c",
-        //   "referenceId": "ref$count"
-        // },
         "FinPlan__Content__c": "${sms.body != null && sms.body!.length > 255 ? sms.body?.substring(0, 255) : sms.body}",
         "FinPlan__Sender__c": "${sms.sender}",
         "FinPlan__Received_At__c": sms.date.toString(),
         "FinPlan__Device__c": deviceName,
-        "FinPlan__Created_From__c" : "Sync" // Explicitly set as 'Sync' so it does not fire up the trigger on SMS Object
+        "FinPlan__Created_From__c" : "Sync" // 2 values are possible 'Sync or 'Manual'
       };
       allRecords.add(record);
       count++;

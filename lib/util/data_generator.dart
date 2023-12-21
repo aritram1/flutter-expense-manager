@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:ExpenseManager/util/message_util.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:logger/logger.dart';
-import './salesforce_util2.dart';
+import 'salesforce_util.dart';
 import 'package:device_info/device_info.dart';
 
-class DataGenerator2 {
+class DataGenerator {
 
   static String customEndpointForSyncMessages       = '/services/apexrest/FinPlan/api/sms/sync/*';
   static String customEndpointForApproveMessages    = '/services/apexrest/FinPlan/api/sms/approve/*';
@@ -18,7 +18,7 @@ class DataGenerator2 {
   static Future<List<List<String>>> generateTab1Data() async {
     List<List<String>> generatedData = [];
 
-    Map<String, dynamic> response = await SalesforceUtil2.queryFromSalesforce(
+    Map<String, dynamic> response = await SalesforceUtil.queryFromSalesforce(
       objAPIName: 'FinPlan__SMS_Message__c', 
       fieldList: ['Id', 'FinPlan__Received_At_formula__c', 'FinPlan__Transaction_Date__c', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c', 'FinPlan__Formula_Amount__c'], 
       whereClause: 'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true AND FinPlan__Formula_Amount__c > 0',
@@ -72,7 +72,7 @@ class DataGenerator2 {
     String formattedEndDate = endDate.toString().split(' ')[0];
     List<List<String>> generatedData = [];
     log.d('here 2');
-    Map<String, dynamic> response = await SalesforceUtil2.queryFromSalesforce(
+    Map<String, dynamic> response = await SalesforceUtil.queryFromSalesforce(
       objAPIName: 'FinPlan__Bank_Transaction__c', 
       fieldList: ['Id', 'FinPlan__Beneficiary_Name__c','FinPlan__Transaction_Date__c', 'FinPlan__Amount__c','FinPlan__Type__c'],
       whereClause: 'FinPlan__Transaction_Date__c >= $formattedStartDate AND FinPlan__Transaction_Date__c <= $formattedEndDate ',
@@ -144,14 +144,14 @@ class DataGenerator2 {
 
     data.add(each);
 
-    Map<String, dynamic> response =  await SalesforceUtil2.dmlToSalesforce(opType: 'insert',objAPIName: 'FinPlan__SMS_Message__c', fieldNameValuePairs: data);
+    Map<String, dynamic> response =  await SalesforceUtil.dmlToSalesforce(opType: 'insert',objAPIName: 'FinPlan__SMS_Message__c', fieldNameValuePairs: data);
     return response;
     
   }
 
   static Future<Map<String, dynamic>> deleteAllMessages(String objAPIName) async {
     Map<String, dynamic> response = {};
-    response = await SalesforceUtil2.dmlToSalesforce(opType: 'delete', objAPIName: 'FinPlan__SMS_Message__c');
+    response = await SalesforceUtil.dmlToSalesforce(opType: 'delete', objAPIName: 'FinPlan__SMS_Message__c');
     return response;
   }
 
@@ -163,7 +163,7 @@ class DataGenerator2 {
     };
     
     String responseString = 
-        await SalesforceUtil2.callSalesforceAPI
+        await SalesforceUtil.callSalesforceAPI
           (httpMethod: 'POST', 
           endpointUrl: customEndpointForApproveMessages, 
           body : body);
@@ -178,10 +178,10 @@ class DataGenerator2 {
     List<Map<String, dynamic>> processedMessages = await MessageUtil.convert(messages);
     
     // TB Implemented
-    // Map<String, dynamic> transactionsDeleteResponse = await SalesforceUtil2.callSalesforceAPI(httpMethod: 'DELETE', endpointUrl: customEndpointForDeleteTransactions, body: {});
+    // Map<String, dynamic> transactionsDeleteResponse = await SalesforceUtil.callSalesforceAPI(httpMethod: 'DELETE', endpointUrl: customEndpointForDeleteTransactions, body: {});
     // log.d('transactionsDeleteResponse response IS->$transactionsDeleteResponse');
     
-    Map<String, dynamic> response = await SalesforceUtil2.dmlToSalesforce(
+    Map<String, dynamic> response = await SalesforceUtil.dmlToSalesforce(
         opType: 'insert',
         objAPIName : 'FinPlan__SMS_Message__c', 
         fieldNameValuePairs : processedMessages);
