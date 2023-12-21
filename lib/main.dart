@@ -137,18 +137,18 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
     log.d('Syncing SMS data...');
     
     // refresh the state
-    setState(() {
-     messageSyncStatus = 'Dilting';
-    });
+    // setState(() {
+     messageSyncStatus = 'Syncing';
+    // });
     
     Map<String, dynamic> response = await DataGenerator.deleteAllMessagesAndTransactions();
     log.d('Deleting completed.');
 
     // refresh the state
     
-    setState(() {
-      messageSyncStatus = 'Critting';
-    });
+    // setState(() {
+    //   messageSyncStatus = 'Critting';
+    // });
 
     Map<String, dynamic> result = await DataGenerator.syncMessages();
     log.d('Syncing SMS data completed.');// Response : $result');

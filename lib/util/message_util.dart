@@ -74,10 +74,13 @@ class MessageUtil {
 
   // Method to sort the messages as per received at value, records are to be arranged by date asc
   static List<SmsMessage> sort(List<SmsMessage> msgList){
-    List<SmsMessage> sortedMsgList = [];
-    for(int i = msgList.length-1; i >= 0; i--){
-      sortedMsgList.add(msgList[i]);
-    }
-    return sortedMsgList;
+    // List<SmsMessage> sortedMsgList = [];
+    // for(int i = msgList.length-1; i >= 0; i--){
+    //   sortedMsgList.add(msgList[i]);
+    // }
+    // return sortedMsgList;
+
+    // sorting is not required at the moment, because balance update works when messages are arranged most recent on top
+    return msgList;
   }
 }
