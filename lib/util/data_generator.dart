@@ -174,7 +174,7 @@ class DataGenerator {
 
   static Future<Map<String, dynamic>> syncMessages() async{
     
-    List<SmsMessage> messages = await MessageUtil.getMessages(count : 200); // Change this while debugging
+    List<SmsMessage> messages = await MessageUtil.getMessages();//count : 200); // Change this while debugging
     List<Map<String, dynamic>> processedMessages = await MessageUtil.convert(messages);
     
     // TB Implemented

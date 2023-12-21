@@ -61,7 +61,7 @@ class MessageUtil {
         "FinPlan__Sender__c": "${sms.sender}",
         "FinPlan__Received_At__c": sms.date.toString(),
         "FinPlan__Device__c": deviceName,
-        "FinPlan__Created_From__c" : "Sync" // 2 values are possible 'Sync or 'Manual'
+        "FinPlan__Created_From__c" : "Sync" // Explicitly set as 'Sync' so it does not fire up the trigger on SMS Object
       };
       allRecords.add(record);
       count++;
