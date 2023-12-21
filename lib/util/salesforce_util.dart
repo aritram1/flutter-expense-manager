@@ -83,7 +83,21 @@ class SalesforceUtil{
     }
     else if(opType == 'insert' || opType == 'update'){
       while(fieldNameValuePairs.isNotEmpty){
-        eachBatchSize = min(fieldNameValuePairs.length, batchSize); // check the size of the list and split in a batch of 200
+        
+        // Add the required value attribute and reference as applicable for successful insert/update
+        for(int i=0; i<fieldNameValuePairs.length; i++){
+          dynamic each = fieldNameValuePairs[i];
+          if(!each.containsKey('attributes')){
+            each['attributes'] = {
+              "type": objAPIName,
+              "referenceId": "ref$i"
+            };
+          }
+        }
+
+        // check the size of the list and split in a batch of `batchSize` which by default is 200
+        eachBatchSize = min(fieldNameValuePairs.length, batchSize); 
+        
         for(int i=0; i<eachBatchSize; i++){
           eachInsertUpdateBatch.add(fieldNameValuePairs.removeLast());
         }
@@ -265,16 +279,6 @@ class SalesforceUtil{
 
   // private method - gets called from private method `_dmlToSalesforce`
   static Future<Map<String, dynamic>> _insertToSalesforce(String objAPIName, List<Map<String, dynamic>> fieldNameValuePairs, int batchCount) async{
-    
-    for(int i=0; i<fieldNameValuePairs.length; i++){
-      dynamic each = fieldNameValuePairs[i];
-      if(!each.containsKey('attributes')){
-        each['attributes'] = {
-          "type": objAPIName,
-          "referenceId": "ref$i"
-        };
-      }
-    }
     
     Map<String, dynamic> insertResponse = getGenericResponseTemplate(); 
     if(!isLoggedIn()) await loginToSalesforce();
