@@ -4,7 +4,7 @@ import 'package:logger/logger.dart';
 
 class TableWidget extends StatefulWidget {
   final List<List<String>> tableData;
-  final int tabIndex; // Add tabIndex property
+  final int tabIndex;
   final List<String> columnNames;
   final List<double> columnWidths;
 

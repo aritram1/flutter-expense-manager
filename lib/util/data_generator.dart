@@ -1,5 +1,6 @@
 // data_generator.dart
 import 'dart:convert';
+import 'dart:ffi';
 import 'package:intl/intl.dart';
 import 'package:ExpenseManager/util/message_util.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
@@ -184,19 +185,28 @@ class DataGenerator {
     List<Map<String, dynamic>> data = [];
     
     Map<String, dynamic> each = {};
-    each['FinPlan__Amount_Value__c'] = amount;
-    each['FinPlan__Beneficiary__c'] = paidTo;
-    each['FinPlan__Content__c'] = details;
-    each['FinPlan__Received_At__c'] = selectedDate.toString();
-    each['FinPlan__Sender__c'] = 'N/A';
+    each['FinPlan__Amount__c'] = double.parse(amount);
+    each['FinPlan__Beneficiary_Name__c'] = paidTo;
+    
+    each['FinPlan__SMS_Content__c'] = details;
+    each['FinPlan__Created_From__c'] = 'Manual';
+    each['FinPlan__Type__c'] = 'Debit';
+    
 
-    AndroidDeviceInfo androidInfo = await DeviceInfoPlugin().androidInfo;
-    String deviceName = androidInfo.model;
-    each['FinPlan__Device__c'] = deviceName;
+    // To be implemented URGENT 
+    
+    //FinPlan__Payment_Via__c
+
+    // DateTime dateOnly = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+    // each['FinPlan__Transaction_Date__c'] = dateOnly;
+    
+    // AndroidDeviceInfo androidInfo = await DeviceInfoPlugin().androidInfo;
+    // String deviceName = androidInfo.model;
+    // each['FinPlan__Device__c'] = deviceName;
 
     data.add(each);
 
-    Map<String, dynamic> response =  await SalesforceUtil.dmlToSalesforce(opType: 'insert',objAPIName: 'FinPlan__SMS_Message__c', fieldNameValuePairs: data);
+    Map<String, dynamic> response =  await SalesforceUtil.dmlToSalesforce(opType: 'insert',objAPIName: 'FinPlan__Bank_Transaction__c', fieldNameValuePairs: data);
     return response;
     
   }
