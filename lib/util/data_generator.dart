@@ -1,5 +1,6 @@
 // data_generator.dart
 import 'dart:convert';
+import 'dart:ffi';
 import 'package:ExpenseManager/util/message_util.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:logger/logger.dart';
@@ -17,7 +18,7 @@ class DataGenerator {
   static Logger log = Logger();
 
   static Future<List<List<String>>> generateTab1Data() async {
-    List<List<String>> generatedData = [];
+    List<List<String>> generatedDataTab1 = [];
 
     Map<String, dynamic> response = await SalesforceUtil.queryFromSalesforce(
       objAPIName: 'FinPlan__SMS_Message__c', 
@@ -43,17 +44,21 @@ class DataGenerator {
         if(records != null && records.isNotEmpty){
           for (var record in records) {
             Map<String, dynamic> recordMap = Map.castFrom(record);
+            
             String id = recordMap['Id'];
             log.d('1 -Id $id');
+            
             String beneficiary = recordMap['FinPlan__Beneficiary__c'];
             log.d('2 -beneficiary $beneficiary');
+            
             String amount = (recordMap['FinPlan__Formula_Amount__c'] != null) ? recordMap['FinPlan__Formula_Amount__c'].toString() : 'N/A' ;
             log.d('3 -amount $amount');
+            
             String date = recordMap['FinPlan__Transaction_Date__c'].substring(5,10);
             log.d('3 -date $date');
             String formattedDate = '${date.split('-')[1]}/${date.split('-')[0]}';
             
-            generatedData.add([beneficiary, amount, formattedDate, id]);
+            generatedDataTab1.add([beneficiary, amount, formattedDate, id]);
           }
         }
       }
@@ -61,8 +66,8 @@ class DataGenerator {
         log.d('Error Inside generateTab1Data : $error');
       }
     }
-    log.d('Inside generateTab1Data=>$generatedData');
-    return generatedData;
+    log.d('Inside generateTab1Data=>$generatedDataTab1');
+    return generatedDataTab1;
   }
   
   static Future<List<List<String>>> generateTab2Data(DateTime startDate, DateTime endDate) async {
@@ -71,7 +76,7 @@ class DataGenerator {
     log.d('Inside generate tab2 data, endDate date is => $endDate');
     String formattedStartDate = startDate.toString().split(' ')[0];
     String formattedEndDate = endDate.toString().split(' ')[0];
-    List<List<String>> generatedData = [];
+    List<List<String>> generatedDataTab2 = [];
     log.d('here 2');
     Map<String, dynamic> response = await SalesforceUtil.queryFromSalesforce(
       objAPIName: 'FinPlan__Bank_Transaction__c', 
@@ -103,8 +108,9 @@ class DataGenerator {
             String rawDate = recordMap['FinPlan__Transaction_Date__c']; //.substring(5,10);
             String formattedDate = '${rawDate.split('-')[2]}/${rawDate.split('-')[1]}';
 
-            log.d('beneficiary $beneficiary || amount $amount || rawDate $rawDate || id $id');            
-            generatedData.add([beneficiary, amount, formattedDate, id]);
+            log.d('beneficiary $beneficiary || amount $amount || rawDate $rawDate || id $id');
+
+            generatedDataTab2.add([beneficiary, amount, formattedDate, id]);
           }
         }
       }
@@ -112,20 +118,65 @@ class DataGenerator {
         log.d('Error inside generateTab2Data : $error');
       }
     }
-    log.d('Inside generateTab2Data=>$generatedData');
-    return generatedData;
+    log.d('Inside generateTab2Data=>$generatedDataTab2');
+    return generatedDataTab2;
   } 
  
-  static List<List<String>> generateTab3Data() {
-    // Replace this with your data generation logic
-    List<List<String>> data = List.generate(100, (index) {
-      return [
-        'T3 Row ${index + 1}',
-        'Data ${(index + 1) * 2}',
-        'Info ${(index + 1) * 3}',
-      ];  
-    });
-    return data;
+  static Future<List<List<String>>> generateTab3Data() async{
+    List<List<String>> generatedDataTab3 = [];
+
+    Map<String, dynamic> response = await SalesforceUtil.queryFromSalesforce(
+      objAPIName: 'FinPlan__Bank_Account__c',
+      fieldList: ['Id', 'FinPlan__Account_Code__c', 'Name', 'FinPlan__Last_Balance__c', 'FinPlan__CC_Available_Limit__c', 'FinPlan__CC_Max_Limit__c', 'LastModifiedDate'], 
+      // whereClause: 'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true AND FinPlan__Formula_Amount__c > 0',
+      orderByClause: 'LastModifiedDate desc',
+      //count : 120
+      );
+    dynamic error = response['error'];
+    dynamic data = response['data'];
+
+    log.d('Error inside generateTab1Data : ${error.toString()}');
+    log.d('Datainside generateTab1Data: ${data.toString()}');
+    
+    if(error != null && error.isNotEmpty){
+      log.d('Error occurred while querying inside generateTab1Data : ${response['error']}');
+      //return null;
+    }
+    else if (data != null && data.isNotEmpty) {
+      try{
+        log.d('here 0');
+        dynamic records = data['data'];
+        if(records != null && records.isNotEmpty){
+          for (var record in records) {
+            Map<String, dynamic> recordMap = Map.castFrom(record);
+            
+            String id = recordMap['Id'];            
+            String accountCode = recordMap['FinPlan__Account_Code__c'] ?? 'N/Av';  
+
+            String amount = accountCode.contains('-CC') 
+              ? recordMap['FinPlan__CC_Available_Limit__c'].toString() 
+              : recordMap['FinPlan__Last_Balance__c'].toString();
+
+            String time = '';
+            String lastmodifiedDate = recordMap['LastModifiedDate'].toString(); // example 2023-12-12T19:56:13.000+0000
+            if(lastmodifiedDate.contains('T')){
+              String hhmmss = lastmodifiedDate.split('T')[1].split('.')[0];
+              String date = lastmodifiedDate.split('T')[0];
+              time = hhmmss;
+            }
+            
+            log.d('accountCode $accountCode || amount $amount || time $time || id $id');
+
+            generatedDataTab3.add([accountCode, amount, time, id]);
+          }
+        }
+      }
+      catch(error){
+        log.d('Error Inside generateTab3Data : $error');
+      }
+    }
+    log.d('Inside generateTab3Data=>$generatedDataTab3');
+    return generatedDataTab3;
   }
 
   static Future<Map<String, dynamic>> addExpenseToSalesforce(String amount, String paidTo, String details, DateTime selectedDate) async {
@@ -150,6 +201,7 @@ class DataGenerator {
     
   }
 
+  // Custom REST Endpoints
   static Future<Map<String, dynamic>> deleteAllMessagesAndTransactions() async {
     String response = await SalesforceUtil.callSalesforceAPI(
         endpointUrl: customEndpointForDeleteAllMessagesAndTransactions,

@@ -119,7 +119,7 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
         children: const [
           TabData(tabIndex: 0, title: 'Transactions'),
           TabData(tabIndex: 1, title: 'View Expenses'),
-          TabData(tabIndex: 2, title: 'Investments'),
+          TabData(tabIndex: 2, title: 'Bank Accounts'),
         ],
       ),
       bottomNavigationBar: TabBar(
@@ -127,7 +127,7 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
         tabs: const [
           Tab(text: 'Transactions'),
           Tab(text: 'View Expenses'),
-          Tab(text: 'Investments'),
+          Tab(text: 'Bank Accounts'),
         ],
       ),
     );
