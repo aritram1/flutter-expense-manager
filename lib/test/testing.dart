@@ -2,15 +2,14 @@
 
 import 'dart:convert';
 
-import 'salesforce_util.dart';
-
+import '../util/salesforce_util.dart';
 
 main() async{
 
-  String customEndpointForSyncMessages = '/services/apexrest/FinPlan/api/sms/sync/*';
-  String customEndpointForApproveMessages = '/services/apexrest/FinPlan/api/sms/approve/*';
-  String customEndpointForDeleteMessages = '/services/apexrest/FinPlan/api/sms/delete/*';
-  String customEndpointForDeleteTransactions = '/services/apexrest/FinPlan/api/transactions/delete/*';
+  // String customEndpointForSyncMessages = '/services/apexrest/FinPlan/api/sms/sync/*';
+  // String customEndpointForApproveMessages = '/services/apexrest/FinPlan/api/sms/approve/*';
+  // String customEndpointForDeleteMessages = '/services/apexrest/FinPlan/api/sms/delete/*';
+  // String customEndpointForDeleteTransactions = '/services/apexrest/FinPlan/api/transactions/delete/*';
 
   // // ------------------------------------------------------------------------------------------------ // 
   // // Login
@@ -20,21 +19,21 @@ main() async{
   
   // // ------------------------------------------------------------------------------------------------ // 
   // // Insert
-  List<Map<String, String>> toBeInsertedRecords = [];
-  for(int i=0;i<30;i++){
-    Map<String, String> each = {};
-    each['ref'] = 'Ref$i';
-    each['name'] = 'Account-$i';
-    each['phone'] = '123456$i';
-    toBeInsertedRecords.add(each);
-  }
-  dynamic insertResponse = await SalesforceUtil.dmlToSalesforce(
-      opType: 'insert', 
-      objAPIName: 'Account', 
-      fieldNameValuePairs : toBeInsertedRecords,
-      batchSize: 200);
+  // List<Map<String, String>> toBeInsertedRecords = [];
+  // for(int i=0;i<30;i++){
+  //   Map<String, String> each = {};
+  //   each['ref'] = 'Ref$i';
+  //   each['name'] = 'Account-$i';
+  //   each['phone'] = '123456$i';
+  //   toBeInsertedRecords.add(each);
+  // }
+  // dynamic insertResponse = await SalesforceUtil.dmlToSalesforce(
+  //     opType: 'insert', 
+  //     objAPIName: 'Account', 
+  //     fieldNameValuePairs : toBeInsertedRecords,
+  //     batchSize: 200);
   
-  print('Insert response from testing.dart =>${jsonEncode(insertResponse)}');
+  // print('Insert response from testing.dart =>${jsonEncode(insertResponse)}');
 
   // // ------------------------------------------------------------------------------------------------ // 
   // // update

@@ -14,7 +14,7 @@ class TableWidget extends StatefulWidget {
 class _TableWidgetState extends State<TableWidget> {
   late List<bool> selectedRows;
   final String _commaOperationName = 'Approve';
-  List<String> COLUMN_NAMES = ['Paid To', 'Amount', 'Date'];
+  final List<String> COLUMN_NAMES = ['Paid To', 'Amount', 'Date'];
   static final Logger log = Logger();
 
   int _sortColumnIndex = 0;

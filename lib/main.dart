@@ -2,6 +2,8 @@
 
 // ignore_for_file: library_private_types_in_public_api, use_key_in_widget_constructors
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'util/data_generator.dart';
@@ -67,8 +69,8 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
               );
 
               // Perform the sync operation
-              String result = await handleSMSDelete();
-              log.d('Handle Delete Message Result => $result');
+              String result = await handleSMSAndTransactionsDelete();
+              // log.d('Handle handleSMSAndTransactionsDelete Result => $result');
 
               // Close the loading dialog
               Navigator.of(context).pop();
@@ -102,7 +104,7 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
 
               // Perform the sync operation
               String result = await handleSMSSync();
-              log.d('Handle Sync Message Result => $result');
+              // log.d('Handle Sync Message Result => $result');
 
               // Close the loading dialog
               Navigator.of(context).pop();
@@ -135,15 +137,15 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
   Future<String> handleSMSSync() async {
     log.d('Syncing SMS data...');
     Map<String, dynamic> result = await DataGenerator.syncMessages();
-    log.d('Syncing SMS data completed. Response : $result');
+    log.d('Syncing SMS data completed.');// Response : $result');
     return result.toString();
   }
 
   // Method to help mass deletion of SMS messages by calling the SF API `/api/sms/delete/*`
-  Future<String> handleSMSDelete() async {
+  Future<String> handleSMSAndTransactionsDelete() async {
     log.d('Deleting SMS data...');
-    Map<String, dynamic> response = await DataGenerator.deleteAllMessages('FinPlan__SMS_Message__c');
-    log.d('Deleting completed. Delete response is -> $response'); 
+    Map<String, dynamic> response = await DataGenerator.deleteAllMessagesAndTransactions();
+    log.d('Deleting completed');//. encoded response is -> ${jsonEncode(response)}'); 
     return response.toString();
   }
 }

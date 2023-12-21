@@ -12,6 +12,7 @@ class DataGenerator {
   static String customEndpointForApproveMessages    = '/services/apexrest/FinPlan/api/sms/approve/*';
   static String customEndpointForDeleteMessages     = '/services/apexrest/FinPlan/api/sms/delete/*';
   static String customEndpointForDeleteTransactions = '/services/apexrest/FinPlan/api/transactions/delete/*';
+  static String customEndpointForDeleteAllMessagesAndTransactions = '/services/apexrest/FinPlan/api/delete/*';
 
   static Logger log = Logger();
 
@@ -149,10 +150,12 @@ class DataGenerator {
     
   }
 
-  static Future<Map<String, dynamic>> deleteAllMessages(String objAPIName) async {
-    Map<String, dynamic> response = {};
-    response = await SalesforceUtil.dmlToSalesforce(opType: 'delete', objAPIName: 'FinPlan__SMS_Message__c');
-    return response;
+  static Future<Map<String, dynamic>> deleteAllMessagesAndTransactions() async {
+    String response = await SalesforceUtil.callSalesforceAPI(
+        endpointUrl: customEndpointForDeleteAllMessagesAndTransactions,
+        httpMethod: 'POST'
+    );
+    return jsonDecode(response);
   }
 
   static Future<Map<String, dynamic>> approveSelectedMessages({required String objAPIName, required List<String> recordIds}) async {
