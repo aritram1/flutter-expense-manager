@@ -1,11 +1,20 @@
-import 'package:ExpenseManager/util/data_generator.dart';
 import 'package:flutter/material.dart';
+import 'package:ExpenseManager/util/data_generator.dart';
 import 'package:logger/logger.dart';
+
 class TableWidget extends StatefulWidget {
   final List<List<String>> tableData;
   final int tabIndex; // Add tabIndex property
+  final List<String> columnNames;
+  final List<double> columnWidths;
 
-  const TableWidget({Key? key, required this.tableData, required this.tabIndex}) : super(key: key);
+  const TableWidget({
+    Key? key,
+    required this.tableData,
+    required this.tabIndex,
+    required this.columnNames,
+    required this.columnWidths,
+  }) : super(key: key);
 
   @override
   _TableWidgetState createState() => _TableWidgetState();
@@ -13,8 +22,6 @@ class TableWidget extends StatefulWidget {
 
 class _TableWidgetState extends State<TableWidget> {
   late List<bool> selectedRows;
-  final String _commaOperationName = 'Approve';
-  final List<String> COLUMN_NAMES = ['Paid To', 'Amount', 'Date'];
   static final Logger log = Logger();
 
   int _sortColumnIndex = 0;
@@ -43,13 +50,13 @@ class _TableWidgetState extends State<TableWidget> {
                         columnSpacing: 1.0,
                         headingRowHeight: 40.0,
                         sortAscending: _sortAscending,
-                        columns: [
-                          DataColumn(
+                        columns: List.generate(widget.columnNames.length, (index) {
+                          return DataColumn(
                             label: SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.35,
+                              width: widget.columnWidths[index],
                               child: Padding(
                                 padding: const EdgeInsets.all(1.0),
-                                child: Text(COLUMN_NAMES[0]),
+                                child: Text(widget.columnNames[index]),
                               ),
                             ),
                             onSort: (columnIndex, ascending) {
@@ -57,44 +64,11 @@ class _TableWidgetState extends State<TableWidget> {
                               setState(() {});
                             },
                             numeric: false,
-                          ),
-                          DataColumn(
-                            label: SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.15,
-                              child: Padding(
-                                padding: const EdgeInsets.all(1.0),
-                                child: Text(COLUMN_NAMES[1]),
-                              ),
-                            ),
-                            onSort: (columnIndex, ascending) {
-                              _sortColumn(columnIndex, ascending);
-                              setState(() {});
-                            },
-                            numeric: false,
-                          ),
-                          DataColumn(
-                            label: SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.15,
-                              child: Padding(
-                                padding: const EdgeInsets.all(1.0),
-                                child: Text(COLUMN_NAMES[2]),
-                              ),
-                            ),
-                            onSort: (columnIndex, ascending) {
-                              _sortColumn(columnIndex, ascending);
-                              setState(() {});
-                            },
-                            numeric: true,
-                          ),
-                        ],
+                          );
+                        }),
                         rows: widget.tableData.asMap().entries.map((entry) {
                           final rowIndex = entry.key;
                           final row = entry.value;
-
-                          String col1 = row[0].replaceAll('VPA', '').replaceAll('paytm', '');
-                          col1 = col1.length <= 15 ? col1 : col1.substring(0, 15);
-                          final String col2 = row[1];
-                          final String col3 = row[2];
 
                           return DataRow(
                             selected: selectedRows[rowIndex],
@@ -105,47 +79,21 @@ class _TableWidgetState extends State<TableWidget> {
                                 });
                               }
                             },
-                            cells: [
-                              DataCell(
+                            cells: List.generate(widget.columnNames.length, (index) {
+                              return DataCell(
                                 SizedBox(
-                                  width: MediaQuery.of(context).size.width * 0.35,
+                                  width: widget.columnWidths[index],
                                   child: Padding(
                                     padding: const EdgeInsets.all(1.0),
                                     child: Text(
-                                      col1,
+                                      row[index],
                                       overflow: TextOverflow.clip,
                                       maxLines: 2,
                                     ),
                                   ),
                                 ),
-                              ),
-                              DataCell(
-                                SizedBox(
-                                  width: MediaQuery.of(context).size.width * 0.15,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(1.0),
-                                    child: Text(
-                                      col2,
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 2,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              DataCell(
-                                SizedBox(
-                                  width: MediaQuery.of(context).size.width * 0.15,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(1.0),
-                                    child: Text(
-                                      col3,
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 2,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                              );
+                            }),
                           );
                         }).toList(),
                       ),
@@ -157,9 +105,7 @@ class _TableWidgetState extends State<TableWidget> {
                 onPressed: () async {
                   await handleApproveSMS();
                 },
-                child: isApproving
-                    ? const CircularProgressIndicator() 
-                    : Text(_commaOperationName),
+                child: isApproving ? const CircularProgressIndicator() : Text('Approve'),
               ),
             ),
           ],
@@ -167,7 +113,7 @@ class _TableWidgetState extends State<TableWidget> {
         if (isApproving)
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.3), // Colors.blue.withOpacity(0.5),
+              color: Colors.black.withOpacity(0.3),
               child: const Center(
                 child: CircularProgressIndicator(),
               ),
@@ -175,11 +121,6 @@ class _TableWidgetState extends State<TableWidget> {
           ),
       ],
     );
-  }
-
-  // Method to determine whether to show the approved button or not
-  bool showApproveButton() {
-    return selectedRows.any((selected) => selected) && widget.tabIndex == 0;
   }
 
   Widget _buildEmptyTableMessage() {
@@ -232,6 +173,11 @@ class _TableWidgetState extends State<TableWidget> {
     });
   }
 
+  // Method to determine whether to show the approved button or not
+  bool showApproveButton() {
+    return selectedRows.any((selected) => selected) && widget.tabIndex == 0;
+  }
+
   Future<void> handleApproveSMS() async {
     // Set the flag to true when starting the approval process
     setState(() {
@@ -261,4 +207,6 @@ class _TableWidgetState extends State<TableWidget> {
       }
     });
   }
+
+
 }

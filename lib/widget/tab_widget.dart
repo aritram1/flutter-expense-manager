@@ -26,11 +26,7 @@ class _TabDataState extends State<TabData> {
   @override
   void initState() {
     super.initState();
-    _fetchData();
-  }
-
-  Future<void> _fetchData() async {
-    await fetchData();
+    fetchData();
   }
 
   Future<List<List<String>>> fetchData() async {
@@ -63,36 +59,17 @@ class _TabDataState extends State<TabData> {
             return Container();
         }
       }(),
-      body: widget.tabIndex == 1
-          ? Column(
-              children: [
-                DatepickerPanel(
-                  key: UniqueKey(),
-                  onDateRangeSelected: handleDateRangeSelection,
-                  startDate: selectedStartDate,
-                  endDate: selectedEndDate,
-                ),
-                Expanded(
-                  child: FutureBuilder<List<List<String>>>(
-                    future: fetchData(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      } else if (snapshot.hasError) {
-                        return Center(
-                          child: Text('Error loading data in the tab ${snapshot.error.toString()}'),
-                        );
-                      } else {
-                        return TableWidget(tableData: snapshot.data ?? [], tabIndex: widget.tabIndex);
-                      }
-                    },
-                  ),
-                ),
-              ],
-            )
-          : FutureBuilder<List<List<String>>>(
+      body: Column(
+        children: [
+          if (widget.tabIndex == 1)
+            DatepickerPanel(
+              key: UniqueKey(),
+              onDateRangeSelected: handleDateRangeSelection,
+              startDate: selectedStartDate,
+              endDate: selectedEndDate,
+            ),
+          Expanded(
+            child: FutureBuilder<List<List<String>>>(
               future: fetchData(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -100,15 +77,49 @@ class _TabDataState extends State<TabData> {
                     child: CircularProgressIndicator(),
                   );
                 } else if (snapshot.hasError) {
-                  return const Center(
-                    child: Text('Error loading data'),
+                  return Center(
+                    child: Text('Error loading data in the tab ${snapshot.error.toString()}'),
                   );
                 } else {
-                  return TableWidget(tableData: snapshot.data ?? [], tabIndex: widget.tabIndex);
+                  return TableWidget(
+                    tableData: snapshot.data ?? [],
+                    tabIndex: widget.tabIndex,
+                    columnNames: getTableColumnNames(widget.tabIndex),
+                    columnWidths: getTableColumnWidths(widget.tabIndex),
+                  );
                 }
               },
             ),
+          ),
+        ],
+      ),
     );
+  }
+
+  List<String> getTableColumnNames(int tabIndex) {
+    switch (tabIndex) {
+      case 0:
+        return ['Paid To', 'Amount', 'Date'];
+      case 1:
+        return ['Paid To', 'Amount', 'Date']; // Add your column names for tab 1
+      case 2:
+        return ['Column1', 'Column2', 'Column3']; // Add your column names for tab 2
+      default:
+        return [];
+    }
+  }
+
+  List<double> getTableColumnWidths(int tabIndex) {
+    switch (tabIndex) {
+      case 0:
+        return [MediaQuery.of(context).size.width * 0.35, MediaQuery.of(context).size.width * 0.15, MediaQuery.of(context).size.width * 0.15];
+      case 1:
+        return [MediaQuery.of(context).size.width * 0.35, MediaQuery.of(context).size.width * 0.15, MediaQuery.of(context).size.width * 0.15];
+      case 2:
+        return [MediaQuery.of(context).size.width * 0.2, MediaQuery.of(context).size.width * 0.3, MediaQuery.of(context).size.width * 0.25];
+      default:
+        return [];
+    }
   }
 
   Future<void> recordNewExpenseDialogue() async {
@@ -118,7 +129,7 @@ class _TabDataState extends State<TabData> {
         return AddNewExpenseDialog(
           onSave: (amount, paidTo, details, txnDate) {
             log.d('Amount: $amount Paid To: $paidTo Details: $details Start Date: $selectedStartDate End Date: $selectedEndDate');
-            _fetchData(); // Refresh the table data
+            fetchData(); // Refresh the table data
           },
         );
       },
@@ -130,6 +141,6 @@ class _TabDataState extends State<TabData> {
       selectedStartDate = startDate;
       selectedEndDate = endDate;
     });
-    await _fetchData();
+    await fetchData();
   }
 }

@@ -1,6 +1,6 @@
 // data_generator.dart
 import 'dart:convert';
-import 'dart:ffi';
+import 'package:intl/intl.dart';
 import 'package:ExpenseManager/util/message_util.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:logger/logger.dart';
@@ -154,9 +154,9 @@ class DataGenerator {
             String accountCode = recordMap['FinPlan__Account_Code__c'] ?? 'N/Av';  
 
             String amount = accountCode.contains('-CC') 
-              ? recordMap['FinPlan__CC_Available_Limit__c'].toString() 
-              : recordMap['FinPlan__Last_Balance__c'].toString();
-
+              ? NumberFormat.currency(locale: 'en_IN').format(recordMap['FinPlan__CC_Available_Limit__c'] ?? 0)
+              : NumberFormat.currency(locale: 'en_IN').format(recordMap['FinPlan__Last_Balance__c'] ?? 0);
+            
             String time = '';
             String lastmodifiedDate = recordMap['LastModifiedDate'].toString(); // example 2023-12-12T19:56:13.000+0000
             if(lastmodifiedDate.contains('T')){
