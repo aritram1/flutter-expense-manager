@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'util/data_generator.dart';
 import './widget/tab_widget.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+void main() async {
+  await dotenv.load(fileName: ".env"); 
   runApp(MyApp());
 }
 
@@ -30,6 +32,7 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
   final String title = 'Expense Manager';
   final Logger log = Logger();
   String messageSyncStatus = 'Default';
+  static bool debug = false;
 
   @override
   void initState() {
@@ -69,7 +72,7 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
 
               // Perform the sync operation
               String result = await handleSMSAndTransactionsDelete();
-              // log.d('Handle handleSMSAndTransactionsDelete Result => $result');
+              if(debug) log.d('Handle handleSMSAndTransactionsDelete Result => $result');
 
               // Close the loading dialog
               Navigator.of(context).pop();
@@ -103,7 +106,7 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
 
               // Perform the sync operation
               String result = await handleSMSSync();
-              // log.d('Handle Sync Message Result => $result');
+              if(debug) log.d('Handle Sync Message Result => $result');
 
               // Close the loading dialog
               Navigator.of(context).pop();

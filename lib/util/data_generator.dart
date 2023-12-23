@@ -1,5 +1,6 @@
 // data_generator.dart
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
 import 'package:ExpenseManager/util/message_util.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
@@ -7,6 +8,8 @@ import 'package:logger/logger.dart';
 import 'salesforce_util.dart';
 import 'package:device_info/device_info.dart';
 class DataGenerator {
+
+  static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
 
   static String customEndpointForSyncMessages       = '/services/apexrest/FinPlan/api/sms/sync/*';
   static String customEndpointForApproveMessages    = '/services/apexrest/FinPlan/api/sms/approve/*';
@@ -29,32 +32,32 @@ class DataGenerator {
     dynamic error = response['error'];
     dynamic data = response['data'];
 
-    // log.d('Error inside generateTab1Data : ${error.toString()}');
-    // log.d('Datainside generateTab1Data: ${data.toString()}');
+    if(debug) log.d('Error inside generateTab1Data : ${error.toString()}');
+    if(debug) log.d('Datainside generateTab1Data: ${data.toString()}');
     
     if(error != null && error.isNotEmpty){
-      // log.d('Error occurred while querying inside generateTab1Data : ${response['error']}');
+      if(debug) log.d('Error occurred while querying inside generateTab1Data : ${response['error']}');
       //return null;
     }
     else if (data != null && data.isNotEmpty) {
       try{
-        // log.d('here 0');
+        if(debug) log.d('here 0');
         dynamic records = data['data'];
         if(records != null && records.isNotEmpty){
           for (var record in records) {
             Map<String, dynamic> recordMap = Map.castFrom(record);
             
             String id = recordMap['Id'];
-            // log.d('1 -Id $id');
+            if(debug) log.d('1 -Id $id');
             
             String beneficiary = recordMap['FinPlan__Beneficiary__c'];
-            // log.d('2 -beneficiary $beneficiary');
+            if(debug) log.d('2 -beneficiary $beneficiary');
             
             String amount = (recordMap['FinPlan__Formula_Amount__c'] != null) ? recordMap['FinPlan__Formula_Amount__c'].toString() : 'N/A' ;
-            // log.d('3 -amount $amount');
+            if(debug) log.d('3 -amount $amount');
             
             String date = recordMap['FinPlan__Transaction_Date__c'].substring(5,10);
-            // log.d('3 -date $date');
+            if(debug) log.d('3 -date $date');
             String formattedDate = '${date.split('-')[1]}/${date.split('-')[0]}';
             
             generatedDataTab1.add([beneficiary, amount, formattedDate, id]);
@@ -62,21 +65,21 @@ class DataGenerator {
         }
       }
       catch(error){
-        // log.d('Error Inside generateTab1Data : $error');
+        if(debug) log.d('Error Inside generateTab1Data : $error');
       }
     }
-    // log.d('Inside generateTab1Data=>$generatedDataTab1');
+    if(debug) log.d('Inside generateTab1Data=>$generatedDataTab1');
     return generatedDataTab1;
   }
   
   static Future<List<List<String>>> generateTab2Data(DateTime startDate, DateTime endDate) async {
-    // log.d('here 1');
-    // log.d('Inside generate tab2 data, startDate date is => $startDate');
-    // log.d('Inside generate tab2 data, endDate date is => $endDate');
+    if(debug) log.d('here 1');
+    if(debug) log.d('Inside generate tab2 data, startDate date is => $startDate');
+    if(debug) log.d('Inside generate tab2 data, endDate date is => $endDate');
     String formattedStartDate = startDate.toString().split(' ')[0];
     String formattedEndDate = endDate.toString().split(' ')[0];
     List<List<String>> generatedDataTab2 = [];
-    // log.d('here 2');
+    if(debug) log.d('here 2');
     Map<String, dynamic> response = await SalesforceUtil.queryFromSalesforce(
       objAPIName: 'FinPlan__Bank_Transaction__c', 
       fieldList: ['Id', 'FinPlan__Beneficiary_Name__c','FinPlan__Transaction_Date__c', 'FinPlan__Amount__c','FinPlan__Type__c'],
@@ -84,15 +87,15 @@ class DataGenerator {
       orderByClause: 'FinPlan__Transaction_Date__c desc',
       //count : 120
     );
-    // log.d('here 3');
+    if(debug) log.d('here 3');
     dynamic error = response['error'];
     dynamic data = response['data'];
 
-    // log.d('Error: ${error.toString()}');
-    // log.d('Data inside : ${data.toString()}');
-    // log.d('here 4');
+    if(debug) log.d('Error: ${error.toString()}');
+    if(debug) log.d('Data inside : ${data.toString()}');
+    if(debug) log.d('here 4');
     if(error != null && error.isNotEmpty){
-      // log.d('Error occurred while querying inside generateTab2Data : ${response['error']}');
+      if(debug) log.d('Error occurred while querying inside generateTab2Data : ${response['error']}');
       //return null;
     }
     else if (data != null && data.isNotEmpty) {
@@ -107,17 +110,17 @@ class DataGenerator {
             String rawDate = recordMap['FinPlan__Transaction_Date__c']; //.substring(5,10);
             String formattedDate = '${rawDate.split('-')[2]}/${rawDate.split('-')[1]}';
 
-            // log.d('beneficiary $beneficiary || amount $amount || rawDate $rawDate || id $id');
+            if(debug) log.d('beneficiary $beneficiary || amount $amount || rawDate $rawDate || id $id');
 
             generatedDataTab2.add([beneficiary, amount, formattedDate, id]);
           }
         }
       }
       catch(error){
-        // log.d('Error inside generateTab2Data : $error');
+        if(debug) log.d('Error inside generateTab2Data : $error');
       }
     }
-    // log.d('Inside generateTab2Data=>$generatedDataTab2');
+    if(debug) log.d('Inside generateTab2Data=>$generatedDataTab2');
     return generatedDataTab2;
   } 
  
@@ -134,16 +137,16 @@ class DataGenerator {
     dynamic error = response['error'];
     dynamic data = response['data'];
 
-    // log.d('Error inside generateTab1Data : ${error.toString()}');
-    // log.d('Datainside generateTab1Data: ${data.toString()}');
+    if(debug) log.d('Error inside generateTab1Data : ${error.toString()}');
+    if(debug) log.d('Datainside generateTab1Data: ${data.toString()}');
     
     if(error != null && error.isNotEmpty){
-      // log.d('Error occurred while querying inside generateTab1Data : ${response['error']}');
+      if(debug) log.d('Error occurred while querying inside generateTab1Data : ${response['error']}');
       //return null;
     }
     else if (data != null && data.isNotEmpty) {
       try{
-        // log.d('here 0');
+        if(debug) log.d('here 0');
         dynamic records = data['data'];
         if(records != null && records.isNotEmpty){
           for (var record in records) {
@@ -165,17 +168,17 @@ class DataGenerator {
               formattedDateTime = '${hhmmss[0]}:${hhmmss[1]}:${hhmmss[2]}';
             }
             
-            // log.d('accountCode $accountCode || amount $amount || formattedDateTime $formattedDateTime || id $id');
+            if(debug) log.d('accountCode $accountCode || amount $amount || formattedDateTime $formattedDateTime || id $id');
 
             generatedDataTab3.add([accountCode, amount, formattedDateTime, id]);
           }
         }
       }
       catch(error){
-        // log.d('Error Inside generateTab3Data : $error');
+        if(debug) log.d('Error Inside generateTab3Data : $error');
       }
     }
-    // log.d('Inside generateTab3Data=>$generatedDataTab3');
+    if(debug) log.d('Inside generateTab3Data=>$generatedDataTab3');
     return generatedDataTab3;
   }
 
@@ -236,20 +239,22 @@ class DataGenerator {
 
   static Future<Map<String, dynamic>> syncMessages() async{
     
-    List<SmsMessage> messages = await MessageUtil.getMessages();//count : 200); // Change this while debugging
+    final int maxmMessageCount = int.parse(dotenv.env['MAXM_MESSAGE_COUNT'] ?? '0');
+
+    List<SmsMessage> messages = await MessageUtil.getMessages(count : maxmMessageCount);
     List<Map<String, dynamic>> processedMessages = await MessageUtil.convert(messages);
     
     // TB Implemented
     // Map<String, dynamic> transactionsDeleteResponse = await SalesforceUtil.callSalesforceAPI(httpMethod: 'DELETE', endpointUrl: customEndpointForDeleteTransactions, body: {});
-    // // log.d('transactionsDeleteResponse response IS->$transactionsDeleteResponse');
+    // if(debug) log.d('transactionsDeleteResponse response IS->$transactionsDeleteResponse');
     
     Map<String, dynamic> response = await SalesforceUtil.dmlToSalesforce(
         opType: 'insert',
         objAPIName : 'FinPlan__SMS_Message__c', 
         fieldNameValuePairs : processedMessages);
 
-    // log.d('SMS Created response Data => ${response['data'].toString()}');
-    // log.d('SMS Created response Errors => ${response['errors'].toString()}');
+    if(debug) log.d('SMS Created response Data => ${response['data'].toString()}');
+    if(debug) log.d('SMS Created response Errors => ${response['errors'].toString()}');
 
     return response;
   }

@@ -8,10 +8,10 @@ import 'package:device_info/device_info.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class MessageUtil {
+
+  static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
   
   static Logger log = Logger();
-
-  // static const int MAXM_MESSAGE_COUNT = 2000;
 
   ///////////////////////////////Get SMS Messages//////////////////////////////////////
   static Future<List<SmsMessage>> getMessages({List<SmsQueryKind>? kinds, String? sender, int? count}) async {
@@ -38,7 +38,7 @@ class MessageUtil {
         messages = await SmsQuery().querySms(
           kinds: smsKinds, // SmsQueryKind.inbox ,SmsQueryKind.sent, SmsMessageKind.draft
           address: sender, // +1234567890
-          // count: MAXM_MESSAGE_COUNT,
+          count: 300, //default value
         );
       }
       
@@ -46,7 +46,7 @@ class MessageUtil {
     else {
       await Permission.sms.request();
     }
-    // log.d('Inbox message count : ${messages.length}');
+    if(debug) log.d('Inbox message count : ${messages.length}');
     return sort(messages);
   }
 
