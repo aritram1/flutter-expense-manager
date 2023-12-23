@@ -6,6 +6,7 @@ import '../widget/date_picker_panel.dart';
 import '../widget/table_widget.dart';
 import '../widget/add_new_expense.dart';
 import '../util/data_generator.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class TabWidget extends StatefulWidget {
   final int tabIndex;
@@ -49,11 +50,23 @@ class _TabWidgetState extends State<TabWidget> {
       floatingActionButton: () {
         switch (widget.tabIndex) {
           case 1:
-            return FloatingActionButton(
-              onPressed: () {
-                recordNewExpenseDialogue();
-              },
-              child: const Icon(Icons.add),
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FloatingActionButton(
+                  onPressed: ()  {
+                    printTheTable();
+                  },
+                  child: const Icon(Icons.print),
+                ),
+                const SizedBox(height: 16), // Adjust the spacing as needed
+                FloatingActionButton(
+                  onPressed: () {
+                    recordNewExpenseDialogue();
+                  },
+                  child: const Icon(Icons.add),
+                ),
+              ],
             );
           default:
             return Container();
@@ -142,5 +155,11 @@ class _TabWidgetState extends State<TabWidget> {
       selectedEndDate = endDate;
     });
     await fetchData();
+  }
+
+  Future<void> printTheTable() async{
+    bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
+    tableData = await fetchData(); // Refresh the table data
+    if(debug) log.d('Table data is $tableData');
   }
 }

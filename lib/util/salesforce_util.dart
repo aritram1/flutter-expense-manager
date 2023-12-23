@@ -21,6 +21,8 @@ class SalesforceUtil{
   static String compositeUrlForDelete = dotenv.env['compositeUrlForDelete'] ?? '';
   static String queryUrl = dotenv.env['queryUrl'] ?? '';
   static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
+  static bool bigdebug = bool.parse(dotenv.env['bigdebug'] ?? 'false');
+  
 
   static String accessToken = '';
   static String instanceUrl = '';
@@ -179,7 +181,7 @@ class SalesforceUtil{
     if(debug) log.d('epUrl=>' + epUrl);   
     dynamic resp = await _callSalesforceAPI(httpMethod : httpMethod, epUrl : epUrl, body : body);
     
-    if(debug) log.d('resp.body=> ${resp.body}');
+    if(bigdebug) log.d('resp.body=> ${resp.body}');
     
     return resp.body;
   }
@@ -293,7 +295,7 @@ class SalesforceUtil{
       );
       int statusCode = resp.statusCode;
       if(debug) log.d('_insertToSalesforce StatusCode $statusCode');
-      if(debug) log.d('_insertToSalesforce resp.body=> ${jsonEncode(resp.body)}');
+      if(bigdebug) log.d('_insertToSalesforce resp.body=> ${jsonEncode(resp.body)}');
       body = json.decode(resp.body);
       if(debug) log.d('ResponseBody for _insertToSalesforce => ${body.toString()}');
       if(statusCode == 201 && !body['hasErrors']){
@@ -466,7 +468,7 @@ class SalesforceUtil{
       body['records'] = allRecords;
       if(opType == 'update'){
         body['allOrNone'] = 'false';
-      }if(debug) log.d('body=>' + body.toString());
+      }if(bigdebug) log.d('body=>' + body.toString());
     }
     else if(opType == 'delete'){
       //no body element is required for delete
