@@ -2,13 +2,12 @@
 
 // ignore_for_file: library_private_types_in_public_api, use_key_in_widget_constructors
 
-import 'package:flutter/material.dart';
-import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
-import 'widget/tab_data.dart';
-import 'package:logger/logger.dart';
-import 'util/message_util.dart';
-import 'util/salesforce_util.dart';
+import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+import 'util/data_generator.dart';
+import './widget/tab_widget.dart';
 
 void main() {
   runApp(MyApp());
@@ -39,16 +38,6 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
     _tabController = TabController(length: 3, vsync: this);
   }
 
-  void handleSMSSync() async {
-    // Your logic for handling SMS sync goes here
-    log.d('Syncing SMS data...');
-    List<SmsMessage> messages = await MessageUtil.getMessages();
-    List<Map<String, dynamic>> processedMessages = await MessageUtil.convert(messages);
-    String result = await SalesforceUtil.saveToSalesForce('FinPlan__SMS_Message__c', processedMessages);
-    log.d('RESULT IS->$result');
-    // Add your syncing logic here
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,8 +45,70 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
         title: Text(title),
         actions: [
           IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () async {
+              // Show loading dialog
+              showDialog(
+                context: context,
+                barrierDismissible: false, // Prevent dialog dismissal on tap outside
+                builder: (BuildContext dialogContext) {
+                  return const Dialog(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(width: 16.0),
+                          Text("Deleting..."),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+
+              // Perform the sync operation
+              String result = await handleSMSAndTransactionsDelete();
+              // log.d('Handle handleSMSAndTransactionsDelete Result => $result');
+
+              // Close the loading dialog
+              Navigator.of(context).pop();
+            },
+            tooltip: 'Delete All Messages',
+          ),
+          
+          IconButton(
             icon: const Icon(Icons.sync),
-            onPressed: handleSMSSync,
+            onPressed: () async {
+              // Show loading dialog
+              showDialog(
+                context: context,
+                barrierDismissible: false, // Prevent dialog dismissal on tap outside
+                builder: (BuildContext dialogContext) {
+                  return const Dialog(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(width: 16.0),
+                          Text("Syncing..."),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+
+              // Perform the sync operation
+              String result = await handleSMSSync();
+              // log.d('Handle Sync Message Result => $result');
+
+              // Close the loading dialog
+              Navigator.of(context).pop();
+            },
             tooltip: 'Sync from Phone',
           ),
           // Add more action buttons if needed
@@ -65,20 +116,36 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          TabData(tabIndex: 0, title: 'Credit/Debit'),
-          TabData(tabIndex: 1, title: 'Investments'),
-          TabData(tabIndex: 2, title: 'Another Category'),
+        children: const [
+          TabData(tabIndex: 0, title: 'Transactions'),
+          TabData(tabIndex: 1, title: 'View Expenses'),
+          TabData(tabIndex: 2, title: 'Investments'),
         ],
       ),
       bottomNavigationBar: TabBar(
         controller: _tabController,
         tabs: const [
-          Tab(text: 'Credit/Debit'),
+          Tab(text: 'Transactions'),
+          Tab(text: 'View Expenses'),
           Tab(text: 'Investments'),
-          Tab(text: 'Another'),
         ],
       ),
     );
+  }
+
+
+  Future<String> handleSMSSync() async {
+    log.d('Syncing SMS data...');
+    Map<String, dynamic> result = await DataGenerator.syncMessages();
+    log.d('Syncing SMS data completed.');// Response : $result');
+    return result.toString();
+  }
+
+  // Method to help mass deletion of SMS messages by calling the SF API `/api/sms/delete/*`
+  Future<String> handleSMSAndTransactionsDelete() async {
+    log.d('Deleting SMS data...');
+    Map<String, dynamic> response = await DataGenerator.deleteAllMessagesAndTransactions();
+    log.d('Deleting completed');//. encoded response is -> ${jsonEncode(response)}'); 
+    return response.toString();
   }
 }
