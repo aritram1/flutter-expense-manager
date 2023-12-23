@@ -6,7 +6,6 @@ import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:logger/logger.dart';
 import 'salesforce_util.dart';
 import 'package:device_info/device_info.dart';
-
 class DataGenerator {
 
   static String customEndpointForSyncMessages       = '/services/apexrest/FinPlan/api/sms/sync/*';

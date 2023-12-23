@@ -5,6 +5,7 @@ import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:logger/logger.dart';
 import 'package:device_info/device_info.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class MessageUtil {
   
