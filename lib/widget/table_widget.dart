@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ExpenseManager/util/data_generator.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:logger/logger.dart';
 
 class TableWidget extends StatefulWidget {
@@ -24,16 +25,32 @@ class _TableWidgetState extends State<TableWidget> {
   late List<bool> selectedRows;
   static final Logger log = Logger();
 
-  int _sortColumnIndex = 0;
+  int sortColumnIndex = 0;
   bool _sortAscending = true;
+  List<IconData?> _sortIcons = [];
+  final int onLoadDefaultDescendingColumnId = 2; // By default, on load the table will be sorted by col 2 (i.e. date)
+  
+  static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
+  static bool bigdebug = bool.parse(dotenv.env['bigdebug'] ?? 'false');
 
+  String approveButtonName = 'Approve';
   bool isApproving = false; // Flag to track whether the approval process is ongoing
 
   @override
   void initState() {
     super.initState();
     selectedRows = List.generate(widget.tableData.length, (index) => false);
+    _sortIcons = List.generate(widget.columnNames.length, (index) {
+      if (index == 2) {
+        return Icons.arrow_downward; // Set the default sorting icon for the third column
+      } else {
+        return null;
+      }
+    });
+    // Sort the data by the third column (date) in descending order initially
+    _sortColumn(onLoadDefaultDescendingColumnId);
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -54,13 +71,24 @@ class _TableWidgetState extends State<TableWidget> {
                           return DataColumn(
                             label: SizedBox(
                               width: widget.columnWidths[index],
-                              child: Padding(
-                                padding: const EdgeInsets.all(1.0),
-                                child: Text(widget.columnNames[index]),
+                              child: InkWell(
+                                onTap: () {
+                                  _sortColumn(index);
+                                },
+                                child: Row(
+                                  children: [
+                                    Text(widget.columnNames[index]),
+                                    if (_sortIcons[index] != null)
+                                      Icon(
+                                        _sortIcons[index], 
+                                        size: 15.0, // Adjust the size as needed
+                                      ),
+                                  ],
+                                ),
                               ),
                             ),
                             onSort: (columnIndex, ascending) {
-                              _sortColumn(columnIndex, ascending);
+                              _sortColumn(columnIndex);
                               setState(() {});
                             },
                             numeric: false,
@@ -105,7 +133,7 @@ class _TableWidgetState extends State<TableWidget> {
                 onPressed: () async {
                   await handleApproveSMS();
                 },
-                child: isApproving ? const CircularProgressIndicator() : Text('Approve'),
+                child: isApproving ? const CircularProgressIndicator() : Text(approveButtonName),
               ),
             ),
           ],
@@ -134,7 +162,7 @@ class _TableWidgetState extends State<TableWidget> {
           message = 'No transactions are available between the dates';
           break;
         case 2:
-          message = 'Tab 3 : No data found';
+          message = 'No bank accounts are available to show';
           break;
         // Add more cases if needed
         default:
@@ -153,34 +181,73 @@ class _TableWidgetState extends State<TableWidget> {
     }
   }
 
-  void _sortColumn(int columnIndex, bool ascending) {
-    setState(() {
-      _sortColumnIndex = columnIndex;
-      _sortAscending = ascending;
-
-      widget.tableData.sort((a, b) {
-        var aValue = a[columnIndex];
-        var bValue = b[columnIndex];
-
-        if (columnIndex == 1) {
-          return ascending ? int.parse(aValue) - int.parse(bValue) : int.parse(bValue) - int.parse(aValue);
-        } else if (columnIndex == 0) {
-          return ascending ? aValue.compareTo(bValue) : bValue.compareTo(aValue);
+  // The private `_sort` method
+  void _sortColumn(int columnIndex) {
+  setState(() {
+    for (int i = 0; i < _sortIcons.length; i++) {
+      if (i == columnIndex) {
+        if (_sortIcons[i] == Icons.arrow_upward) {
+          _sortIcons[i] = Icons.arrow_downward;
+          _sortAscending = false;
         } else {
-          return 1;
+          _sortIcons[i] = Icons.arrow_upward;
+          _sortAscending = true;
         }
-      });
-    });
-  }
+      } else {
+        _sortIcons[i] = null;
+      }
+    }
 
-  // Method to determine whether to show the approved button or not
+    sortColumnIndex = columnIndex;
+
+    widget.tableData.sort((a, b) {
+
+      // 0th - this column is string - so normal sorting
+      if (columnIndex == 0) {
+        String aName = a[columnIndex];
+        String bName = b[columnIndex];
+        return _sortAscending ? aName.compareTo(bName) : bName.compareTo(aName);
+      }
+      // 1st - this column is numeric - so some transformation is required from local formated currency to double
+      else if (columnIndex == 1) {
+        String aAmountValueString = a[columnIndex].replaceAll(',', '').replaceAll('INR', '').replaceAll(' ', '');
+        String bAmountValueString = b[columnIndex].replaceAll(',', '').replaceAll('INR', '').replaceAll(' ', '');;
+        var aAmountValue = double.parse(aAmountValueString);
+        var bAmountValue = double.parse(bAmountValueString);
+        return _sortAscending ? aAmountValue.compareTo(bAmountValue) : bAmountValue.compareTo(aAmountValue);
+      } 
+      // 2nd - this column is date so additional logic is required
+      else if (columnIndex == 2) {
+        String aDateValue = a[columnIndex];
+        String bDateValue = b[columnIndex];
+        
+        if(bigdebug) log.d('Tabindex is => ${widget.tabIndex}');
+
+        // When its on Messages tab or transactions tab
+        if(widget.tabIndex == 0 || widget.tabIndex == 1){
+          // just switch the DD/MM format to MM/DD format so they can be string sorted
+          aDateValue = '${aDateValue.split('/')[1]}${aDateValue.split('/')[0]}';
+          bDateValue = '${bDateValue.split('/')[1]}${bDateValue.split('/')[0]}';
+          return _sortAscending ? aDateValue.compareTo(bDateValue) : bDateValue.compareTo(aDateValue);
+        }
+        else{// To be implemented for third tab // TBD // Urgent
+          return 1;
+        } 
+      }
+      else {
+        return 1;
+      }
+    });
+  });
+}
+
   bool showApproveButton() {
     return selectedRows.any((selected) => selected) && widget.tabIndex == 0;
   }
 
   Future<void> handleApproveSMS() async {
-    // Set the flag to true when starting the approval process
     setState(() {
+      // Set the flag to true when starting the approval process
       isApproving = true;
     });
 
@@ -192,10 +259,12 @@ class _TableWidgetState extends State<TableWidget> {
       }
     }
 
-    dynamic response = await DataGenerator.approveSelectedMessages(objAPIName :'FinPlan__SMS_Message__c', recordIds : recordIds);
-    log.d('Response for handleApproveSMS ${response.toString()}');
+    dynamic response = await DataGenerator.approveSelectedMessages(objAPIName: 'FinPlan__SMS_Message__c', recordIds: recordIds);
+    
+    if(debug) log.d('Response for handleApproveSMS ${response.toString()}');
 
     setState(() {
+
       // Reset the flag when the approval process is completed
       isApproving = false;
 
@@ -207,6 +276,4 @@ class _TableWidgetState extends State<TableWidget> {
       }
     });
   }
-
-
 }

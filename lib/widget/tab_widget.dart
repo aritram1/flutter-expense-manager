@@ -116,7 +116,7 @@ class _TabWidgetState extends State<TabWidget> {
       case 1:
         return ['Paid To', 'Amount', 'Date']; // Add your column names for tab 1
       case 2:
-        return ['Name', 'Last Balance', 'Date/Time']; // Add your column names for tab 2
+        return ['Name', 'Last Balance', 'Last Updated']; // Add your column names for tab 2
       default:
         return [];
     }
@@ -125,11 +125,11 @@ class _TabWidgetState extends State<TabWidget> {
   List<double> getTableColumnWidths(int tabIndex) {
     switch (tabIndex) {
       case 0:
-        return [MediaQuery.of(context).size.width * 0.35, MediaQuery.of(context).size.width * 0.15, MediaQuery.of(context).size.width * 0.15];
+        return [MediaQuery.of(context).size.width * 0.35, MediaQuery.of(context).size.width * 0.20, MediaQuery.of(context).size.width * 0.15];
       case 1:
-        return [MediaQuery.of(context).size.width * 0.35, MediaQuery.of(context).size.width * 0.15, MediaQuery.of(context).size.width * 0.15];
+        return [MediaQuery.of(context).size.width * 0.35, MediaQuery.of(context).size.width * 0.20, MediaQuery.of(context).size.width * 0.15];
       case 2:
-        return [MediaQuery.of(context).size.width * 0.2, MediaQuery.of(context).size.width * 0.3, MediaQuery.of(context).size.width * 0.25];
+        return [MediaQuery.of(context).size.width * 0.18, MediaQuery.of(context).size.width * 0.28, MediaQuery.of(context).size.width * 0.35];
       default:
         return [];
     }
