@@ -26,9 +26,9 @@ class _TableWidgetState extends State<TableWidget> {
   static final Logger log = Logger();
 
   int sortColumnIndex = 0;
-  bool _sortAscending = true;
+  bool _sortAscending = false;
   List<IconData?> _sortIcons = [];
-  final int onLoadDefaultDescendingColumnId = 2; // By default, on load the table will be sorted by col 2 (i.e. date)
+  int onLoadDefaultDescendingColumnId = 2; // default order declared
   
   static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
   static bool bigdebug = bool.parse(dotenv.env['bigdebug'] ?? 'false');
@@ -38,12 +38,23 @@ class _TableWidgetState extends State<TableWidget> {
 
   @override
   void initState() {
+
     super.initState();
+
+    if(widget.tabIndex == 0 || widget.tabIndex == 1){ 
+      onLoadDefaultDescendingColumnId = 2;  // By default, on load the table will be sorted by col 2 (i.e. date)
+    }
+    else{
+      onLoadDefaultDescendingColumnId = 0;  // However for third tab (bank account details) sorting will be on col 0 i.e. Name
+    }
+
     selectedRows = List.generate(widget.tableData.length, (index) => false);
-    _sortIcons = List.generate(widget.columnNames.length, (index) {
-      if (index == 2) {
-        return Icons.arrow_downward; // Set the default sorting icon for the third column
-      } else {
+    _sortIcons = List.generate(widget.columnNames.length, (colIndex) {
+      if (colIndex == 2) {  // This index = 2 means the third column i.e. the `date` column
+        _sortAscending = false; // Set the default sort order for the date column to descending
+        return Icons.arrow_upward; // Set the default sorting icon for the third column
+      } 
+      else {
         return null;
       }
     });
@@ -51,7 +62,7 @@ class _TableWidgetState extends State<TableWidget> {
     _sortColumn(onLoadDefaultDescendingColumnId);
   }
 
-
+  // The `build` method of the widget
   @override
   Widget build(BuildContext context) {
     return Stack(
