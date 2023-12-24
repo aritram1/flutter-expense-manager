@@ -215,8 +215,8 @@ class _TableWidgetState extends State<TableWidget> {
 
       // 0th - this column is string - so normal sorting
       if (columnIndex == 0) {
-        String aName = a[columnIndex];
-        String bName = b[columnIndex];
+        String aName = a[columnIndex].toUpperCase();
+        String bName = b[columnIndex].toUpperCase();
         return _sortAscending ? aName.compareTo(bName) : bName.compareTo(aName);
       }
       // 1st - this column is numeric - so some transformation is required from local formated currency to double

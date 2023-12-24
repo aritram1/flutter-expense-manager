@@ -21,7 +21,7 @@ class TabWidget extends StatefulWidget {
 class _TabWidgetState extends State<TabWidget> {
   List<List<String>> tableData = [];
   final Logger log = Logger();
-  DateTime selectedStartDate = DateTime.now();
+  DateTime selectedStartDate = DateTime.now().add(const Duration(days: -1)); // by default show data for today and yesterday
   DateTime selectedEndDate = DateTime.now();
 
   @override

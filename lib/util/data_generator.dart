@@ -130,7 +130,7 @@ class DataGenerator {
     Map<String, dynamic> response = await SalesforceUtil.queryFromSalesforce(
       objAPIName: 'FinPlan__Bank_Account__c',
       fieldList: ['Id', 'FinPlan__Account_Code__c', 'Name', 'FinPlan__Last_Balance__c', 'FinPlan__CC_Available_Limit__c', 'FinPlan__CC_Max_Limit__c', 'LastModifiedDate'], 
-      // whereClause: 'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true AND FinPlan__Formula_Amount__c > 0',
+      // whereClause: 'FinPlan__Last_Balance__c > 0',
       orderByClause: 'LastModifiedDate desc',
       //count : 120
       );
