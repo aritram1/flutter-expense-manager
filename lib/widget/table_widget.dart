@@ -42,7 +42,7 @@ class _TableWidgetState extends State<TableWidget> {
   bool isLoading = false; // Flag to track whether the approval process is ongoing
 
   @override
-  void initState() {
+  void initState(){
 
     super.initState();
 
@@ -70,7 +70,7 @@ class _TableWidgetState extends State<TableWidget> {
     });
 
     // Sort the data by the third column (date) in descending order initially
-    _sortColumn(onLoadDefaultDescendingColumnId);
+    sortColumn(onLoadDefaultDescendingColumnId);
   }
 
   // The `build` method of the widget
@@ -95,7 +95,7 @@ class _TableWidgetState extends State<TableWidget> {
                               width: widget.columnWidths[index],
                               child: InkWell(
                                 onTap: () {
-                                  _sortColumn(index);
+                                  sortColumn(index);
                                 },
                                 child: Row(
                                   children: [
@@ -109,9 +109,8 @@ class _TableWidgetState extends State<TableWidget> {
                                 ),
                               ),
                             ),
-                            onSort: (columnIndex, ascending) {
-                              _sortColumn(columnIndex);
-                              setState(() {});
+                            onSort: (columnIndex, ascending) { // Can we use this callback ? for using ascending flag? TBD Urgent
+                              sortColumn(columnIndex);
                             },
                             numeric: false,
                           );
@@ -160,6 +159,15 @@ class _TableWidgetState extends State<TableWidget> {
             ),
           ],
         ),
+        if (isLoading)
+        Positioned.fill(
+          child: Container(
+            color: Colors.black.withOpacity(0.3),
+            child: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+        ),
         if (isApproving)
           Positioned.fill(
             child: Container(
@@ -203,67 +211,79 @@ class _TableWidgetState extends State<TableWidget> {
     }
   }
 
-  // The private `_sort` method
-  void _sortColumn(int columnIndex) {
+  void sortColumn(int colIndex) async{
     setState(() {
-
       // Show the spinner till the sorting is completed
-      isApproving = true;
+      isLoading = true;
+    });
+
+    await _sortColumn(colIndex);
+
+    // Way to create async mocking
+    // await Future.delayed(const Duration(seconds: 3));
+    
+    setState(() {
+      // stop the spinner because the sorting is completed
+      isLoading = false;
+    });
+  }
+
+  // The private `_sort` method
+  Future<void> _sortColumn(int columnIndex) async{
+    
+    // Start the sorting
       
-      for (int i = 0; i < _sortIcons.length; i++) {
-        if (i == columnIndex) {
-          if (_sortIcons[i] == Icons.arrow_upward) {
-            _sortIcons[i] = Icons.arrow_downward;
-            _sortAscending = false;
-          } else {
-            _sortIcons[i] = Icons.arrow_upward;
-            _sortAscending = true;
-          }
+    for (int i = 0; i < _sortIcons.length; i++) {
+      if (i == columnIndex) {
+        if (_sortIcons[i] == Icons.arrow_upward) {
+          _sortIcons[i] = Icons.arrow_downward;
+          _sortAscending = false;
         } else {
-          _sortIcons[i] = null;
+          _sortIcons[i] = Icons.arrow_upward;
+          _sortAscending = true;
         }
+      } else {
+        _sortIcons[i] = null;
+      }
+    }
+
+    sortColumnIndex = columnIndex;
+    if(detaildebug) log.d('I am here sortColumnIndex => $sortColumnIndex $_sortAscending');
+    widget.tableData.sort((a, b) {
+      int result = 0;
+      if (columnIndex == constNameColumnId) {  // constNameColumnId = 0
+        result = compareStrings(a[columnIndex], b[columnIndex]);
+      } 
+      else if (columnIndex == constAmountColumnId) { // constAmountColumnId = 1;
+        result = compareNumeric(a[columnIndex], b[columnIndex]);
+      } 
+      else if (columnIndex == constDateColumnId) { // constDateColumnId = 2
+        result = compareDates(a[columnIndex], b[columnIndex]);
       }
 
-      sortColumnIndex = columnIndex;
-      if(detaildebug) log.d('I am here sortColumnIndex => $sortColumnIndex $_sortAscending');
-      widget.tableData.sort((a, b) {
-        int result = 0;
-        if (columnIndex == constNameColumnId) {  // constNameColumnId = 0
-          result = compareStrings(a[columnIndex], b[columnIndex]);
-        } 
-        else if (columnIndex == constAmountColumnId) { // constAmountColumnId = 1;
-          result = compareNumeric(a[columnIndex], b[columnIndex]);
-        } 
-        else if (columnIndex == constDateColumnId) { // constDateColumnId = 2
-          result = compareDates(a[columnIndex], b[columnIndex]);
-        }
-
-        // If the first column comparison is equal, use another column for sorting. See the default order below
-        if (result == 0) {
-          if (columnIndex == constNameColumnId) { 
-            result = compareDates(a[constDateColumnId], b[constDateColumnId]); // If still `amounts` are same finally sort by `date`
-            if(result == 0){      
-              result = compareNumeric(a[constAmountColumnId], b[constAmountColumnId]);   // If `names` are same sort by `amount`
-            }
-          } else if (columnIndex == constAmountColumnId) {
-            result = compareStrings(a[constNameColumnId], b[constNameColumnId]); // If `amounts` are same sort by `name`
-            if(result == 0){
-              result = compareDates(a[constDateColumnId], b[constDateColumnId]); // If still `names` are same sort by `date`
-            }
-          } else if (columnIndex == constDateColumnId) {
-            result = compareStrings(a[constNameColumnId], b[constNameColumnId]); // If dates are same sort by names
-            if(result == 0){
-              result = compareNumeric(a[constAmountColumnId], b[constAmountColumnId]); // If still names are same finally sort by amount
-            }
+      // If the first column comparison is equal, use another column for sorting. See the default order below
+      if (result == 0) {
+        if (columnIndex == constNameColumnId) { 
+          result = compareDates(a[constDateColumnId], b[constDateColumnId]); // If still `amounts` are same finally sort by `date`
+          if(result == 0){      
+            result = compareNumeric(a[constAmountColumnId], b[constAmountColumnId]);   // If `names` are same sort by `amount`
+          }
+        } else if (columnIndex == constAmountColumnId) {
+          result = compareStrings(a[constNameColumnId], b[constNameColumnId]); // If `amounts` are same sort by `name`
+          if(result == 0){
+            result = compareDates(a[constDateColumnId], b[constDateColumnId]); // If still `names` are same sort by `date`
+          }
+        } else if (columnIndex == constDateColumnId) {
+          result = compareStrings(a[constNameColumnId], b[constNameColumnId]); // If dates are same sort by names
+          if(result == 0){
+            result = compareNumeric(a[constAmountColumnId], b[constAmountColumnId]); // If still names are same finally sort by amount
           }
         }
-        if(detaildebug) log.d('_sortAscending ? result : -result => ${_sortAscending ? result : -result}');
-        return result;
-      });
-
-      // stop the spinner because the sorting is completed
-      isApproving = false;      
+      }
+      if(detaildebug) log.d('_sortAscending ? result : -result => ${_sortAscending ? result : -result}');
+      return result;
     });
+    
   }
 
   // Helper method to compare strings case insensitive
