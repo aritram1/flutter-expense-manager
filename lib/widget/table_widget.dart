@@ -97,6 +97,14 @@ class _TableWidgetState extends State<TableWidget> {
                                 onTap: () {
                                   sortColumn(index);
                                 },
+                                // Async version
+                                // onTap: () async {
+                                //   setState(() { isLoading = true; });
+                                //   log.d('start=> ${DateTime.now(). millisecondsSinceEpoch}');
+                                //   await _sortColumn(index); // we found it takes ~ 10ms so no immediate requirement to handle async from calling place
+                                //   log.d('end=> ${DateTime.now(). millisecondsSinceEpoch}');
+                                //   setState(() { isLoading = false; });
+                                // },
                                 child: Row(
                                   children: [
                                     Text(widget.columnNames[index]),
