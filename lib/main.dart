@@ -2,14 +2,14 @@
 
 // ignore_for_file: library_private_types_in_public_api, use_key_in_widget_constructors
 
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'util/data_generator.dart';
 import './widget/tab_widget.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+void main() async {
+  await dotenv.load(fileName: ".env"); 
   runApp(MyApp());
 }
 
@@ -31,6 +31,10 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final String title = 'Expense Manager';
   final Logger log = Logger();
+  String messageSyncStatus = 'Default';
+
+  static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
+  static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
 
   @override
   void initState() {
@@ -60,7 +64,7 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
                         children: [
                           CircularProgressIndicator(),
                           SizedBox(width: 16.0),
-                          Text("Deleting..."),
+                          Text("Deleting Messages..."),
                         ],
                       ),
                     ),
@@ -70,12 +74,12 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
 
               // Perform the sync operation
               String result = await handleSMSAndTransactionsDelete();
-              // log.d('Handle handleSMSAndTransactionsDelete Result => $result');
+              if(detaildebug) log.d('Handle handleSMSAndTransactionsDelete Result => $result');
 
               // Close the loading dialog
               Navigator.of(context).pop();
             },
-            tooltip: 'Delete All Messages',
+            tooltip: 'Delete All Messages and Transactions',
           ),
           
           IconButton(
@@ -86,15 +90,15 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
                 context: context,
                 barrierDismissible: false, // Prevent dialog dismissal on tap outside
                 builder: (BuildContext dialogContext) {
-                  return const Dialog(
+                  return Dialog(
                     child: Padding(
-                      padding: EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(16.0),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          CircularProgressIndicator(),
-                          SizedBox(width: 16.0),
-                          Text("Syncing..."),
+                          const CircularProgressIndicator(),
+                          const SizedBox(width: 16.0),
+                          Text('$messageSyncStatus...'),
                         ],
                       ),
                     ),
@@ -104,7 +108,7 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
 
               // Perform the sync operation
               String result = await handleSMSSync();
-              // log.d('Handle Sync Message Result => $result');
+              if(detaildebug) log.d('Handle Sync Message Result => $result');
 
               // Close the loading dialog
               Navigator.of(context).pop();
@@ -117,9 +121,9 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
       body: TabBarView(
         controller: _tabController,
         children: const [
-          TabData(tabIndex: 0, title: 'Transactions'),
-          TabData(tabIndex: 1, title: 'View Expenses'),
-          TabData(tabIndex: 2, title: 'Investments'),
+          TabWidget(tabIndex: 0, title: 'Transactions'),
+          TabWidget(tabIndex: 1, title: 'View Expenses'),
+          TabWidget(tabIndex: 2, title: 'Bank Accounts'),
         ],
       ),
       bottomNavigationBar: TabBar(
@@ -127,7 +131,7 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
         tabs: const [
           Tab(text: 'Transactions'),
           Tab(text: 'View Expenses'),
-          Tab(text: 'Investments'),
+          Tab(text: 'Bank Accounts'),
         ],
       ),
     );
@@ -136,6 +140,21 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
 
   Future<String> handleSMSSync() async {
     log.d('Syncing SMS data...');
+    
+    // refresh the state
+    // setState(() {
+     messageSyncStatus = 'Syncing';
+    // });
+    
+    Map<String, dynamic> response = await DataGenerator.deleteAllMessagesAndTransactions();
+    log.d('Deleting completed.');
+
+    // refresh the state
+    
+    // setState(() {
+    //   messageSyncStatus = 'Critting';
+    // });
+
     Map<String, dynamic> result = await DataGenerator.syncMessages();
     log.d('Syncing SMS data completed.');// Response : $result');
     return result.toString();
