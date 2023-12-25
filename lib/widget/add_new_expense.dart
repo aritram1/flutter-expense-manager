@@ -1,6 +1,7 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:logger/logger.dart';
 import '../util/data_generator.dart';
 
@@ -22,6 +23,9 @@ class _AddNewExpenseDialogState extends State<AddNewExpenseDialog> {
   String? errorMessage;
   
   final Logger log = Logger();
+
+  static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
+  static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
 
   @override
   void initState() {

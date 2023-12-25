@@ -1,3 +1,4 @@
+// tab_widget.dart
 // ignore_for_file: library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
@@ -21,8 +22,11 @@ class TabWidget extends StatefulWidget {
 class _TabWidgetState extends State<TabWidget> {
   List<List<String>> tableData = [];
   final Logger log = Logger();
-  DateTime selectedStartDate = DateTime.now();
+  DateTime selectedStartDate = DateTime.now().add(const Duration(days: -1)); // by default show data for today and yesterday
   DateTime selectedEndDate = DateTime.now();
+  
+  static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
+  static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
 
   @override
   void initState() {
@@ -125,9 +129,9 @@ class _TabWidgetState extends State<TabWidget> {
   List<double> getTableColumnWidths(int tabIndex) {
     switch (tabIndex) {
       case 0:
-        return [MediaQuery.of(context).size.width * 0.35, MediaQuery.of(context).size.width * 0.20, MediaQuery.of(context).size.width * 0.15];
+        return [MediaQuery.of(context).size.width * 0.30, MediaQuery.of(context).size.width * 0.25, MediaQuery.of(context).size.width * 0.15];
       case 1:
-        return [MediaQuery.of(context).size.width * 0.35, MediaQuery.of(context).size.width * 0.20, MediaQuery.of(context).size.width * 0.15];
+        return [MediaQuery.of(context).size.width * 0.30, MediaQuery.of(context).size.width * 0.25, MediaQuery.of(context).size.width * 0.15];
       case 2:
         return [MediaQuery.of(context).size.width * 0.18, MediaQuery.of(context).size.width * 0.28, MediaQuery.of(context).size.width * 0.35];
       default:

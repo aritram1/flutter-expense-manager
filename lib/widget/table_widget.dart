@@ -1,3 +1,4 @@
+import 'package:ExpenseManager/util/helper_util.dart';
 import 'package:flutter/material.dart';
 import 'package:ExpenseManager/util/data_generator.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -29,37 +30,47 @@ class _TableWidgetState extends State<TableWidget> {
   bool _sortAscending = false;
   List<IconData?> _sortIcons = [];
   int onLoadDefaultDescendingColumnId = 2; // default order declared
-  
+  final int constNameColumnId = 0;
+  final int constAmountColumnId = 1;
+  final int constDateColumnId = 2;
+      
   static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
-  static bool bigdebug = bool.parse(dotenv.env['bigdebug'] ?? 'false');
+  static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
 
   String approveButtonName = 'Approve';
   bool isApproving = false; // Flag to track whether the approval process is ongoing
+  bool isLoading = false; // Flag to track whether the approval process is ongoing
 
   @override
-  void initState() {
+  void initState(){
 
     super.initState();
 
     if(widget.tabIndex == 0 || widget.tabIndex == 1){ 
-      onLoadDefaultDescendingColumnId = 2;  // By default, on load the table will be sorted by col 2 (i.e. date)
+      // By default, first and second tab will be sorted based on date column `constDateColumnId` which is 2
+      onLoadDefaultDescendingColumnId = constDateColumnId;  
     }
     else{
-      onLoadDefaultDescendingColumnId = 0;  // However for third tab (bank account details) sorting will be on col 0 i.e. Name
+      // By default, the third tab will be sorted based on name column `constNameColumnId` which is 0
+      onLoadDefaultDescendingColumnId = constNameColumnId;  
     }
 
     selectedRows = List.generate(widget.tableData.length, (index) => false);
     _sortIcons = List.generate(widget.columnNames.length, (colIndex) {
-      if (colIndex == 2) {  // This index = 2 means the third column i.e. the `date` column
-        _sortAscending = false; // Set the default sort order for the date column to descending
-        return Icons.arrow_upward; // Set the default sorting icon for the third column
+      if (colIndex == constDateColumnId) {  
+        // specific rule for the date column 
+        // i.e. when `constDateColumnId` = 2, set the default sort order and sorting icon
+        _sortAscending = false;
+        return Icons.arrow_upward;
       } 
       else {
+        // no specific rule for other columns
         return null;
       }
     });
+
     // Sort the data by the third column (date) in descending order initially
-    _sortColumn(onLoadDefaultDescendingColumnId);
+    sortColumn(onLoadDefaultDescendingColumnId);
   }
 
   // The `build` method of the widget
@@ -84,8 +95,16 @@ class _TableWidgetState extends State<TableWidget> {
                               width: widget.columnWidths[index],
                               child: InkWell(
                                 onTap: () {
-                                  _sortColumn(index);
+                                  sortColumn(index);
                                 },
+                                // Async version
+                                // onTap: () async {
+                                //   setState(() { isLoading = true; });
+                                //   log.d('start=> ${DateTime.now(). millisecondsSinceEpoch}');
+                                //   await _sortColumn(index); // we found it takes ~ 10ms so no immediate requirement to handle async from calling place
+                                //   log.d('end=> ${DateTime.now(). millisecondsSinceEpoch}');
+                                //   setState(() { isLoading = false; });
+                                // },
                                 child: Row(
                                   children: [
                                     Text(widget.columnNames[index]),
@@ -98,9 +117,8 @@ class _TableWidgetState extends State<TableWidget> {
                                 ),
                               ),
                             ),
-                            onSort: (columnIndex, ascending) {
-                              _sortColumn(columnIndex);
-                              setState(() {});
+                            onSort: (columnIndex, ascending) { // Can we use this callback ? for using ascending flag? TBD Urgent
+                              sortColumn(columnIndex);
                             },
                             numeric: false,
                           );
@@ -149,6 +167,15 @@ class _TableWidgetState extends State<TableWidget> {
             ),
           ],
         ),
+        if (isLoading)
+        Positioned.fill(
+          child: Container(
+            color: Colors.black.withOpacity(0.3),
+            child: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+        ),
         if (isApproving)
           Positioned.fill(
             child: Container(
@@ -192,9 +219,28 @@ class _TableWidgetState extends State<TableWidget> {
     }
   }
 
+  void sortColumn(int colIndex) async{
+    setState(() {
+      // Show the spinner till the sorting is completed
+      isLoading = true;
+    });
+
+    await _sortColumn(colIndex);
+
+    // Way to create async mocking
+    // await Future.delayed(const Duration(seconds: 3));
+    
+    setState(() {
+      // stop the spinner because the sorting is completed
+      isLoading = false;
+    });
+  }
+
   // The private `_sort` method
-  void _sortColumn(int columnIndex) {
-  setState(() {
+  Future<void> _sortColumn(int columnIndex) async{
+    
+    // Start the sorting
+      
     for (int i = 0; i < _sortIcons.length; i++) {
       if (i == columnIndex) {
         if (_sortIcons[i] == Icons.arrow_upward) {
@@ -210,50 +256,81 @@ class _TableWidgetState extends State<TableWidget> {
     }
 
     sortColumnIndex = columnIndex;
-
+    if(detaildebug) log.d('I am here sortColumnIndex => $sortColumnIndex $_sortAscending');
     widget.tableData.sort((a, b) {
-
-      // 0th - this column is string - so normal sorting
-      if (columnIndex == 0) {
-        String aName = a[columnIndex];
-        String bName = b[columnIndex];
-        return _sortAscending ? aName.compareTo(bName) : bName.compareTo(aName);
-      }
-      // 1st - this column is numeric - so some transformation is required from local formated currency to double
-      else if (columnIndex == 1) {
-        String aAmountValueString = a[columnIndex].replaceAll(',', '').replaceAll('INR', '').replaceAll(' ', '');
-        String bAmountValueString = b[columnIndex].replaceAll(',', '').replaceAll('INR', '').replaceAll(' ', '');;
-        var aAmountValue = double.parse(aAmountValueString);
-        var bAmountValue = double.parse(bAmountValueString);
-        return _sortAscending ? aAmountValue.compareTo(bAmountValue) : bAmountValue.compareTo(aAmountValue);
+      int result = 0;
+      if (columnIndex == constNameColumnId) {  // constNameColumnId = 0
+        result = compareStrings(a[columnIndex], b[columnIndex]);
       } 
-      // 2nd - this column is date so additional logic is required
-      else if (columnIndex == 2) {
-        String aDateValue = a[columnIndex];
-        String bDateValue = b[columnIndex];
-        
-        if(bigdebug) log.d('Tabindex is => ${widget.tabIndex}');
+      else if (columnIndex == constAmountColumnId) { // constAmountColumnId = 1;
+        result = compareNumeric(a[columnIndex], b[columnIndex]);
+      } 
+      else if (columnIndex == constDateColumnId) { // constDateColumnId = 2
+        result = compareDates(a[columnIndex], b[columnIndex]);
+      }
 
-        // When its on Messages tab or transactions tab
-        if(widget.tabIndex == 0 || widget.tabIndex == 1){
-          // just switch the DD/MM format to MM/DD format so they can be string sorted
-          aDateValue = '${aDateValue.split('/')[1]}${aDateValue.split('/')[0]}';
-          bDateValue = '${bDateValue.split('/')[1]}${bDateValue.split('/')[0]}';
-          return _sortAscending ? aDateValue.compareTo(bDateValue) : bDateValue.compareTo(aDateValue);
+      // If the first column comparison is equal, use another column for sorting. See the default order below
+      if (result == 0) {
+        if (columnIndex == constNameColumnId) { 
+          result = compareDates(a[constDateColumnId], b[constDateColumnId]); // If still `amounts` are same finally sort by `date`
+          if(result == 0){      
+            result = compareNumeric(a[constAmountColumnId], b[constAmountColumnId]);   // If `names` are same sort by `amount`
+          }
+        } else if (columnIndex == constAmountColumnId) {
+          result = compareStrings(a[constNameColumnId], b[constNameColumnId]); // If `amounts` are same sort by `name`
+          if(result == 0){
+            result = compareDates(a[constDateColumnId], b[constDateColumnId]); // If still `names` are same sort by `date`
+          }
+        } else if (columnIndex == constDateColumnId) {
+          result = compareStrings(a[constNameColumnId], b[constNameColumnId]); // If dates are same sort by names
+          if(result == 0){
+            result = compareNumeric(a[constAmountColumnId], b[constAmountColumnId]); // If still names are same finally sort by amount
+          }
         }
-        else{// To be implemented for third tab // TBD // Urgent
-          return 1;
-        } 
       }
-      else {
-        return 1;
-      }
+      if(detaildebug) log.d('_sortAscending ? result : -result => ${_sortAscending ? result : -result}');
+      return result;
     });
-  });
-}
+    
+  }
+
+  // Helper method to compare strings case insensitive
+  int compareStrings(String a, String b) {
+    a = a.toUpperCase();
+    b = b.toUpperCase();
+    return _sortAscending ? a.compareTo(b) : b.compareTo(a);
+  }
+
+  // Helper method to compare numeric values, removing unncessary spaces, commas and currency symbol
+  int compareNumeric(String a, String b) {
+    // a = a.replaceAll(',', '').replaceAll('INR', '').replaceAll(' ', '');
+    // b = b.replaceAll(',', '').replaceAll('INR', '').replaceAll(' ', '');
+    // double aValue = double.parse(a);
+    // double bValue = double.parse(b);
+    double aValue = HelperUtil.parseCurrencyStringsToDouble(a);
+    double bValue = HelperUtil.parseCurrencyStringsToDouble(b);
+    return _sortAscending ? aValue.compareTo(bValue) : bValue.compareTo(aValue);
+  }
+
+  // Helper method to compare date values
+  int compareDates(String aDateValue, String bDateValue) {
+    
+    if(detaildebug) log.d('Tabindex is => ${widget.tabIndex}');
+
+    // When its on Messages tab or transactions tab
+    if(widget.tabIndex == 0 || widget.tabIndex == 1){
+      // just switch the DD/MM format to MM/DD format so they can be string sorted
+      aDateValue = '${aDateValue.split('/')[1]}${aDateValue.split('/')[0]}';
+      bDateValue = '${bDateValue.split('/')[1]}${bDateValue.split('/')[0]}';
+      return _sortAscending ? aDateValue.compareTo(bDateValue) : bDateValue.compareTo(aDateValue);
+    }
+    else{// To be implemented for third tab // TBD // Urgent
+      return 1;
+    } 
+  }
 
   bool showApproveButton() {
-    return selectedRows.any((selected) => selected) && widget.tabIndex == 0;
+    return selectedRows.any((selected) => selected) && widget.tabIndex == 0; // widget.tabIndex == 0 means its first tab (messages)
   }
 
   Future<void> handleApproveSMS() async {
@@ -262,16 +339,18 @@ class _TableWidgetState extends State<TableWidget> {
       isApproving = true;
     });
 
+    // Extract recordIds from the list
     List<String> recordIds = [];
-
     for (int i = 0; i < selectedRows.length; i++) {
       if (selectedRows[i]) {
         recordIds.add(widget.tableData[i][3]);
       }
     }
 
+    if(debug) log.d('recordIds=> $recordIds');
+
+    // Call the API for approve message
     dynamic response = await DataGenerator.approveSelectedMessages(objAPIName: 'FinPlan__SMS_Message__c', recordIds: recordIds);
-    
     if(debug) log.d('Response for handleApproveSMS ${response.toString()}');
 
     setState(() {
@@ -281,6 +360,7 @@ class _TableWidgetState extends State<TableWidget> {
 
       for (int i = 0; i < selectedRows.length; i++) {
         if (selectedRows[i]) {
+          if(debug) log.d('i=>$i AND selectedRows[i]=>${selectedRows[i]}');
           widget.tableData.removeAt(i);
           selectedRows.removeAt(i);
         }

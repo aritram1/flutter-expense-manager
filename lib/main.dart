@@ -32,7 +32,9 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
   final String title = 'Expense Manager';
   final Logger log = Logger();
   String messageSyncStatus = 'Default';
-  static bool debug = false;
+
+  static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
+  static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
 
   @override
   void initState() {
@@ -72,7 +74,7 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
 
               // Perform the sync operation
               String result = await handleSMSAndTransactionsDelete();
-              if(debug) log.d('Handle handleSMSAndTransactionsDelete Result => $result');
+              if(detaildebug) log.d('Handle handleSMSAndTransactionsDelete Result => $result');
 
               // Close the loading dialog
               Navigator.of(context).pop();
@@ -106,7 +108,7 @@ class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
 
               // Perform the sync operation
               String result = await handleSMSSync();
-              if(debug) log.d('Handle Sync Message Result => $result');
+              if(detaildebug) log.d('Handle Sync Message Result => $result');
 
               // Close the loading dialog
               Navigator.of(context).pop();
