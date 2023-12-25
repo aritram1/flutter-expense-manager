@@ -35,6 +35,7 @@ class _TableWidgetState extends State<TableWidget> {
 
   String approveButtonName = 'Approve';
   bool isApproving = false; // Flag to track whether the approval process is ongoing
+  bool isLoading = false; // Flag to track whether the approval process is ongoing
 
   @override
   void initState() {
@@ -194,66 +195,106 @@ class _TableWidgetState extends State<TableWidget> {
 
   // The private `_sort` method
   void _sortColumn(int columnIndex) {
-  setState(() {
-    for (int i = 0; i < _sortIcons.length; i++) {
-      if (i == columnIndex) {
-        if (_sortIcons[i] == Icons.arrow_upward) {
-          _sortIcons[i] = Icons.arrow_downward;
-          _sortAscending = false;
+    setState(() {
+
+      // Show the spinner till the sorting is completed
+      isApproving = true;
+      
+      for (int i = 0; i < _sortIcons.length; i++) {
+        if (i == columnIndex) {
+          if (_sortIcons[i] == Icons.arrow_upward) {
+            _sortIcons[i] = Icons.arrow_downward;
+            _sortAscending = false;
+          } else {
+            _sortIcons[i] = Icons.arrow_upward;
+            _sortAscending = true;
+          }
         } else {
-          _sortIcons[i] = Icons.arrow_upward;
-          _sortAscending = true;
+          _sortIcons[i] = null;
         }
-      } else {
-        _sortIcons[i] = null;
       }
-    }
 
-    sortColumnIndex = columnIndex;
-
-    widget.tableData.sort((a, b) {
-
-      // 0th - this column is string - so normal sorting
-      if (columnIndex == 0) {
-        String aName = a[columnIndex].toUpperCase();
-        String bName = b[columnIndex].toUpperCase();
-        return _sortAscending ? aName.compareTo(bName) : bName.compareTo(aName);
-      }
-      // 1st - this column is numeric - so some transformation is required from local formated currency to double
-      else if (columnIndex == 1) {
-        String aAmountValueString = a[columnIndex].replaceAll(',', '').replaceAll('INR', '').replaceAll(' ', '');
-        String bAmountValueString = b[columnIndex].replaceAll(',', '').replaceAll('INR', '').replaceAll(' ', '');;
-        var aAmountValue = double.parse(aAmountValueString);
-        var bAmountValue = double.parse(bAmountValueString);
-        return _sortAscending ? aAmountValue.compareTo(bAmountValue) : bAmountValue.compareTo(aAmountValue);
-      } 
-      // 2nd - this column is date so additional logic is required
-      else if (columnIndex == 2) {
-        String aDateValue = a[columnIndex];
-        String bDateValue = b[columnIndex];
-        
-        if(bigdebug) log.d('Tabindex is => ${widget.tabIndex}');
-
-        // When its on Messages tab or transactions tab
-        if(widget.tabIndex == 0 || widget.tabIndex == 1){
-          // just switch the DD/MM format to MM/DD format so they can be string sorted
-          aDateValue = '${aDateValue.split('/')[1]}${aDateValue.split('/')[0]}';
-          bDateValue = '${bDateValue.split('/')[1]}${bDateValue.split('/')[0]}';
-          return _sortAscending ? aDateValue.compareTo(bDateValue) : bDateValue.compareTo(aDateValue);
-        }
-        else{// To be implemented for third tab // TBD // Urgent
-          return 1;
+      sortColumnIndex = columnIndex;
+      
+      int NAME_COLUMN_ID = 0;
+      int AMOUNT_COLUMN_ID = 1;
+      int DATE_COLUMN_ID = 2;
+      
+      widget.tableData.sort((a, b) {
+        int result = 0;
+        if (columnIndex == NAME_COLUMN_ID) {
+          result = _compareStrings(a[columnIndex], b[columnIndex]);
         } 
-      }
-      else {
-        return 1;
-      }
+        else if (columnIndex == AMOUNT_COLUMN_ID) {
+          result = _compareNumeric(a[columnIndex], b[columnIndex]);
+        } 
+        else if (columnIndex == DATE_COLUMN_ID) {
+          result = _compareDates(a[columnIndex], b[columnIndex]);
+        }
+
+        // If the first column comparison is equal, use another column for sorting. See the default order below
+        if (result == 0) {
+          if (columnIndex == NAME_COLUMN_ID) { 
+              result = _compareDates(a[DATE_COLUMN_ID], b[DATE_COLUMN_ID]); // If still `amounts` are same finally sort by `date`
+            if(result == 0){      
+              result = _compareNumeric(a[AMOUNT_COLUMN_ID], b[AMOUNT_COLUMN_ID]);   // If `names` are same sort by `amount`
+            }
+          } else if (columnIndex == AMOUNT_COLUMN_ID) {
+            result = _compareStrings(a[NAME_COLUMN_ID], b[NAME_COLUMN_ID]); // If `amounts` are same sort by `name`
+            if(result == 0){
+              result = _compareDates(a[DATE_COLUMN_ID], b[DATE_COLUMN_ID]); // If still `names` are same sort by `date`
+            }
+          } else if (columnIndex == DATE_COLUMN_ID) {
+            result = _compareStrings(a[NAME_COLUMN_ID], b[NAME_COLUMN_ID]); // If dates are same sort by names
+            if(result == 0){
+              result = _compareNumeric(a[AMOUNT_COLUMN_ID], b[AMOUNT_COLUMN_ID]); // If still names are same finally sort by amount
+            }
+          }
+        }
+
+        return _sortAscending ? result : -result; // Invert result for descending order
+      });
+
+      // stop the spinner because the sorting is completed
+      isApproving = false;      
     });
-  });
-}
+  }
+
+  // Helper method to compare strings case insensitive
+  int _compareStrings(String a, String b) {
+    a = a.toUpperCase();
+    b = b.toUpperCase();
+    return _sortAscending ? a.compareTo(b) : b.compareTo(a);
+  }
+
+  // Helper method to compare numeric values, removing unncessary spaces, commas and currency symbol
+  int _compareNumeric(String a, String b) {
+    a = a.replaceAll(',', '').replaceAll('INR', '').replaceAll(' ', '');
+    b = b.replaceAll(',', '').replaceAll('INR', '').replaceAll(' ', '');
+    double aValue = double.parse(a);
+    double bValue = double.parse(b);
+    return _sortAscending ? aValue.compareTo(bValue) : bValue.compareTo(aValue);
+  }
+
+  // Helper method to compare date values
+  int _compareDates(String aDateValue, String bDateValue) {
+    
+    if(bigdebug) log.d('Tabindex is => ${widget.tabIndex}');
+
+    // When its on Messages tab or transactions tab
+    if(widget.tabIndex == 0 || widget.tabIndex == 1){
+      // just switch the DD/MM format to MM/DD format so they can be string sorted
+      aDateValue = '${aDateValue.split('/')[1]}${aDateValue.split('/')[0]}';
+      bDateValue = '${bDateValue.split('/')[1]}${bDateValue.split('/')[0]}';
+      return _sortAscending ? aDateValue.compareTo(bDateValue) : bDateValue.compareTo(aDateValue);
+    }
+    else{// To be implemented for third tab // TBD // Urgent
+      return 1;
+    } 
+  }
 
   bool showApproveButton() {
-    return selectedRows.any((selected) => selected) && widget.tabIndex == 0;
+    return selectedRows.any((selected) => selected) && widget.tabIndex == 0; // widget.tabIndex == 0 means its first tab (messages)
   }
 
   Future<void> handleApproveSMS() async {
