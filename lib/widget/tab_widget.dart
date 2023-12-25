@@ -1,3 +1,4 @@
+// tab_widget.dart
 // ignore_for_file: library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
@@ -6,31 +7,31 @@ import '../widget/date_picker_panel.dart';
 import '../widget/table_widget.dart';
 import '../widget/add_new_expense.dart';
 import '../util/data_generator.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-class TabData extends StatefulWidget {
+class TabWidget extends StatefulWidget {
   final int tabIndex;
   final String title;
 
-  const TabData({Key? key, required this.tabIndex, required this.title}) : super(key: key);
+  const TabWidget({Key? key, required this.tabIndex, required this.title}) : super(key: key);
 
   @override
-  _TabDataState createState() => _TabDataState();
+  _TabWidgetState createState() => _TabWidgetState();
 }
 
-class _TabDataState extends State<TabData> {
+class _TabWidgetState extends State<TabWidget> {
   List<List<String>> tableData = [];
   final Logger log = Logger();
-  DateTime selectedStartDate = DateTime.now();
+  DateTime selectedStartDate = DateTime.now().add(const Duration(days: -1)); // by default show data for today and yesterday
   DateTime selectedEndDate = DateTime.now();
+  
+  static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
+  static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
 
   @override
   void initState() {
     super.initState();
-    _fetchData();
-  }
-
-  Future<void> _fetchData() async {
-    await fetchData();
+    fetchData();
   }
 
   Future<List<List<String>>> fetchData() async {
@@ -53,46 +54,39 @@ class _TabDataState extends State<TabData> {
       floatingActionButton: () {
         switch (widget.tabIndex) {
           case 1:
-            return FloatingActionButton(
-              onPressed: () {
-                recordNewExpenseDialogue();
-              },
-              child: const Icon(Icons.add),
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FloatingActionButton(
+                  onPressed: ()  {
+                    printTheTable();
+                  },
+                  child: const Icon(Icons.print),
+                ),
+                const SizedBox(height: 16), // Adjust the spacing as needed
+                FloatingActionButton(
+                  onPressed: () {
+                    recordNewExpenseDialogue();
+                  },
+                  child: const Icon(Icons.add),
+                ),
+              ],
             );
           default:
             return Container();
         }
       }(),
-      body: widget.tabIndex == 1
-          ? Column(
-              children: [
-                DatepickerPanel(
-                  key: UniqueKey(),
-                  onDateRangeSelected: handleDateRangeSelection,
-                  startDate: selectedStartDate,
-                  endDate: selectedEndDate,
-                ),
-                Expanded(
-                  child: FutureBuilder<List<List<String>>>(
-                    future: fetchData(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      } else if (snapshot.hasError) {
-                        return Center(
-                          child: Text('Error loading data in the tab ${snapshot.error.toString()}'),
-                        );
-                      } else {
-                        return TableWidget(tableData: snapshot.data ?? [], tabIndex: widget.tabIndex);
-                      }
-                    },
-                  ),
-                ),
-              ],
-            )
-          : FutureBuilder<List<List<String>>>(
+      body: Column(
+        children: [
+          if (widget.tabIndex == 1)
+            DatepickerPanel(
+              key: UniqueKey(),
+              onDateRangeSelected: handleDateRangeSelection,
+              startDate: selectedStartDate,
+              endDate: selectedEndDate,
+            ),
+          Expanded(
+            child: FutureBuilder<List<List<String>>>(
               future: fetchData(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -100,15 +94,49 @@ class _TabDataState extends State<TabData> {
                     child: CircularProgressIndicator(),
                   );
                 } else if (snapshot.hasError) {
-                  return const Center(
-                    child: Text('Error loading data'),
+                  return Center(
+                    child: Text('Error loading data in the tab ${snapshot.error.toString()}'),
                   );
                 } else {
-                  return TableWidget(tableData: snapshot.data ?? [], tabIndex: widget.tabIndex);
+                  return TableWidget(
+                    tableData: snapshot.data ?? [],
+                    tabIndex: widget.tabIndex,
+                    columnNames: getTableColumnNames(widget.tabIndex),
+                    columnWidths: getTableColumnWidths(widget.tabIndex),
+                  );
                 }
               },
             ),
+          ),
+        ],
+      ),
     );
+  }
+
+  List<String> getTableColumnNames(int tabIndex) {
+    switch (tabIndex) {
+      case 0:
+        return ['Paid To', 'Amount', 'Date']; // Column names to show messages
+      case 1:
+        return ['Paid To', 'Amount', 'Date']; // Add your column names for tab 1
+      case 2:
+        return ['Name', 'Last Balance', 'Last Updated']; // Add your column names for tab 2
+      default:
+        return [];
+    }
+  }
+
+  List<double> getTableColumnWidths(int tabIndex) {
+    switch (tabIndex) {
+      case 0:
+        return [MediaQuery.of(context).size.width * 0.30, MediaQuery.of(context).size.width * 0.25, MediaQuery.of(context).size.width * 0.15];
+      case 1:
+        return [MediaQuery.of(context).size.width * 0.30, MediaQuery.of(context).size.width * 0.25, MediaQuery.of(context).size.width * 0.15];
+      case 2:
+        return [MediaQuery.of(context).size.width * 0.18, MediaQuery.of(context).size.width * 0.28, MediaQuery.of(context).size.width * 0.35];
+      default:
+        return [];
+    }
   }
 
   Future<void> recordNewExpenseDialogue() async {
@@ -116,9 +144,9 @@ class _TabDataState extends State<TabData> {
       context: context,
       builder: (BuildContext context) {
         return AddNewExpenseDialog(
-          onSave: (amount, paidTo, details, txnDate) {
-            log.d('Amount: $amount Paid To: $paidTo Details: $details Start Date: $selectedStartDate End Date: $selectedEndDate');
-            _fetchData(); // Refresh the table data
+          onComplete: () async { // This `onComplete`is example of a callback that gets called after `AddNewExpenseDialog` widget `complete`s
+            tableData = await fetchData(); // Refresh the table data
+            setState(() {}); // Trigger a rebuild of the widget
           },
         );
       },
@@ -130,6 +158,12 @@ class _TabDataState extends State<TabData> {
       selectedStartDate = startDate;
       selectedEndDate = endDate;
     });
-    await _fetchData();
+    await fetchData();
+  }
+
+  Future<void> printTheTable() async{
+    bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
+    tableData = await fetchData(); // Refresh the table data
+    if(debug) log.d('Table data is $tableData');
   }
 }

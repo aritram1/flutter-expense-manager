@@ -1,5 +1,8 @@
+//date_picker_panel.dart
+
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Import the intl package
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 
 class DatepickerPanel extends StatefulWidget {
@@ -21,6 +24,10 @@ class DatepickerPanel extends StatefulWidget {
 }
 
 class _DatepickerPanelState extends State<DatepickerPanel> {
+
+  static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
+  static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
+
   @override
   Widget build(BuildContext context) {
     return Padding(
