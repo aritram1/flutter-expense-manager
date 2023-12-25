@@ -1,5 +1,6 @@
 // data_generator.dart
 import 'dart:convert';
+import 'package:ExpenseManager/util/helper_util.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
 import 'package:ExpenseManager/util/message_util.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:logger/logger.dart';
 import 'salesforce_util.dart';
 import 'package:device_info/device_info.dart';
+import 'helper_util.dart';
 class DataGenerator {
 
   static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
@@ -47,18 +49,16 @@ class DataGenerator {
           for (var record in records) {
             Map<String, dynamic> recordMap = Map.castFrom(record);
             
-            String id = recordMap['Id'];
-            if(debug) log.d('1 -Id $id');
+            String id = recordMap['Id'];            
+            String beneficiary = recordMap['FinPlan__Beneficiary__c'];            
             
-            String beneficiary = recordMap['FinPlan__Beneficiary__c'];
-            if(debug) log.d('2 -beneficiary $beneficiary');
-            
-            String amount = (recordMap['FinPlan__Formula_Amount__c'] != null) ? recordMap['FinPlan__Formula_Amount__c'].toString() : 'N/A' ;
-            if(debug) log.d('3 -amount $amount');
+            // String amount = (recordMap['FinPlan__Formula_Amount__c'] != null) ? recordMap['FinPlan__Formula_Amount__c'].toString() : 'N/A' ;
+            String amount = HelperUtil.parseDoubleTocurrencyString(recordMap['FinPlan__Formula_Amount__c'] ?? 0);
             
             String date = recordMap['FinPlan__Transaction_Date__c'].substring(5,10);
-            if(debug) log.d('3 -date $date');
             String formattedDate = '${date.split('-')[1]}/${date.split('-')[0]}';
+
+            if(debug) log.d('beneficiary=>$beneficiary, amount=>$amount, formattedDate=>$formattedDate, id=>$id');
             
             generatedDataTab1.add([beneficiary, amount, formattedDate, id]);
           }
@@ -106,7 +106,10 @@ class DataGenerator {
             Map<String, dynamic> recordMap = Map.castFrom(record);
             String id = recordMap['Id'];
             String beneficiary = recordMap['FinPlan__Beneficiary_Name__c'];
-            String amount = recordMap['FinPlan__Amount__c'].toString();
+            // String amount = recordMap['FinPlan__Amount__c'].toString();
+
+            String amount = HelperUtil.parseDoubleTocurrencyString(recordMap['FinPlan__Amount__c'] ?? 0);
+
             String rawDate = recordMap['FinPlan__Transaction_Date__c']; //.substring(5,10);
             String formattedDate = '${rawDate.split('-')[2]}/${rawDate.split('-')[1]}';
 
@@ -137,11 +140,11 @@ class DataGenerator {
     dynamic error = response['error'];
     dynamic data = response['data'];
 
-    if(debug) log.d('Error inside generateTab1Data : ${error.toString()}');
-    if(debug) log.d('Datainside generateTab1Data: ${data.toString()}');
+    if(debug) log.d('Error inside generateTab3Data : ${error.toString()}');
+    if(debug) log.d('Datainside generateTab3Data: ${data.toString()}');
     
     if(error != null && error.isNotEmpty){
-      if(debug) log.d('Error occurred while querying inside generateTab1Data : ${response['error']}');
+      if(debug) log.d('Error occurred while querying inside generateTab3Data : ${response['error']}');
       //return null;
     }
     else if (data != null && data.isNotEmpty) {
@@ -156,9 +159,9 @@ class DataGenerator {
             String accountCode = recordMap['FinPlan__Account_Code__c'] ?? 'N/Av';  
 
             String amount = accountCode.contains('-CC') 
-              ? NumberFormat.currency(locale: 'en_IN').format(recordMap['FinPlan__CC_Available_Limit__c'] ?? 0)
-              : NumberFormat.currency(locale: 'en_IN').format(recordMap['FinPlan__Last_Balance__c'] ?? 0);
-            
+              ? HelperUtil.parseDoubleTocurrencyString(recordMap['FinPlan__CC_Available_Limit__c'] ?? 0)
+              : HelperUtil.parseDoubleTocurrencyString(recordMap['FinPlan__Last_Balance__c'] ?? 0);
+
             String formattedDateTime = DateTime.now().toString();
             String lastmodifiedDate = recordMap['LastModifiedDate'].toString(); // example 2023-12-12T19:56:13.000+0000
             if(lastmodifiedDate.contains('T') && lastmodifiedDate.length == 28){ // strict check to avoid index out of range
@@ -259,5 +262,4 @@ class DataGenerator {
     return response;
   }
 
-  
 }

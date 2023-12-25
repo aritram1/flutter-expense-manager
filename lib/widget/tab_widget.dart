@@ -125,9 +125,9 @@ class _TabWidgetState extends State<TabWidget> {
   List<double> getTableColumnWidths(int tabIndex) {
     switch (tabIndex) {
       case 0:
-        return [MediaQuery.of(context).size.width * 0.35, MediaQuery.of(context).size.width * 0.20, MediaQuery.of(context).size.width * 0.15];
+        return [MediaQuery.of(context).size.width * 0.30, MediaQuery.of(context).size.width * 0.25, MediaQuery.of(context).size.width * 0.15];
       case 1:
-        return [MediaQuery.of(context).size.width * 0.35, MediaQuery.of(context).size.width * 0.20, MediaQuery.of(context).size.width * 0.15];
+        return [MediaQuery.of(context).size.width * 0.30, MediaQuery.of(context).size.width * 0.25, MediaQuery.of(context).size.width * 0.15];
       case 2:
         return [MediaQuery.of(context).size.width * 0.18, MediaQuery.of(context).size.width * 0.28, MediaQuery.of(context).size.width * 0.35];
       default:

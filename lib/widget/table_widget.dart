@@ -1,3 +1,4 @@
+import 'package:ExpenseManager/util/helper_util.dart';
 import 'package:flutter/material.dart';
 import 'package:ExpenseManager/util/data_generator.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -29,7 +30,10 @@ class _TableWidgetState extends State<TableWidget> {
   bool _sortAscending = false;
   List<IconData?> _sortIcons = [];
   int onLoadDefaultDescendingColumnId = 2; // default order declared
-  
+  final int constNameColumnId = 0;
+  final int constAmountColumnId = 1;
+  final int constDateColumnId = 2;
+      
   static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
   static bool bigdebug = bool.parse(dotenv.env['bigdebug'] ?? 'false');
 
@@ -43,22 +47,28 @@ class _TableWidgetState extends State<TableWidget> {
     super.initState();
 
     if(widget.tabIndex == 0 || widget.tabIndex == 1){ 
-      onLoadDefaultDescendingColumnId = 2;  // By default, on load the table will be sorted by col 2 (i.e. date)
+      // By default, first and second tab will be sorted based on date column `constDateColumnId` which is 2
+      onLoadDefaultDescendingColumnId = constDateColumnId;  
     }
     else{
-      onLoadDefaultDescendingColumnId = 0;  // However for third tab (bank account details) sorting will be on col 0 i.e. Name
+      // By default, the third tab will be sorted based on name column `constNameColumnId` which is 0
+      onLoadDefaultDescendingColumnId = constNameColumnId;  
     }
 
     selectedRows = List.generate(widget.tableData.length, (index) => false);
     _sortIcons = List.generate(widget.columnNames.length, (colIndex) {
-      if (colIndex == 2) {  // This index = 2 means the third column i.e. the `date` column
-        _sortAscending = false; // Set the default sort order for the date column to descending
-        return Icons.arrow_upward; // Set the default sorting icon for the third column
+      if (colIndex == constDateColumnId) {  
+        // specific rule for the date column 
+        // i.e. when `constDateColumnId` = 2, set the default sort order and sorting icon
+        _sortAscending = false;
+        return Icons.arrow_upward;
       } 
       else {
+        // no specific rule for other columns
         return null;
       }
     });
+
     // Sort the data by the third column (date) in descending order initially
     _sortColumn(onLoadDefaultDescendingColumnId);
   }
@@ -215,44 +225,40 @@ class _TableWidgetState extends State<TableWidget> {
       }
 
       sortColumnIndex = columnIndex;
-      
-      int NAME_COLUMN_ID = 0;
-      int AMOUNT_COLUMN_ID = 1;
-      int DATE_COLUMN_ID = 2;
-      
+      if(debug) log.d('I am here sortColumnIndex => $sortColumnIndex $_sortAscending');
       widget.tableData.sort((a, b) {
         int result = 0;
-        if (columnIndex == NAME_COLUMN_ID) {
+        if (columnIndex == constNameColumnId) {  // constNameColumnId = 0
           result = _compareStrings(a[columnIndex], b[columnIndex]);
         } 
-        else if (columnIndex == AMOUNT_COLUMN_ID) {
+        else if (columnIndex == constAmountColumnId) { // constAmountColumnId = 1;
           result = _compareNumeric(a[columnIndex], b[columnIndex]);
         } 
-        else if (columnIndex == DATE_COLUMN_ID) {
+        else if (columnIndex == constDateColumnId) { // constDateColumnId = 2
           result = _compareDates(a[columnIndex], b[columnIndex]);
         }
 
         // If the first column comparison is equal, use another column for sorting. See the default order below
         if (result == 0) {
-          if (columnIndex == NAME_COLUMN_ID) { 
-              result = _compareDates(a[DATE_COLUMN_ID], b[DATE_COLUMN_ID]); // If still `amounts` are same finally sort by `date`
+          if (columnIndex == constNameColumnId) { 
+            result = _compareDates(a[constDateColumnId], b[constDateColumnId]); // If still `amounts` are same finally sort by `date`
             if(result == 0){      
-              result = _compareNumeric(a[AMOUNT_COLUMN_ID], b[AMOUNT_COLUMN_ID]);   // If `names` are same sort by `amount`
+              result = _compareNumeric(a[constAmountColumnId], b[constAmountColumnId]);   // If `names` are same sort by `amount`
             }
-          } else if (columnIndex == AMOUNT_COLUMN_ID) {
-            result = _compareStrings(a[NAME_COLUMN_ID], b[NAME_COLUMN_ID]); // If `amounts` are same sort by `name`
+          } else if (columnIndex == constAmountColumnId) {
+            result = _compareStrings(a[constNameColumnId], b[constNameColumnId]); // If `amounts` are same sort by `name`
             if(result == 0){
-              result = _compareDates(a[DATE_COLUMN_ID], b[DATE_COLUMN_ID]); // If still `names` are same sort by `date`
+              result = _compareDates(a[constDateColumnId], b[constDateColumnId]); // If still `names` are same sort by `date`
             }
-          } else if (columnIndex == DATE_COLUMN_ID) {
-            result = _compareStrings(a[NAME_COLUMN_ID], b[NAME_COLUMN_ID]); // If dates are same sort by names
+          } else if (columnIndex == constDateColumnId) {
+            result = _compareStrings(a[constNameColumnId], b[constNameColumnId]); // If dates are same sort by names
             if(result == 0){
-              result = _compareNumeric(a[AMOUNT_COLUMN_ID], b[AMOUNT_COLUMN_ID]); // If still names are same finally sort by amount
+              result = _compareNumeric(a[constAmountColumnId], b[constAmountColumnId]); // If still names are same finally sort by amount
             }
           }
         }
-
-        return _sortAscending ? result : -result; // Invert result for descending order
+        if(debug) log.d('_sortAscending ? result : -result => ${_sortAscending ? result : -result}');
+        return result;
       });
 
       // stop the spinner because the sorting is completed
@@ -269,10 +275,12 @@ class _TableWidgetState extends State<TableWidget> {
 
   // Helper method to compare numeric values, removing unncessary spaces, commas and currency symbol
   int _compareNumeric(String a, String b) {
-    a = a.replaceAll(',', '').replaceAll('INR', '').replaceAll(' ', '');
-    b = b.replaceAll(',', '').replaceAll('INR', '').replaceAll(' ', '');
-    double aValue = double.parse(a);
-    double bValue = double.parse(b);
+    // a = a.replaceAll(',', '').replaceAll('INR', '').replaceAll(' ', '');
+    // b = b.replaceAll(',', '').replaceAll('INR', '').replaceAll(' ', '');
+    // double aValue = double.parse(a);
+    // double bValue = double.parse(b);
+    double aValue = HelperUtil.parseCurrencyStringsToDouble(a);
+    double bValue = HelperUtil.parseCurrencyStringsToDouble(b);
     return _sortAscending ? aValue.compareTo(bValue) : bValue.compareTo(aValue);
   }
 
