@@ -1,3 +1,4 @@
+// tab_widget.dart
 // ignore_for_file: library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
@@ -23,6 +24,9 @@ class _TabWidgetState extends State<TabWidget> {
   final Logger log = Logger();
   DateTime selectedStartDate = DateTime.now().add(const Duration(days: -1)); // by default show data for today and yesterday
   DateTime selectedEndDate = DateTime.now();
+  
+  static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
+  static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
 
   @override
   void initState() {

@@ -35,7 +35,7 @@ class _TableWidgetState extends State<TableWidget> {
   final int constDateColumnId = 2;
       
   static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
-  static bool bigdebug = bool.parse(dotenv.env['bigdebug'] ?? 'false');
+  static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
 
   String approveButtonName = 'Approve';
   bool isApproving = false; // Flag to track whether the approval process is ongoing
@@ -225,39 +225,39 @@ class _TableWidgetState extends State<TableWidget> {
       }
 
       sortColumnIndex = columnIndex;
-      if(debug) log.d('I am here sortColumnIndex => $sortColumnIndex $_sortAscending');
+      if(detaildebug) log.d('I am here sortColumnIndex => $sortColumnIndex $_sortAscending');
       widget.tableData.sort((a, b) {
         int result = 0;
         if (columnIndex == constNameColumnId) {  // constNameColumnId = 0
-          result = _compareStrings(a[columnIndex], b[columnIndex]);
+          result = compareStrings(a[columnIndex], b[columnIndex]);
         } 
         else if (columnIndex == constAmountColumnId) { // constAmountColumnId = 1;
-          result = _compareNumeric(a[columnIndex], b[columnIndex]);
+          result = compareNumeric(a[columnIndex], b[columnIndex]);
         } 
         else if (columnIndex == constDateColumnId) { // constDateColumnId = 2
-          result = _compareDates(a[columnIndex], b[columnIndex]);
+          result = compareDates(a[columnIndex], b[columnIndex]);
         }
 
         // If the first column comparison is equal, use another column for sorting. See the default order below
         if (result == 0) {
           if (columnIndex == constNameColumnId) { 
-            result = _compareDates(a[constDateColumnId], b[constDateColumnId]); // If still `amounts` are same finally sort by `date`
+            result = compareDates(a[constDateColumnId], b[constDateColumnId]); // If still `amounts` are same finally sort by `date`
             if(result == 0){      
-              result = _compareNumeric(a[constAmountColumnId], b[constAmountColumnId]);   // If `names` are same sort by `amount`
+              result = compareNumeric(a[constAmountColumnId], b[constAmountColumnId]);   // If `names` are same sort by `amount`
             }
           } else if (columnIndex == constAmountColumnId) {
-            result = _compareStrings(a[constNameColumnId], b[constNameColumnId]); // If `amounts` are same sort by `name`
+            result = compareStrings(a[constNameColumnId], b[constNameColumnId]); // If `amounts` are same sort by `name`
             if(result == 0){
-              result = _compareDates(a[constDateColumnId], b[constDateColumnId]); // If still `names` are same sort by `date`
+              result = compareDates(a[constDateColumnId], b[constDateColumnId]); // If still `names` are same sort by `date`
             }
           } else if (columnIndex == constDateColumnId) {
-            result = _compareStrings(a[constNameColumnId], b[constNameColumnId]); // If dates are same sort by names
+            result = compareStrings(a[constNameColumnId], b[constNameColumnId]); // If dates are same sort by names
             if(result == 0){
-              result = _compareNumeric(a[constAmountColumnId], b[constAmountColumnId]); // If still names are same finally sort by amount
+              result = compareNumeric(a[constAmountColumnId], b[constAmountColumnId]); // If still names are same finally sort by amount
             }
           }
         }
-        if(debug) log.d('_sortAscending ? result : -result => ${_sortAscending ? result : -result}');
+        if(detaildebug) log.d('_sortAscending ? result : -result => ${_sortAscending ? result : -result}');
         return result;
       });
 
@@ -267,14 +267,14 @@ class _TableWidgetState extends State<TableWidget> {
   }
 
   // Helper method to compare strings case insensitive
-  int _compareStrings(String a, String b) {
+  int compareStrings(String a, String b) {
     a = a.toUpperCase();
     b = b.toUpperCase();
     return _sortAscending ? a.compareTo(b) : b.compareTo(a);
   }
 
   // Helper method to compare numeric values, removing unncessary spaces, commas and currency symbol
-  int _compareNumeric(String a, String b) {
+  int compareNumeric(String a, String b) {
     // a = a.replaceAll(',', '').replaceAll('INR', '').replaceAll(' ', '');
     // b = b.replaceAll(',', '').replaceAll('INR', '').replaceAll(' ', '');
     // double aValue = double.parse(a);
@@ -285,9 +285,9 @@ class _TableWidgetState extends State<TableWidget> {
   }
 
   // Helper method to compare date values
-  int _compareDates(String aDateValue, String bDateValue) {
+  int compareDates(String aDateValue, String bDateValue) {
     
-    if(bigdebug) log.d('Tabindex is => ${widget.tabIndex}');
+    if(detaildebug) log.d('Tabindex is => ${widget.tabIndex}');
 
     // When its on Messages tab or transactions tab
     if(widget.tabIndex == 0 || widget.tabIndex == 1){
@@ -311,16 +311,18 @@ class _TableWidgetState extends State<TableWidget> {
       isApproving = true;
     });
 
+    // Extract recordIds from the list
     List<String> recordIds = [];
-
     for (int i = 0; i < selectedRows.length; i++) {
       if (selectedRows[i]) {
         recordIds.add(widget.tableData[i][3]);
       }
     }
 
+    if(debug) log.d('recordIds=> $recordIds');
+
+    // Call the API for approve message
     dynamic response = await DataGenerator.approveSelectedMessages(objAPIName: 'FinPlan__SMS_Message__c', recordIds: recordIds);
-    
     if(debug) log.d('Response for handleApproveSMS ${response.toString()}');
 
     setState(() {
@@ -330,6 +332,7 @@ class _TableWidgetState extends State<TableWidget> {
 
       for (int i = 0; i < selectedRows.length; i++) {
         if (selectedRows[i]) {
+          if(debug) log.d('i=>$i AND selectedRows[i]=>${selectedRows[i]}');
           widget.tableData.removeAt(i);
           selectedRows.removeAt(i);
         }
