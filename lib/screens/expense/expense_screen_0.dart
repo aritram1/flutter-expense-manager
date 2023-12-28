@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../utils/data_generator_local.dart';
+// import '../../utils/data_generator_local.dart';
+import '../../utils/data_generator.dart';
 import '../../widgets/finplan_table_widget.dart';
 import 'package:logger/logger.dart';
 
@@ -15,7 +16,7 @@ class ExpenseScreen0 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: getAndEnrichAllSms(),
+      future: DataGenerator.generateTab1Data(),
       builder: (context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
@@ -30,6 +31,7 @@ class ExpenseScreen0 extends StatelessWidget {
             child: Text('No data available'),
           );
         } else {
+          log.d('Snapshot Data : ${snapshot.data!}');
           return FinPlanTableWidget(
             key: key,
             headerNames: const ['Paid To', 'Amount', 'Date'],
@@ -44,6 +46,42 @@ class ExpenseScreen0 extends StatelessWidget {
       },
     );
   }
+
+
+  // @override
+  // Widget build(BuildContext context) {
+  //   return FutureBuilder(
+  //     future: DataGenerator.generateTab1Data(),
+  //     builder: (context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+  //       if (snapshot.connectionState == ConnectionState.waiting) {
+  //         return const Center(
+  //           child: CircularProgressIndicator(),
+  //         );
+  //       } else if (snapshot.hasError) {
+  //         return Center(
+  //           child: Text('Error loading data here! ${snapshot.error.toString()}'),
+  //         );
+  //       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+  //         return const Center(
+  //           child: Text('No data available'),
+  //         );
+  //       } else {
+  //         return FinPlanTableWidget(
+  //           key: key,
+  //           headerNames: const ['Paid To', 'Amount', 'Date'],
+  //           noRecordFoundMessage: 'Nothing to approve',
+  //           caller: 'ExpenseScreen0',
+  //           columnWidths: const [0.3, 0.2, 0.2],
+  //           data: snapshot.data!,
+  //           onLoadComplete: onLoadComplete,
+  //           defaultSortcolumnName: 'Date', // 2 meaning the Date column
+  //         );
+  //       }
+  //     },
+  //   );
+  // }
+
+
 }
 
 //   case 0:

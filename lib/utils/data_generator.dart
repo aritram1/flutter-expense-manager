@@ -16,9 +16,10 @@ class DataGenerator {
 
   static Logger log = Logger();
 
-  static Future<List<List<String>>> generateTab1Data() async {
-    List<List<String>> generatedData = [];
-
+  // static Future<List<List<String>>> generateTab1Data() async {
+  static Future<List<Map<String, dynamic>>> generateTab1Data() async {
+    // List<List<String>> generatedData = [];
+    List<Map<String, dynamic>> generatedData = [];
     Map<String, dynamic> response = await SalesforceUtil.queryFromSalesforce(
       objAPIName: 'FinPlan__SMS_Message__c', 
       fieldList: ['Id', 'FinPlan__Received_At_formula__c', 'FinPlan__Transaction_Date__c', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c', 'FinPlan__Formula_Amount__c'], 
@@ -43,17 +44,12 @@ class DataGenerator {
         if(records != null && records.isNotEmpty){
           for (var record in records) {
             Map<String, dynamic> recordMap = Map.castFrom(record);
-            String id = recordMap['Id'];
-            log.d('1 -Id $id');
-            String beneficiary = recordMap['FinPlan__Beneficiary__c'];
-            log.d('2 -beneficiary $beneficiary');
-            String amount = (recordMap['FinPlan__Formula_Amount__c'] != null) ? recordMap['FinPlan__Formula_Amount__c'].toString() : 'N/A' ;
-            log.d('3 -amount $amount');
-            String date = recordMap['FinPlan__Transaction_Date__c'].substring(5,10);
-            log.d('3 -date $date');
-            String formattedDate = '${date.split('-')[1]}/${date.split('-')[0]}';
-            
-            generatedData.add([beneficiary, amount, formattedDate, id]);
+            generatedData.add({
+              'Paid To': recordMap['FinPlan__Beneficiary__c'] ?? 'Default Beneficiary',
+              'Amount': recordMap['FinPlan__Formula_Amount__c'] ?? 0,
+              'Date': recordMap['FinPlan__Transaction_Date__c'] ?? DateTime.now(),
+              'Id': recordMap['Id'] ?? 'Default Id',
+            });
           }
         }
       }
