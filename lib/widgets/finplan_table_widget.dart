@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 
@@ -30,10 +31,9 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
   late List<Map<String, dynamic>> tableData;
   late Set<int> selectedRows;
   final Logger log = Logger();
+  static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
+  static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
   bool isLoading = false;
-
-  bool debug = true;
-  bool detaildebug = true;
 
   int sortColumnIndex = 0;
   bool _sortAscending = false;
@@ -184,7 +184,7 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
       isLoading = true;
     });
 
-    // await _sortColumn(colIndex);
+    await _sortColumn(colIndex);
 
     // Way to create async mocking
     await Future.delayed(const Duration(milliseconds: 100));
@@ -220,11 +220,16 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
 
       int result = 0;
 
-      log.d('a => ${a}');
-      log.d('b => ${b}');
+      if(detaildebug){
+        log.d('a => ${a}');
+        log.d('b => ${b}');
+      }
       String columnName = widget.headerNames[sortColumnIndex];
-      log.d('a => ${a[columnName]}');//I am here sortColumnIndex => $sortColumnIndex $_sortAscending');
-      log.d('b => ${b[columnName]}');//log.d('I am here sortColumnIndex => $sortColumnIndex $_sortAscending');
+
+      if(detaildebug){
+        log.d('a => ${a[columnName]}');//I am here sortColumnIndex => $sortColumnIndex $_sortAscending');
+        log.d('b => ${b[columnName]}');//log.d('I am here sortColumnIndex => $sortColumnIndex $_sortAscending');
+      }
       
       if (columnIndex == constNameColumnId) { // constNameColumnId = 0;
         result = compareStrings(a[columnName], b[columnName]);
@@ -235,7 +240,7 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
       else if (columnIndex == constDateColumnId) {  // constDateColumnId = 2
         result = compareDates(a[columnName], b[columnName]);
       }
-      log.d('Interim result : $result');
+      if(detaildebug) log.d('Interim result : $result');
 
       // Second layer sorting will be implemented later
       // TBD

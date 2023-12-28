@@ -1,4 +1,3 @@
-//message_util.dart
 // ignore_for_file: constant_identifier_names, depend_on_referenced_packages
 
 import 'dart:core';
@@ -6,14 +5,12 @@ import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:logger/logger.dart';
 import 'package:device_info/device_info.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class MessageUtil {
-
-  static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
-  static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
-
+  
   static Logger log = Logger();
+
+  static const int MAXM_MESSAGE_COUNT = 1000;
 
   ///////////////////////////////Get SMS Messages//////////////////////////////////////
   static Future<List<SmsMessage>> getMessages({List<SmsQueryKind>? kinds, String? sender, int? count}) async {
@@ -40,7 +37,7 @@ class MessageUtil {
         messages = await SmsQuery().querySms(
           kinds: smsKinds, // SmsQueryKind.inbox ,SmsQueryKind.sent, SmsMessageKind.draft
           address: sender, // +1234567890
-          count: 300, //default value
+          count: MAXM_MESSAGE_COUNT,
         );
       }
       
@@ -48,7 +45,7 @@ class MessageUtil {
     else {
       await Permission.sms.request();
     }
-    if(debug) log.d('Inbox message count : ${messages.length}');
+    log.d('Inbox message count : ${messages.length}');
     return sort(messages);
   }
 
@@ -77,13 +74,10 @@ class MessageUtil {
 
   // Method to sort the messages as per received at value, records are to be arranged by date asc
   static List<SmsMessage> sort(List<SmsMessage> msgList){
-    // List<SmsMessage> sortedMsgList = [];
-    // for(int i = msgList.length-1; i >= 0; i--){
-    //   sortedMsgList.add(msgList[i]);
-    // }
-    // return sortedMsgList;
-
-    // sorting is not required at the moment, because balance update works when messages are arranged most recent on top
-    return msgList;
+    List<SmsMessage> sortedMsgList = [];
+    for(int i = msgList.length-1; i >= 0; i--){
+      sortedMsgList.add(msgList[i]);
+    }
+    return sortedMsgList;
   }
 }

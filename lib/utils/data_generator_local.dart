@@ -1,13 +1,17 @@
 import 'dart:math';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:logger/logger.dart';
 import './SMSProcessor.dart';
-import 'message_util_local.dart';
+import 'message_util.dart';
 
 Logger log = Logger();
+bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
+bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
 
 Future<List<Map<String, dynamic>>> generateMockDataForExpense() async {
   final List<Map<String, dynamic>> data = [];
+  
 
   for (int i = 1; i <= 50; i++) {
     data.add({
