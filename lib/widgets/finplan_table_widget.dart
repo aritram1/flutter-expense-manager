@@ -11,6 +11,8 @@ class FinPlanTableWidget extends StatefulWidget {
   final String caller;
   final List<double> columnWidths;
   final String defaultSortcolumnName;
+  final bool showSelectionBoxes; // Add this line
+
 
   const FinPlanTableWidget({
     Key? key,
@@ -21,6 +23,7 @@ class FinPlanTableWidget extends StatefulWidget {
     required this.caller,
     required this.columnWidths, // Add this line
     required this.defaultSortcolumnName,
+    this.showSelectionBoxes = true,
   }) : super(key: key);
 
   @override
@@ -29,7 +32,7 @@ class FinPlanTableWidget extends StatefulWidget {
 
 class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
   late List<Map<String, dynamic>> tableData;
-  late Set<int> selectedRows;
+  List<String> selectedRowIds = [];
   final Logger log = Logger();
   static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
   static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
@@ -49,9 +52,6 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
 
     // Initialize tableData based on whether widget.data is empty or not
     tableData = widget.data.isNotEmpty ? widget.data : [];
-
-    // Initialize selectedRows list
-    selectedRows = {}; //List.generate(widget.data.length, (index) => false);
 
     _sortIcons = List.generate(widget.headerNames.length, (colIndex) {
       if (widget.headerNames[colIndex] == widget.defaultSortcolumnName) {  // Set default sorting based on the passed column
@@ -94,11 +94,59 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
                       ),
                     ),
             ),
-          ],
+          ],         
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Visibility(
+            visible: selectedRowIds.isNotEmpty,
+            child : createApproveButton()
+          ),
         ),
       ],
     );
   }
+
+  createApproveButton(){
+    return 
+      ElevatedButton.icon(
+        onPressed: () async {
+          await handleApproveSMS(selectedRowIds);
+          setState(() {
+            selectedRowIds.clear();
+          });
+        },
+        icon: const Icon(Icons.approval), //, color: Color.fromARGB(255, 194, 127, 233)), // Set the icon color
+        label: const Text('Approve'),
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.resolveWith<Color>(
+            (Set<MaterialState> states) {
+              // Define the background color based on the button's state
+              if (states.contains(MaterialState.pressed)) {
+                return Colors.grey; // Grey color when pressed
+              }
+              return Colors.blue.shade50; // Default background color
+            },
+          ),
+          elevation: MaterialStateProperty.all<double>(0.0),
+          shape: MaterialStateProperty.all<OutlinedBorder>(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0), // Adjust the border radius
+            ),
+          ),
+        ),
+      );
+  }
+  
+
+
+
+         
+
+
+
+
+
 
   _generateColumns() {
     return List.generate(widget.headerNames.length, (index) {
@@ -133,11 +181,11 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
 
   _generateRows() {
     return widget.data.asMap().entries.map((entry) {
-      final rowIndex = entry.key;
+      final String rowIndex = entry.value['Id'];
       final row = entry.value;
 
       return DataRow(
-        selected: selectedRows.contains(rowIndex), // Updated line
+        selected: selectedRowIds.contains(rowIndex), // Updated line
         onSelectChanged: (selected) {
           handleRowSelection(selected, rowIndex);
         },
@@ -310,18 +358,17 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
     }
   }
 
-  void handleRowSelection(bool? selected, int rowIndex) {
+  void handleRowSelection(bool? selected, String rowIndex) {
     setState(() {
       if (selected != null) {
         if (selected) {
-          selectedRows.add(rowIndex);
+          selectedRowIds.add(rowIndex);
         } else {
-          selectedRows.remove(rowIndex);
+          selectedRowIds.remove(rowIndex);
         }
       }
     });
   }
-
 
   String getFormattedCellData(String columnName, dynamic row){
     String formattedCellData = '';
@@ -341,4 +388,22 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
     return formattedCellData;
   }
 
+
+  Future<void> handleApproveSMS(List<String> recordIds) async {
+    // Set the flag to true when starting the approval process
+    setState(() {
+      isLoading = true;
+    });
+
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    // dynamic response = await DataGenerator.approveSelectedMessages(objAPIName :'FinPlan__SMS_Message__c', recordIds : recordIds);
+    // log.d('Response for handleApproveSMS ${response.toString()}');
+
+    setState(() {
+      // Reset the flag when the approval process is completed
+      isLoading = false;
+    });
+  }
+  
 }

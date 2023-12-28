@@ -40,6 +40,7 @@ class ExpenseScreen2 extends StatelessWidget {
             data: snapshot.data!,
             onLoadComplete: onLoadComplete,
             defaultSortcolumnName: 'Date', // 2 meaning the Date column
+            showSelectionBoxes : false
           );
         }
       },
