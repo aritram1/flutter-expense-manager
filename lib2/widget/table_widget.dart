@@ -1,4 +1,4 @@
-import 'package:ExpenseManager/util/data_generator.dart';
+import '../../lib2/util/data_generator.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 class TableWidget extends StatefulWidget {

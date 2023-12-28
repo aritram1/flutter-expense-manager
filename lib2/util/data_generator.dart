@@ -1,6 +1,6 @@
 // data_generator.dart
 import 'dart:convert';
-import 'package:ExpenseManager/util/message_util.dart';
+import '../../lib2/util/message_util.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:logger/logger.dart';
 import 'salesforce_util.dart';

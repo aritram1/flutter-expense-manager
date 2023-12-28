@@ -1,15 +1,14 @@
-// main.dart
-
-// ignore_for_file: library_private_types_in_public_api, use_key_in_widget_constructors
-
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'util/data_generator.dart';
-import './widget/tab_widget.dart';
+import './screens/expense/expense_home_screen.dart';
+import './screens/home/home_home_screen.dart';
+import './screens/investment/investment_home_screen.dart';
+import './services/database_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final isDbCreated = await DatabaseService.instance.initializeDatabase();
+  Logger().d('Created > $isDbCreated');
   runApp(MyApp());
 }
 
@@ -17,135 +16,63 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MyTabs(),
+      title: 'Expense Manager',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      home: MyAppHomePage(),
     );
   }
 }
 
-class MyTabs extends StatefulWidget {
+class MyAppHomePage extends StatefulWidget {
   @override
-  _MyTabsState createState() => _MyTabsState();
+  _MyAppHomePageState createState() => _MyAppHomePageState();
 }
 
-class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  final String title = 'Expense Manager';
-  final Logger log = Logger();
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-  }
+class _MyAppHomePageState extends State<MyAppHomePage> {
+  int _currentIndex = 1;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () async {
-              // Show loading dialog
-              showDialog(
-                context: context,
-                barrierDismissible: false, // Prevent dialog dismissal on tap outside
-                builder: (BuildContext dialogContext) {
-                  return const Dialog(
-                    child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircularProgressIndicator(),
-                          SizedBox(width: 16.0),
-                          Text("Deleting..."),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              );
-
-              // Perform the sync operation
-              String result = await handleSMSAndTransactionsDelete();
-              // log.d('Handle handleSMSAndTransactionsDelete Result => $result');
-
-              // Close the loading dialog
-              Navigator.of(context).pop();
-            },
-            tooltip: 'Delete All Messages',
+      body: _getBody(),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
           ),
-          
-          IconButton(
-            icon: const Icon(Icons.sync),
-            onPressed: () async {
-              // Show loading dialog
-              showDialog(
-                context: context,
-                barrierDismissible: false, // Prevent dialog dismissal on tap outside
-                builder: (BuildContext dialogContext) {
-                  return const Dialog(
-                    child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircularProgressIndicator(),
-                          SizedBox(width: 16.0),
-                          Text("Syncing..."),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              );
-
-              // Perform the sync operation
-              String result = await handleSMSSync();
-              // log.d('Handle Sync Message Result => $result');
-
-              // Close the loading dialog
-              Navigator.of(context).pop();
-            },
-            tooltip: 'Sync from Phone',
+          BottomNavigationBarItem(
+            icon: Icon(Icons.attach_money),
+            label: 'Expense',
           ),
-          // Add more action buttons if needed
-        ],
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: const [
-          TabData(tabIndex: 0, title: 'Transactions'),
-          TabData(tabIndex: 1, title: 'View Expenses'),
-          TabData(tabIndex: 2, title: 'Investments'),
-        ],
-      ),
-      bottomNavigationBar: TabBar(
-        controller: _tabController,
-        tabs: const [
-          Tab(text: 'Transactions'),
-          Tab(text: 'View Expenses'),
-          Tab(text: 'Investments'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.trending_up),
+            label: 'Investment',
+          ),
         ],
       ),
     );
   }
 
-
-  Future<String> handleSMSSync() async {
-    log.d('Syncing SMS data...');
-    Map<String, dynamic> result = await DataGenerator.syncMessages();
-    log.d('Syncing SMS data completed.');// Response : $result');
-    return result.toString();
-  }
-
-  // Method to help mass deletion of SMS messages by calling the SF API `/api/sms/delete/*`
-  Future<String> handleSMSAndTransactionsDelete() async {
-    log.d('Deleting SMS data...');
-    Map<String, dynamic> response = await DataGenerator.deleteAllMessagesAndTransactions();
-    log.d('Deleting completed');//. encoded response is -> ${jsonEncode(response)}'); 
-    return response.toString();
+  Widget _getBody() {
+    switch (_currentIndex) {
+      case 0:
+        return const HomeScreen();
+      case 1:
+        return const ExpenseHomeScreen();
+      case 2:
+        return const InvestmentHomeScreen();
+      default:
+        return Container(); // Handle unknown index gracefully
+    }
   }
 }
