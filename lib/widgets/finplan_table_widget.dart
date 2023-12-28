@@ -332,7 +332,7 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
       String dd = yyyymmdd.split('-')[2];
       formattedCellData = '$dd/$mm/$yy';
     }
-    else if (columnName == 'Amount'){
+    else if (columnName == 'Amount' || columnName == 'Balance'){
       formattedCellData = NumberFormat.currency(locale: 'en_IN', symbol: '₹').format(double.parse(row[columnName].toString()));
     }
     else{

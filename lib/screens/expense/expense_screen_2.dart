@@ -36,7 +36,7 @@ class ExpenseScreen2 extends StatelessWidget {
             headerNames: const ['Name', 'Balance', 'Date'],
             noRecordFoundMessage: 'Nothing to approve',
             caller: 'ExpenseScreen2',
-            columnWidths: const [0.3, 0.2, 0.2],
+            columnWidths: const [0.2, 0.3, 0.2],
             data: snapshot.data!,
             onLoadComplete: onLoadComplete,
             defaultSortcolumnName: 'Date', // 2 meaning the Date column
