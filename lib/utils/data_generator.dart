@@ -47,7 +47,7 @@ class DataGenerator {
             generatedData.add({
               'Paid To': recordMap['FinPlan__Beneficiary__c'] ?? 'Default Beneficiary',
               'Amount': recordMap['FinPlan__Formula_Amount__c'] ?? 0,
-              'Date': recordMap['FinPlan__Transaction_Date__c'] ?? DateTime.now(),
+              'Date': DateTime.parse(recordMap['FinPlan__Transaction_Date__c'] ?? DateTime.now().toString()),
               'Id': recordMap['Id'] ?? 'Default Id',
             });
           }

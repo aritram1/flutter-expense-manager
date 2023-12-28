@@ -31,7 +31,6 @@ class ExpenseScreen0 extends StatelessWidget {
             child: Text('No data available'),
           );
         } else {
-          log.d('Snapshot Data : ${snapshot.data!}');
           return FinPlanTableWidget(
             key: key,
             headerNames: const ['Paid To', 'Amount', 'Date'],

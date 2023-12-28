@@ -80,9 +80,9 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
               child: widget.data.isEmpty
                 ? _buildEmptyTableMessage()
                 : isLoading
-                  ? Center(
-                    child: const CircularProgressIndicator(), // Show loading indicator
-                  ) 
+                  ? const Center(
+                    child: CircularProgressIndicator(), // Show loading indicator
+                  )
                   : SingleChildScrollView( 
                       scrollDirection: Axis.vertical,
                       child: DataTable(
@@ -184,7 +184,7 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
       isLoading = true;
     });
 
-    await _sortColumn(colIndex);
+    // await _sortColumn(colIndex);
 
     // Way to create async mocking
     await Future.delayed(const Duration(milliseconds: 100));
