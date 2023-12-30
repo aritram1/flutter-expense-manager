@@ -9,7 +9,7 @@ Logger log = Logger();
 bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
 bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
 
-Future<List<Map<String, dynamic>>> generateMockDataForExpense() async {
+Future<List<Map<String, dynamic>>> generateMockDataForHome() async {
   final List<Map<String, dynamic>> data = [];
   
 

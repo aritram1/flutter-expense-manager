@@ -20,8 +20,19 @@ class DataGenerator {
   static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
   static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
 
+  static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen0() async {
+    return generateTab1Data();
+  }
 
-  // static Future<List<List<String>>> generateTab1Data() async {
+  static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen1(DateTime startDate, DateTime endDate) async {
+    return generateTab2Data(startDate, endDate);
+  }
+
+  static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen2() async {
+    return generateTab3Data();
+  }
+    
+
   static Future<List<Map<String, dynamic>>> generateTab1Data() async {
     // List<List<String>> generatedData = [];
     List<Map<String, dynamic>> generatedData = [];
@@ -104,8 +115,6 @@ class DataGenerator {
               'Date': DateTime.parse(recordMap['FinPlan__Transaction_Date__c'] ?? DateTime.now().toString()),
               'Id': recordMap['Id'] ?? 'Default Id',
             });
-
-            // generatedData.add([beneficiary, amount, formattedDate, id]);
           }
         }
       }
@@ -139,9 +148,8 @@ class DataGenerator {
     }
     else if (data != null && data.isNotEmpty) {
       try{
-        if(detaildebug) log.d('here 0');
         dynamic records = data['data'];
-        if(debug) log.d('REcords=> $records');
+        if(debug) log.d('Inside generateTab3Data Records=> $records');
         if(records != null && records.isNotEmpty){
           for (var record in records) {
             Map<String, dynamic> recordMap = Map.castFrom(record);
@@ -157,7 +165,7 @@ class DataGenerator {
             generatedDataTab3.add({
               'Name': accountCode,
               'Balance': balance,
-              'Date': lastmodifiedDate,
+              'Last Updated': lastmodifiedDate,
               'Id': id ,
             });
           }

@@ -16,7 +16,7 @@ class ExpenseScreen2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: DataGenerator.generateTab3Data(),
+      future: DataGenerator.generateDataForExpenseScreen2(),
       builder: (context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
@@ -33,13 +33,13 @@ class ExpenseScreen2 extends StatelessWidget {
         } else {
           return FinPlanTableWidget(
             key: key,
-            headerNames: const ['Name', 'Balance', 'Date'],
+            headerNames: const ['Name', 'Balance', 'Last Updated'],
             noRecordFoundMessage: 'Nothing to approve',
             caller: 'ExpenseScreen2',
-            columnWidths: const [0.2, 0.3, 0.2],
+            columnWidths: const [0.2, 0.25, 0.35],
             data: snapshot.data!,
             onLoadComplete: onLoadComplete,
-            defaultSortcolumnName: 'Date', // 2 meaning the Date column
+            defaultSortcolumnName: 'Last Updated', // 2 meaning the Date column
             showSelectionBoxes : false
           );
         }

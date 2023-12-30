@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Import the intl package
 import 'package:logger/logger.dart';
 
-class FinPlanDatepickerPanel extends StatefulWidget {
+class FinPlanDatepickerPanelWidget extends StatefulWidget {
   final DateTime startDate;
   final DateTime endDate;
   final Function(DateTime, DateTime) onDateRangeSelected;
 
   final Logger log = Logger();
 
-  FinPlanDatepickerPanel({
+  FinPlanDatepickerPanelWidget({
     Key? key,
     required this.startDate,
     required this.endDate,
@@ -17,10 +17,10 @@ class FinPlanDatepickerPanel extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _FinPlanDatepickerPanelState createState() => _FinPlanDatepickerPanelState();
+  _FinPlanDatepickerPanelWidgetState createState() => _FinPlanDatepickerPanelWidgetState();
 }
 
-class _FinPlanDatepickerPanelState extends State<FinPlanDatepickerPanel> {
+class _FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidget> {
   @override
   Widget build(BuildContext context) {
     return Padding(

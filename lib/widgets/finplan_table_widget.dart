@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
+import '../utils/finplan_exception.dart';
 
 class FinPlanTableWidget extends StatefulWidget {
   final List<String> headerNames;
@@ -11,7 +12,7 @@ class FinPlanTableWidget extends StatefulWidget {
   final String caller;
   final List<double> columnWidths;
   final String defaultSortcolumnName;
-  final bool showSelectionBoxes; // Add this line
+  final bool showSelectionBoxes;
 
 
   const FinPlanTableWidget({
@@ -19,10 +20,10 @@ class FinPlanTableWidget extends StatefulWidget {
     required this.headerNames,
     required this.data,
     required this.onLoadComplete,
-    this.noRecordFoundMessage = 'Default Message for no records!',
     required this.caller,
-    required this.columnWidths, // Add this line
+    required this.columnWidths,
     required this.defaultSortcolumnName,
+    this.noRecordFoundMessage = 'Default Message for no records!',
     this.showSelectionBoxes = true,
   }) : super(key: key);
 
@@ -31,7 +32,12 @@ class FinPlanTableWidget extends StatefulWidget {
 }
 
 class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
-  late List<Map<String, dynamic>> tableData;
+
+  final List<String> numericColumns = ['Amount', 'Balance'];
+  final List<String> dateColumns = ['Date'];
+  final List<String> dateTimeColumns = ['Last Updated'];
+  
+  List<Map<String, dynamic>> tableData = [];
   List<String> selectedRowIds = [];
   final Logger log = Logger();
   static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
@@ -48,26 +54,42 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
 
   @override
   void initState() {
+
     super.initState();
+
+    // If the `deafultSortColumn` is not present in passed `headernames`, throw an exception
+    if(!widget.headerNames.contains(widget.defaultSortcolumnName)) {
+      throw FinPlanException('default sorting column "${widget.defaultSortcolumnName}" is not present in table header !') ;
+    }
 
     // Initialize tableData based on whether widget.data is empty or not
     tableData = widget.data.isNotEmpty ? widget.data : [];
-
+    
+    int defaultSortcolumnIndex = 0;
     _sortIcons = List.generate(widget.headerNames.length, (colIndex) {
-      if (widget.headerNames[colIndex] == widget.defaultSortcolumnName) {  // Set default sorting based on the passed column
-        _sortAscending = false;
+      if (widget.headerNames[colIndex] == widget.defaultSortcolumnName) {
+        defaultSortcolumnIndex = colIndex;
+        // Set default sorting icon as ascending on load, so it will be reversed in the sortColumn method
         return Icons.arrow_upward;
       } 
       else {
-        // no specific rule for other columns
-        return null;
+        return null; // no specific rule for other columns
       }
     });
+    
+    log.d('defaultSortcolumnIndex is=> $defaultSortcolumnIndex');
+    sortColumn(defaultSortcolumnIndex); // Sort the table on load, based on `defaultColumnIndex`
 
+    // Set error callback in case some error occurs while loading the widget
+    FlutterError.onError = (FlutterErrorDetails details) {
+      // Custom error handling logic
+      String exceptionDetails = details.exception.toString();
+      String errorStack = (details.stack != null) ? details.stack.toString() : 'N/A';
+      widget.onLoadComplete('Error occurred while loading table : Details : $exceptionDetails | Stack : $errorStack');
+    };
 
     // Notify onLoadComplete based on the initialization result
-    widget.onLoadComplete(
-        tableData.isNotEmpty ? 'SUCCESS' : 'Error: Empty data sent to table');
+    widget.onLoadComplete(tableData.isNotEmpty ? 'SUCCESS' : 'Error: Empty data sent to table');
   }
 
   @override
@@ -86,6 +108,7 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
                   : SingleChildScrollView( 
                       scrollDirection: Axis.vertical,
                       child: DataTable(
+                        showCheckboxColumn: widget.showSelectionBoxes,
                         columnSpacing: 0.0,
                         headingRowHeight: 40.0,
                         sortAscending: _sortAscending,
@@ -137,16 +160,6 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
         ),
       );
   }
-  
-
-
-
-         
-
-
-
-
-
 
   _generateColumns() {
     return List.generate(widget.headerNames.length, (index) {
@@ -344,8 +357,6 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
 
   Widget _buildEmptyTableMessage() {
     if (widget.data.isEmpty) {
-      String message = widget.noRecordFoundMessage;
-
       return Padding(
         padding: const EdgeInsets.all(16.0),
         child: Text(
@@ -354,7 +365,7 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
         ),
       );
     } else {
-      return const SizedBox.shrink();
+      return const CircularProgressIndicator();
     }
   }
 
@@ -371,17 +382,33 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
   }
 
   String getFormattedCellData(String columnName, dynamic row){
+    
     String formattedCellData = '';
-    if(columnName == 'Date'){
+    
+    /////////////////////////// For Date type columns ///////////////////////////////////////
+    if(dateColumns.contains(columnName)){
       String yyyymmdd = row[columnName].toString().substring(0, 10);
-      String yy = yyyymmdd.split('-')[0].substring(2,4);
+      String yy = yyyymmdd.split('-')[0].substring(2,4);  // Instead of `2023` just show `23`
       String mm = yyyymmdd.split('-')[1];
       String dd = yyyymmdd.split('-')[2];
       formattedCellData = '$dd/$mm/$yy';
     }
-    else if (columnName == 'Amount' || columnName == 'Balance'){
-      formattedCellData = NumberFormat.currency(locale: 'en_IN', symbol: '₹').format(double.parse(row[columnName].toString()));
+    /////////////////////////// For DateTime type columns ////////////////////////////////////
+    else if(dateTimeColumns.contains(columnName)){
+      log.d('Datetime column => ${row[columnName].toString()}');
+      String yyyymmdd = row[columnName].toString().split(' ')[0];
+      String hhmmss = row[columnName].toString().split(' ')[1].split('.')[0];
+      String yy = yyyymmdd.split('-')[0].substring(2,4);
+      String mm = yyyymmdd.split('-')[1];
+      String dd = yyyymmdd.split('-')[2];
+      formattedCellData = '$dd/$mm/$yy $hhmmss';
     }
+    /////////////////////////// For Numeric / Currency type columns ///////////////////////////
+    else if (numericColumns.contains(columnName)){
+      double numericValue = row[columnName] ?? 0;
+      formattedCellData = NumberFormat.currency(locale: 'en_IN', symbol: '₹').format(numericValue);
+    }
+    /////////////////////////// For All other and text type columns ////////////////////////////
     else{
       formattedCellData = row[columnName].toString();
     }

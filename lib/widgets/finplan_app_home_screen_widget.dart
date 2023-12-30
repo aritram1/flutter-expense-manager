@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
-class FinPlanHomeScreenWidget extends StatelessWidget {
+class FinPlanAppHomeScreenWidget extends StatelessWidget {
   // declare the widget attributes
   final Key? key;
   final int tabCount;
@@ -24,7 +24,7 @@ class FinPlanHomeScreenWidget extends StatelessWidget {
   ];
 
   // default constructor
-  FinPlanHomeScreenWidget({
+  FinPlanAppHomeScreenWidget({
     this.key,
     required this.tabCount,
     required this.tabNames,

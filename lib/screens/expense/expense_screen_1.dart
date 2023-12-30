@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../utils/data_generator.dart';
-import '../../widgets/finplan_date_picker_panel.dart';
+import '../../widgets/finplan_date_picker_panel_widget.dart';
 import '../../widgets/finplan_table_widget.dart';
 import 'package:logger/logger.dart';
 
@@ -26,14 +26,14 @@ class _ExpenseScreen1State extends State<ExpenseScreen1> {
   @override
   void initState() {
     super.initState();
-    data = DataGenerator.generateTab2Data(selectedStartDate, selectedEndDate);
+    data = DataGenerator.generateDataForExpenseScreen1(selectedStartDate, selectedEndDate);
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        FinPlanDatepickerPanel(
+        FinPlanDatepickerPanelWidget(
           key: UniqueKey(),
           onDateRangeSelected: handleDateRangeSelection,
           startDate: selectedStartDate,
@@ -80,7 +80,7 @@ class _ExpenseScreen1State extends State<ExpenseScreen1> {
         selectedStartDate = startDate;
         selectedEndDate = endDate;
       });
-      data = Future.value(DataGenerator.generateTab2Data(selectedStartDate, selectedEndDate));
+      data = Future.value(DataGenerator.generateDataForExpenseScreen1(selectedStartDate, selectedEndDate));
     });
   }
 }

@@ -16,7 +16,7 @@ class ExpenseScreen0 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: DataGenerator.generateTab1Data(),
+      future: DataGenerator.generateDataForExpenseScreen0(),
       builder: (context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
@@ -39,7 +39,7 @@ class ExpenseScreen0 extends StatelessWidget {
             columnWidths: const [0.3, 0.2, 0.2],
             data: snapshot.data!,
             onLoadComplete: onLoadComplete,
-            defaultSortcolumnName: 'Date', // 2 meaning the Date column
+            defaultSortcolumnName: 'Date',
           );
         }
       },

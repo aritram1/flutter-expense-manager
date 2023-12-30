@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:logger/logger.dart';
 import './screens/expense/expense_home_screen.dart';
 import './screens/home/home_home_screen.dart';
@@ -6,6 +7,7 @@ import './screens/investment/investment_home_screen.dart';
 import './services/database_service.dart';
 
 void main() async {
+  await dotenv.load(fileName: ".env"); 
   WidgetsFlutterBinding.ensureInitialized();
   final isDbCreated = await DatabaseService.instance.initializeDatabase();
   Logger().d('Created > $isDbCreated');

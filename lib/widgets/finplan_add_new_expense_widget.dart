@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
-class FinPlanAddNewExpenseDialog extends StatefulWidget {
+class FinPlanAddNewExpenseWidget extends StatefulWidget {
   final Function(String, String, String, DateTime) onSave;
 
-  const FinPlanAddNewExpenseDialog({Key? key, required this.onSave}) : super(key: key);
+  const FinPlanAddNewExpenseWidget({Key? key, required this.onSave}) : super(key: key);
 
   @override
-  _FinPlanAddNewExpenseDialogState createState() => _FinPlanAddNewExpenseDialogState();
+  _FinPlanAddNewExpenseWidgetState createState() => _FinPlanAddNewExpenseWidgetState();
 }
 
-class _FinPlanAddNewExpenseDialogState extends State<FinPlanAddNewExpenseDialog> {
+class _FinPlanAddNewExpenseWidgetState extends State<FinPlanAddNewExpenseWidget> {
   final TextEditingController amountController = TextEditingController();
   final TextEditingController paidToController = TextEditingController();
   final TextEditingController detailsController = TextEditingController();
