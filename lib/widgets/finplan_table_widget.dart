@@ -1,3 +1,4 @@
+import 'package:ExpenseManager/utils/data_generator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
@@ -131,7 +132,7 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
   }
 
   createApproveButton(){
-    return 
+    return
       ElevatedButton.icon(
         onPressed: () async {
           await handleApproveSMS(selectedRowIds);
@@ -405,7 +406,7 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
     }
     /////////////////////////// For Numeric / Currency type columns ///////////////////////////
     else if (numericColumns.contains(columnName)){
-      double numericValue = row[columnName] ?? 0;
+      double numericValue = double.parse((row[columnName] ?? 0).toString());
       formattedCellData = NumberFormat.currency(locale: 'en_IN', symbol: '₹').format(numericValue);
     }
     /////////////////////////// For All other and text type columns ////////////////////////////
@@ -424,8 +425,8 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
 
     await Future.delayed(const Duration(milliseconds: 100));
 
-    // dynamic response = await DataGenerator.approveSelectedMessages(objAPIName :'FinPlan__SMS_Message__c', recordIds : recordIds);
-    // log.d('Response for handleApproveSMS ${response.toString()}');
+    Map<String, dynamic> response = await DataGenerator.approveSelectedMessages(objAPIName :'FinPlan__SMS_Message__c', recordIds : recordIds);
+    log.d('Response for handleApproveSMS ${response.toString()}');
 
     setState(() {
       // Reset the flag when the approval process is completed

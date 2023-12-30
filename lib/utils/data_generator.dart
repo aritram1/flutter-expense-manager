@@ -110,8 +110,8 @@ class DataGenerator {
           for (var record in records) {
             Map<String, dynamic> recordMap = Map.castFrom(record);
             generatedData.add({
-              'Paid To': recordMap['FinPlan__Beneficiary__c'] ?? 'Default Beneficiary',
-              'Amount': recordMap['FinPlan__Formula_Amount__c'] ?? 0,
+              'Paid To': recordMap['FinPlan__Beneficiary_Name__c'] ?? 'Default Beneficiary',
+              'Amount': recordMap['FinPlan__Amount__c'] ?? 0,
               'Date': DateTime.parse(recordMap['FinPlan__Transaction_Date__c'] ?? DateTime.now().toString()),
               'Id': recordMap['Id'] ?? 'Default Id',
             });

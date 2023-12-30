@@ -69,7 +69,7 @@ class _MyAppHomePageState extends State<MyAppHomePage> {
       case 0:
         return const HomeScreen();
       case 1:
-        return const ExpenseHomeScreen();
+        return ExpenseHomeScreen();
       case 2:
         return const InvestmentHomeScreen();
       default:
