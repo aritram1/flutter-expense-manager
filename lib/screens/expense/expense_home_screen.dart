@@ -17,7 +17,7 @@ class ExpenseHomeScreen extends StatelessWidget {
       title: 'Expense Home',
       caller: 'ExpenseHomeScreen',
       tabCount: 3,
-      tabNames: const ['Expense', 'Transactions', 'Bank Accounts'],
+      tabNames: const ['Expense', 'Transactions', 'A/c Overview'],
       actions: [
         IconButton(
           icon: const Icon(Icons.refresh),
@@ -27,6 +27,7 @@ class ExpenseHomeScreen extends StatelessWidget {
                   // Show dialog only if not loading
                   showDialog(
                     context: context,
+                    barrierDismissible: false,
                     builder: (BuildContext context) {
                       return _buildSyncDialog();
                     },

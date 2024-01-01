@@ -24,12 +24,12 @@ class _FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWid
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 0.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -37,7 +37,7 @@ class _FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWid
                 TextButton(
                   onPressed: () => _selectDate(context, widget.startDate, widget.onDateRangeSelected, startOrEndDate: 'start'),
                   child: Text(
-                    DateFormat('MM-dd-yyyy').format(widget.startDate), // Format the date
+                    DateFormat('dd-MM-yyyy').format(widget.startDate), // Format the date
                     style: const TextStyle(fontSize: 16),
                   ),
                 ),
@@ -45,7 +45,7 @@ class _FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWid
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 0.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -53,7 +53,7 @@ class _FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWid
                 TextButton(
                   onPressed: () => _selectDate(context, widget.endDate, widget.onDateRangeSelected, startOrEndDate: 'end'),
                   child: Text(
-                    DateFormat('MM-dd-yyyy').format(widget.endDate), // Format the date
+                    DateFormat('dd-MM-yyyy').format(widget.endDate), // Format the date
                     style: const TextStyle(fontSize: 16),
                   ),
                 ),

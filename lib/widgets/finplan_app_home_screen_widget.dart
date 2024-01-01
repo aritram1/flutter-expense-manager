@@ -33,10 +33,10 @@ class FinPlanAppHomeScreenWidget extends StatelessWidget {
     required String caller,
     List<IconButton>? actions,
   })  : actions = actions ?? defaultActions,
-        super(key: key) 
-        // { 
-        //    add constructor body here 
-        // }
+        super(key: key)
+  // {
+  //    add constructor body here
+  // }
   ;
 
   @override
@@ -48,11 +48,13 @@ class FinPlanAppHomeScreenWidget extends StatelessWidget {
           title: Text(title),
           actions: actions,
         ),
-        body: TabBarView(children: tabBarViews),
+        body: TabBarView(
+          children: tabBarViews
+          ),
         bottomNavigationBar: Visibility(
           visible: tabCount > 1,
           child: Container(
-            margin: const EdgeInsets.all(16.0),
+            margin: const EdgeInsets.all(14.0),
             decoration: BoxDecoration(
               color: Colors.blue.shade50, // White background
               borderRadius:
@@ -68,15 +70,16 @@ class FinPlanAppHomeScreenWidget extends StatelessWidget {
             ),
             child: TabBar(
               indicator: BoxDecoration(
-                borderRadius:
-                    BorderRadius.circular(1.0), // Border radius for the indicator
+                borderRadius: BorderRadius.circular(
+                    1.0), // Border radius for the indicator
                 color: Colors.transparent, // White color for the indicator
               ),
               labelColor: Theme.of(context)
                   .primaryColor, // Pink text for the selected tab
               unselectedLabelColor:
-                  Colors.grey.shade500, // Black text for unselected tabs
+                  Colors.grey.shade500, // BlRack text for unselected tabs
               tabs: _buildTabsFromNames(tabNames),
+              // isScrollable: true,
             ),
           ),
         ),
@@ -88,7 +91,8 @@ class FinPlanAppHomeScreenWidget extends StatelessWidget {
   List<Tab> _buildTabsFromNames(List<String> tabNames) {
     List<Tab> availableTabs = [];
     for (String tabName in tabNames) {
-      availableTabs.add(Tab(text: tabName));
+      Tab eachTab = Tab(text: tabName);
+      availableTabs.add(eachTab);
     }
     return availableTabs;
   }
