@@ -1,8 +1,7 @@
 // data_generator.dart
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
-import 'message_util_local.dart';
+import 'message_util.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:logger/logger.dart';
 import 'salesforce_util.dart';

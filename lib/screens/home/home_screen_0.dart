@@ -16,7 +16,7 @@ class HomeScreen0 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: generateMockDataForHome(),
+      future: DataGeneratorLocal.generateMockDataForHome(),
       builder: (context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(

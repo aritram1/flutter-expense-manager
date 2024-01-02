@@ -360,9 +360,12 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
     if (widget.data.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Text(
-          widget.noRecordFoundMessage,
-          style: const TextStyle(fontSize: 16),
+        child: 
+        Center(
+          child: Text(
+            widget.noRecordFoundMessage,
+            // style: const TextStyle(fontSize: 16),
+          ),
         ),
       );
     } else {

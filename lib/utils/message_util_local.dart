@@ -6,7 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:logger/logger.dart';
 import 'package:device_info/device_info.dart';
 
-class MessageUtil {
+class DataGeneratorLocal {
   
   static Logger log = Logger();
 
