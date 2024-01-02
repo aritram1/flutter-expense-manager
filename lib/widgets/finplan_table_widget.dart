@@ -78,7 +78,7 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
       }
     });
     
-    log.d('defaultSortcolumnIndex is=> $defaultSortcolumnIndex');
+    if(debug) log.d('defaultSortcolumnIndex is=> $defaultSortcolumnIndex');
     sortColumn(defaultSortcolumnIndex); // Sort the table on load, based on `defaultColumnIndex`
 
     // Set error callback in case some error occurs while loading the widget
@@ -399,7 +399,7 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
     }
     /////////////////////////// For DateTime type columns ////////////////////////////////////
     else if(dateTimeColumns.contains(columnName)){
-      log.d('Datetime column => ${row[columnName].toString()}');
+      if(detaildebug) log.d('Datetime column => ${row[columnName].toString()}');
       String yyyymmdd = row[columnName].toString().split(' ')[0];
       String hhmmss = row[columnName].toString().split(' ')[1].split('.')[0];
       String yy = yyyymmdd.split('-')[0].substring(2,4);
@@ -429,7 +429,7 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
     await Future.delayed(const Duration(milliseconds: 100));
 
     Map<String, dynamic> response = await DataGenerator.approveSelectedMessages(objAPIName :'FinPlan__SMS_Message__c', recordIds : recordIds);
-    log.d('Response for handleApproveSMS ${response.toString()}');
+    if(debug) log.d('Response for handleApproveSMS ${response.toString()}');
 
     setState(() {
       // Reset the flag when the approval process is completed

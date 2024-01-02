@@ -23,12 +23,13 @@ class ExpenseScreen0 extends StatelessWidget {
             child: CircularProgressIndicator(),
           );
         } else if (snapshot.hasError) {
+          log.e('Error loading data => ${snapshot.error.toString()}');
           return Center(
-            child: Text('Error loading data here! ${snapshot.error.toString()}'),
+            child: Text('Error loading data => ${snapshot.error.toString()}'),
           );
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const Center(
-            child: Text('No data available'),
+            child: Text('Nothing to approve'),
           );
         } else {
           return FinPlanTableWidget(

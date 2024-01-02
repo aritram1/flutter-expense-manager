@@ -45,16 +45,16 @@ class DataGenerator {
     dynamic error = response['error'];
     dynamic data = response['data'];
 
-    log.d('Error inside generateTab1Data : ${error.toString()}');
-    log.d('Datainside generateTab1Data: ${data.toString()}');
+    if(debug) log.d('Error inside generateTab1Data : ${error.toString()}');
+    if(debug) log.d('Data inside generateTab1Data : ${data.toString()}');
     
     if(error != null && error.isNotEmpty){
-      log.d('Error occurred while querying inside generateTab1Data : ${response['error']}');
+      if(debug) log.d('Error occurred while querying inside generateTab1Data : ${response['error']}');
       //return null;
     }
     else if (data != null && data.isNotEmpty) {
       try{
-        log.d('here 0');
+        if(detaildebug) log.d('Inside generateTab1 Data where data is not empty');
         dynamic records = data['data'];
         if(records != null && records.isNotEmpty){
           for (var record in records) {
@@ -69,21 +69,19 @@ class DataGenerator {
         }
       }
       catch(error){
-        log.d('Error Inside generateTab1Data : $error');
+        if(debug) log.d('Error Inside generateTab1Data : $error');
       }
     }
-    log.d('Inside generateTab1Data=>$generatedData');
+    if(detaildebug) log.d('Inside generateTab1Data=>$generatedData');
     return generatedData;
   }
   
   static Future<List<Map<String, dynamic>>> generateTab2Data(DateTime startDate, DateTime endDate) async {
-    log.d('here 1');
-    log.d('Inside generate tab2 data, startDate date is => $startDate');
-    log.d('Inside generate tab2 data, endDate date is => $endDate');
+    if(detaildebug) log.d('Inside generate tab2 data, startDate date is => $startDate');
+    if(detaildebug) log.d('Inside generate tab2 data, endDate date is => $endDate');
     String formattedStartDate = startDate.toString().split(' ')[0];
     String formattedEndDate = endDate.toString().split(' ')[0];
     List<Map<String, dynamic>> generatedData = [];
-    log.d('here 2');
     Map<String, dynamic> response = await SalesforceUtil.queryFromSalesforce(
       objAPIName: 'FinPlan__Bank_Transaction__c', 
       fieldList: ['Id', 'FinPlan__Beneficiary_Name__c','FinPlan__Transaction_Date__c', 'FinPlan__Amount__c','FinPlan__Type__c'],
@@ -91,15 +89,14 @@ class DataGenerator {
       orderByClause: 'FinPlan__Transaction_Date__c desc',
       //count : 120
     );
-    log.d('here 3');
     dynamic error = response['error'];
     dynamic data = response['data'];
 
-    log.d('Error: ${error.toString()}');
-    log.d('Data inside : ${data.toString()}');
-    log.d('here 4');
+    if(detaildebug) log.d('Error: ${error.toString()}');
+    if(detaildebug) log.d('Data inside : ${data.toString()}');
+
     if(error != null && error.isNotEmpty){
-      log.d('Error occurred while querying inside generateTab2Data : ${response['error']}');
+      if(debug) log.d('Error occurred while querying inside generateTab2Data : ${response['error']}');
       //return null;
     }
     else if (data != null && data.isNotEmpty) {
@@ -118,10 +115,10 @@ class DataGenerator {
         }
       }
       catch(error){
-        log.d('Error inside generateTab2Data : $error');
+        if(debug) log.d('Error inside generateTab2Data : $error');
       }
     }
-    log.d('Inside generateTab2Data=>$generatedData');
+    if(detaildebug) log.d('Inside generateTab2Data=>$generatedData');
     return generatedData;
   } 
  
@@ -148,7 +145,7 @@ class DataGenerator {
     else if (data != null && data.isNotEmpty) {
       try{
         dynamic records = data['data'];
-        if(debug) log.d('Inside generateTab3Data Records=> $records');
+        if(detaildebug) log.d('Inside generateTab3Data Records=> $records');
         if(records != null && records.isNotEmpty){
           for (var record in records) {
             Map<String, dynamic> recordMap = Map.castFrom(record);
@@ -227,22 +224,26 @@ class DataGenerator {
 
   static Future<Map<String, dynamic>> syncMessages() async{
     
-    List<SmsMessage> messages = await MessageUtil.getMessages();//count : 200); // Change this while debugging
+    // Call the specific API to delete all messages and transactions
+    String mesageAndTransactionsDeleteMessage = await SalesforceUtil.callSalesforceAPI(
+        httpMethod: 'POST', 
+        endpointUrl: customEndpointForDeleteAllMessagesAndTransactions, 
+        body: {});
+    if(detaildebug) log.d('mesageAndTransactionsDeleteMessage is -> $mesageAndTransactionsDeleteMessage');
+    
+    // Then retrieve, convert and call the insert API for inserting messages
+    List<SmsMessage> messages = await MessageUtil.getMessages();
     List<Map<String, dynamic>> processedMessages = await MessageUtil.convert(messages);
     
-    // TB Implemented
-    // Map<String, dynamic> transactionsDeleteResponse = await SalesforceUtil.callSalesforceAPI(httpMethod: 'DELETE', endpointUrl: customEndpointForDeleteTransactions, body: {});
-    // log.d('transactionsDeleteResponse response IS->$transactionsDeleteResponse');
-    
-    Map<String, dynamic> response = await SalesforceUtil.dmlToSalesforce(
+    Map<String, dynamic> createResponse = await SalesforceUtil.dmlToSalesforce(
         opType: 'insert',
         objAPIName : 'FinPlan__SMS_Message__c', 
         fieldNameValuePairs : processedMessages);
 
-    log.d('SMS Created response Data => ${response['data'].toString()}');
-    log.d('SMS Created response Errors => ${response['errors'].toString()}');
+    if(detaildebug) log.d('syncMessages response Data => ${createResponse['data'].toString()}');
+    if(detaildebug) log.d('syncMessages response Errors => ${createResponse['errors'].toString()}');
 
-    return response;
+    return createResponse;
   }
 
   
