@@ -10,6 +10,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SalesforceUtil{
 
+  // Declare required variables
   static String clientId = '';
   static String clientSecret = '';
   static String userName = '';
@@ -19,7 +20,9 @@ class SalesforceUtil{
   static String compositeUrlForInsert = '';
   static String compositeUrlForUpdate = '';
   static String compositeUrlForDelete = '';
-  static String queryUrl              = '';
+  static String queryUrl = '';
+  static bool debug = false; 
+  static bool detaildebug = false;
 
   static String accessToken = '';
   static String instanceUrl = '';
@@ -30,7 +33,7 @@ class SalesforceUtil{
   static String getInstanceUrl() => (instanceUrl);
 
   static Future<void> init() async {
-    // Load environment variables from the .env file and access environment variables
+    // Load environment variables from the .env file and assign to class variables
     await dotenv.load(fileName: ".env");
     clientId              = dotenv.env['clientId'] ?? '';
     clientSecret          = dotenv.env['clientSecret'] ?? '';
@@ -38,10 +41,14 @@ class SalesforceUtil{
     pwdWithToken          = dotenv.env['pwdWithToken'] ?? '';
     tokenEndpoint         = dotenv.env['tokenEndpoint'] ?? '';
     tokenGrantType        = dotenv.env['tokenGrantType'] ?? '';
-    compositeUrlForInsert = dotenv.env['compositeUrlForInsert'] ?? '';
-    compositeUrlForUpdate = dotenv.env['compositeUrlForUpdate'] ?? '';
-    compositeUrlForDelete = dotenv.env['compositeUrlForDelete'] ?? '';
-    queryUrl              = dotenv.env['queryUrl'] ?? '';
+
+    compositeUrlForInsert = dotenv.env['compositeUrlForInsert'] ?? ''; // Standard Insert API from Salesforce
+    compositeUrlForUpdate = dotenv.env['compositeUrlForUpdate'] ?? ''; // Standard Update API from Salesforce
+    compositeUrlForDelete = dotenv.env['compositeUrlForDelete'] ?? ''; // Standard Delete API from Salesforce
+    queryUrl              = dotenv.env['queryUrl'] ?? '';              // Standard Query API from Salesforce
+    
+    debug                 = bool.parse(dotenv.env['debug'] ?? 'false');
+    detaildebug           = bool.parse(dotenv.env['detaildebug'] ?? 'false');
   }
 
   // Method to Login to SalesforceR
@@ -72,7 +79,7 @@ class SalesforceUtil{
           eachDeleteBatch.add(recordIds.removeLast());
         }
         resp = await _deleteFromSalesforce(objAPIName, eachDeleteBatch, batchCount , hardDelete);
-        // log.d('resp in delete : $resp');
+        // if(detaildebug) log.d('resp in delete : $resp');
 
         // Process the response
         dmlToSalesforceResponse = processDMLResponse1(resp : resp, inputResponse : dmlToSalesforceResponse);
@@ -102,7 +109,7 @@ class SalesforceUtil{
           eachInsertUpdateBatch.add(fieldNameValuePairs.removeLast());
         }
         resp = await _dmlToSalesforce(opType, objAPIName, eachInsertUpdateBatch, batchCount : batchCount);
-        // log.d('resp in insert update : $resp');
+        // if(detaildebug) log.d('resp in insert update : $resp');
        
         // Process the response
         dmlToSalesforceResponse = processDMLResponse1(resp : resp, inputResponse : dmlToSalesforceResponse);
@@ -110,7 +117,7 @@ class SalesforceUtil{
         batchCount++;
       }
     }
-    // log.d('Final value of dmlToSalesforceResponse=>' + dmlToSalesforceResponse.toString());
+    // if(detaildebug) log.d('Final value of dmlToSalesforceResponse=>' + dmlToSalesforceResponse.toString());
     return dmlToSalesforceResponse;
   }
 
@@ -119,12 +126,12 @@ class SalesforceUtil{
     if(!isLoggedIn()) await loginToSalesforce();
     Map<String, dynamic> queryFromSalesforceResponse = getGenericResponseTemplate();
     Map<String, dynamic> resp = await _queryFromSalesforce(objAPIName, fieldList, whereClause, orderByClause, count);
-    log.d('Response is for records : ${resp.toString()}');
+    if(detaildebug) log.d('Response is for records : ${resp.toString()}');
     bool done = (resp.containsKey('done') && resp['done']) ? true : false;
     if(done){
       if(resp.containsKey('data')){
         queryFromSalesforceResponse['data'] = resp;
-        log.d('I am here ${queryFromSalesforceResponse['data'].toString()}');
+        if(detaildebug) log.d('I am here ${queryFromSalesforceResponse['data'].toString()}');
       }
       else if(resp.containsKey('error')){
         queryFromSalesforceResponse['errors'] = resp;
@@ -132,15 +139,15 @@ class SalesforceUtil{
     }
     else{
       String nextRecordsUrl = resp['nextRecordsUrl'];
-      log.d('queryFromSalesforce nextRecordsUrl =>$nextRecordsUrl');
-      log.d('queryFromSalesforce url =>$instanceUrl$nextRecordsUrl');
+      if(detaildebug) log.d('queryFromSalesforce nextRecordsUrl =>$nextRecordsUrl');
+      if(detaildebug) log.d('queryFromSalesforce url =>$instanceUrl$nextRecordsUrl');
       dynamic restRecordsResponse = await http.get(
         Uri.parse('$instanceUrl$nextRecordsUrl'),
         headers: generateHeader(),
         // body: [], //not required for query call
       );
       final Map<String, dynamic> body = json.decode(restRecordsResponse.body);
-      log.d('Rest query response : ${body.toString()}');
+      if(detaildebug) log.d('Rest query response : ${body.toString()}');
       bool done = (resp.containsKey('done') && resp['done']) ? true : false;
       if(done){
         // Handle when record count is more than 2000
@@ -164,7 +171,7 @@ class SalesforceUtil{
         // Handle when record count is more than 4000
       }
     }
-    // log.d('Result from queryFromSalesforceResponse $queryFromSalesforceResponse');
+    // if(detaildebug) log.d('Result from queryFromSalesforceResponse $queryFromSalesforceResponse');
     return queryFromSalesforceResponse;
   }
 
@@ -175,10 +182,10 @@ class SalesforceUtil{
   
     String epUrl = '$instanceUrl$endpointUrl'; 
 
-    log.d('epUrl=>' + epUrl);   
+    if(detaildebug) log.d('epUrl=>' + epUrl);   
     dynamic resp = await _callSalesforceAPI(httpMethod : httpMethod, epUrl : epUrl, body : body);
     
-    log.d('resp.body=> ${resp.body}');
+    if(detaildebug) log.d('resp.body=> ${resp.body}');
     
     return resp.body;
   }
@@ -198,7 +205,7 @@ class SalesforceUtil{
     else if(httpMethod == 'DELETE'){
       resp = await http.delete(Uri.parse(epUrl), headers: generateHeader(), body: jsonEncode(body));
     }
-    log.d('epUrl $epUrl');
+    if(detaildebug) log.d('epUrl $epUrl');
     return resp;
   }
   
@@ -211,7 +218,7 @@ class SalesforceUtil{
         headers: generateHeader(),
         // body : not required for login call
       );
-      log.d('I am here');
+      if(detaildebug) log.d('I am here');
       final Map<String, dynamic> body = json.decode(resp.body);
       if (resp.statusCode == 200) {
         instanceUrl = body['instance_url'];
@@ -220,13 +227,13 @@ class SalesforceUtil{
       } 
       else {
         // Log an error
-        // log.d('Response code other than 200 detected : ${resp.body}');
+        // if(detaildebug) log.d('Response code other than 200 detected : ${resp.body}');
         loginResponse['error'] = body.toString();
       }
       // responseMap.add('data') = response.body;
     }
     catch(error){
-      // log.d('Error occurred while logging into Salesforce. Error is : $error');
+      // if(detaildebug) log.d('Error occurred while logging into Salesforce. Error is : $error');
       loginResponse['error'] = error.toString();
     }
     return loginResponse;
@@ -240,18 +247,17 @@ class SalesforceUtil{
     try{
       if(opType == 'insert'){
         body = await _insertToSalesforce(objAPIName, fieldNameValuePairs, batchCount);
-        // log.d('body for insert : $body');
+        // if(detaildebug) log.d('body for insert : $body');
       }
       else{
         body = await _updateToSalesforce(objAPIName, fieldNameValuePairs, batchCount);
-        // log.d('body for update : $body');
+        // if(detaildebug) log.d('body for update : $body');
       }
 
-      log.d('I am here line 236');
-      log.d('body[] : ${body.toString()}');
+      if(detaildebug) log.d('I am here line 236');
+      if(detaildebug) log.d('body[] : ${body.toString()}');
       // Collate the response for all batches
       if(body.containsKey('data') && body['data'].isNotEmpty){
-        log.d('I am here line 227 and data is ${body['data']}');
         List<dynamic> existingData = dmlResponse['data'];
         for(dynamic each in body['data'] as List<dynamic>){
           existingData.add(each);
@@ -265,15 +271,14 @@ class SalesforceUtil{
         }
         dmlResponse['errors'] = existingErrors;
       }
-      log.d('I am here line 253');
     }
     catch(error){
-      // log.d('body for error scenario : $body');
+      // if(detaildebug) log.d('body for error scenario : $body');
       List<dynamic> catchBlockErrors = [];
       catchBlockErrors.add(error.toString());
       dmlResponse['errors'] = catchBlockErrors;
     }
-    log.d('DML response for $batchCount : $dmlResponse');
+    if(detaildebug) log.d('DML response for $batchCount : $dmlResponse');
     return dmlResponse;
   }
 
@@ -291,17 +296,17 @@ class SalesforceUtil{
         body: jsonEncode(generateBody(opType : 'insert', objAPIName : objAPIName, fieldNameValuePairs : fieldNameValuePairs, batchCount : batchCount)),
       );
       int statusCode = resp.statusCode;
-      log.d('_insertToSalesforce StatusCode $statusCode');
-      log.d('_insertToSalesforce resp.body=> ${jsonEncode(resp.body)}');
+      if(detaildebug) log.d('_insertToSalesforce StatusCode $statusCode');
+      if(detaildebug) log.d('_insertToSalesforce resp.body=> ${jsonEncode(resp.body)}');
       body = json.decode(resp.body);
-      log.d('ResponseBody for _insertToSalesforce => ${body.toString()}');
+      if(detaildebug) log.d('ResponseBody for _insertToSalesforce => ${body.toString()}');
       if(statusCode == 201 && !body['hasErrors']){
-        log.d('Inside 201 $body');
+        if(detaildebug) log.d('Inside 201 $body');
         insertResponse['data'] = body['results'];
       }
       else{ // non 201 code is returned
-        // log.d('Response code other than 200/201 detected $statusCode');
-        log.d('outside 201 $body');
+        // if(detaildebug) log.d('Response code other than 200/201 detected $statusCode');
+        if(detaildebug) log.d('outside 201 $body');
         if(body['hasErrors']){
           insertResponse['errors'] = body['results'];
         }
@@ -310,7 +315,7 @@ class SalesforceUtil{
     catch(error){
       insertResponse['errors'] = error.toString();
     }
-    log.d('Final insertResponse output : $insertResponse');
+    if(detaildebug) log.d('Final insertResponse output : $insertResponse');
     return insertResponse;
   }
 
@@ -325,13 +330,13 @@ class SalesforceUtil{
         body: jsonEncode(generateBody(opType : 'update', objAPIName : objAPIName, fieldNameValuePairs : fieldNameValuePairs, batchCount : batchCount)),
       );
       final List<dynamic> body = json.decode(resp.body);
-      // log.d('Inside _updateToSalesforce StatusCode: ${resp.statusCode} || body: $body || updateResponse: $updateResponse');
+      // if(detaildebug) log.d('Inside _updateToSalesforce StatusCode: ${resp.statusCode} || body: $body || updateResponse: $updateResponse');
       updateResponse = processDMLResponse2(statusCode : resp.statusCode, inputBody : body, inputResponse : updateResponse);
     }
     catch(error){
       updateResponse['error'] = error.toString();
     }
-    // log.d('Response from _updateToSalesforce $updateResponse');
+    // if(detaildebug) log.d('Response from _updateToSalesforce $updateResponse');
     return updateResponse;
   }
 
@@ -352,14 +357,14 @@ class SalesforceUtil{
         // body : not required for delete call
       );
       final List<dynamic> body = json.decode(resp.body);
-      // log.d('StatusCode: ${resp.statusCode} || body: $body || deleteResponse : $deleteResponse');
+      // if(detaildebug) log.d('StatusCode: ${resp.statusCode} || body: $body || deleteResponse : $deleteResponse');
       deleteResponse = processDMLResponse2(statusCode : resp.statusCode, inputBody : body, inputResponse: deleteResponse);
-      // log.d('After processResponse $deleteResponse');
+      // if(detaildebug) log.d('After processResponse $deleteResponse');
     }
     catch(error){
       deleteResponse['error'] = error.toString();
     }
-    // log.d('Response from _deleteResponse $deleteResponse');
+    // if(detaildebug) log.d('Response from _deleteResponse $deleteResponse');
     return deleteResponse;  
   }
 
@@ -368,7 +373,7 @@ class SalesforceUtil{
     
     if(!isLoggedIn()) await loginToSalesforce();
 
-    log.d('instanceUrl inside _queryFromSalesforce $instanceUrl');
+    if(detaildebug) log.d('instanceUrl inside _queryFromSalesforce $instanceUrl');
     
     Map<String, dynamic> queryFromSlesforceResponse = {};
     
@@ -379,13 +384,13 @@ class SalesforceUtil{
         // body: [], //not required for query call
       );
       final Map<String, dynamic> body = json.decode(resp.body);
-      log.d('_queryFromSalesforce response.statusCode ${resp.statusCode}');
-      log.d('_queryFromSalesforce body : ${body.toString()}');
-      // log.d('_queryFromSalesforce body : $body');
+      if(detaildebug) log.d('_queryFromSalesforce response.statusCode ${resp.statusCode}');
+      if(detaildebug) log.d('_queryFromSalesforce body : ${body.toString()}');
+      // if(detaildebug) log.d('_queryFromSalesforce body : $body');
       if (resp.statusCode == 200) {
-        // log.d('_queryFromSalesforce resp[done] : ${body['done']}');
-        // log.d('_queryFromSalesforce resp[totalSize] : ${body['totalSize']}');
-        // log.d('_queryFromSalesforce resp[nextRecordsUrl] : ${body['nextRecordsUrl']}');
+        // if(detaildebug) log.d('_queryFromSalesforce resp[done] : ${body['done']}');
+        // if(detaildebug) log.d('_queryFromSalesforce resp[totalSize] : ${body['totalSize']}');
+        // if(detaildebug) log.d('_queryFromSalesforce resp[nextRecordsUrl] : ${body['nextRecordsUrl']}');
 
         queryFromSlesforceResponse['data'] = body['records'];
         queryFromSlesforceResponse['totalSize'] = body['totalSize'];
@@ -394,15 +399,15 @@ class SalesforceUtil{
       }
       else {
         // Log an error
-        log.d('Response code other than 200 detected : ${resp.body}');
+        if(detaildebug) log.d('Response code other than 200 detected : ${resp.body}');
         queryFromSlesforceResponse['error'] = resp.body;
       }
     }
     catch(error){
-      log.d('Error occurred while querying data from Salesforce. Error is : $error');
+      if(detaildebug) log.d('Error occurred while querying data from Salesforce. Error is : $error');
       queryFromSlesforceResponse['error'] = error.toString();
     }
-    // log.d('queryFromSlesforceResponse=> $queryFromSlesforceResponse');
+    // if(detaildebug) log.d('queryFromSlesforceResponse=> $queryFromSlesforceResponse');
     return queryFromSlesforceResponse;
   }
   
@@ -438,7 +443,7 @@ class SalesforceUtil{
         endpointUrl = '$instanceUrl$compositeUrlForDelete$ids';
       }
     }
-    // log.d('Generated endpoint : $endpointUrl');
+    // if(detaildebug) log.d('Generated endpoint : $endpointUrl');
     return endpointUrl;
   }
 
@@ -465,7 +470,7 @@ class SalesforceUtil{
       body['records'] = allRecords;
       if(opType == 'update'){
         body['allOrNone'] = 'false';
-      }// log.d('body=>' + body.toString());
+      }// if(detaildebug) log.d('body=>' + body.toString());
     }
     else if(opType == 'delete'){
       //no body element is required for delete
@@ -478,7 +483,7 @@ class SalesforceUtil{
       dataMap['data'] = recordIds;
       body['input'] = dataMap;
     }
-    // // log.d(body);
+    // // if(detaildebug) log.d(body);
     return body;
   }
 
@@ -490,13 +495,13 @@ class SalesforceUtil{
     String limitCount = (count != null && count > 0) ? 'LIMIT $count' : '';
 
     String query = 'SELECT $fields FROM $objAPIName $whereClause $orderByClause $limitCount';
-    log.d('Generated Query : $query');
+    if(detaildebug) log.d('Generated Query : $query');
 
     query = query.replaceAll(' ', '+');
-    // // log.d('Encoded Query : $query');
+    // // if(detaildebug) log.d('Encoded Query : $query');
     
     final String endpointUrl = '$instanceUrl$queryUrl$query';
-    log.d('endpointUrl inside generateQueryEndpointUrl: $endpointUrl');
+    if(detaildebug) log.d('endpointUrl inside generateQueryEndpointUrl: $endpointUrl');
 
     return endpointUrl;
   }
@@ -546,7 +551,7 @@ class SalesforceUtil{
         } 
       }
       else{
-        log.d('Response code other than 200 detected : $statusCode');
+        if(detaildebug) log.d('Response code other than 200 detected : $statusCode');
         inputResponse['errors'] = ['${inputBody.toString()} url: $compositeUrlForUpdate}'];
       }
     }

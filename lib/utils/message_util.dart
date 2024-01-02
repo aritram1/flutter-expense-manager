@@ -14,6 +14,8 @@ class MessageUtil {
   static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
 
   static Logger log = Logger();
+  
+  static int maximumMessageCount = int.parse(dotenv.env['maximumMessageCount'] ?? '1000');
 
   ///////////////////////////////Get SMS Messages//////////////////////////////////////
   static Future<List<SmsMessage>> getMessages({List<SmsQueryKind>? kinds, String? sender, int? count}) async {
@@ -38,9 +40,9 @@ class MessageUtil {
       }
       else{
         messages = await SmsQuery().querySms(
-          kinds: smsKinds, // SmsQueryKind.inbox ,SmsQueryKind.sent, SmsMessageKind.draft
-          address: sender, // +1234567890
-          count: 300, //default value
+          kinds: smsKinds,
+          address: sender,
+          count: maximumMessageCount, // maximum message to be retrieved
         );
       }
       

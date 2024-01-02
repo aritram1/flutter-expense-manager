@@ -22,15 +22,13 @@ class ExpenseScreen2 extends StatelessWidget {
           return const Center(
             child: CircularProgressIndicator(),
           );
-        } else if (snapshot.hasError) {
+        } 
+        else if (snapshot.hasError) {
           return Center(
             child: Text('Error loading data ExpenseScreen2! ${snapshot.error.toString()}'),
           );
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(
-            child: Text('No data available in ExpenseScreen2'),
-          );
-        } else {
+        }
+        else {
           return FinPlanTableWidget(
             key: key,
             headerNames: const ['Name', 'Balance', 'Last Updated'],

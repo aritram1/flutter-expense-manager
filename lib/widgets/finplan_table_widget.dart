@@ -209,35 +209,13 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
               width: MediaQuery.of(context).size.width * widget.columnWidths[index], // Use provided column width
               child: Padding(
                 padding: const EdgeInsets.all(1.0),
-                child : Text(getFormattedCellData(widget.headerNames[index], row), maxLines: 2,)
-                // child: Text(
-                //   (widget.headerNames[index] == 'Date')
-                //       ? row[widget.headerNames[index]].toString().substring(0, 10)
-                //       : (widget.headerNames[index] == 'Amount')
-                //           ? NumberFormat.currency(locale: 'en_IN', symbol: '₹').format(double.parse(row[widget.headerNames[index]].toString()))
-                //           : row[widget.headerNames[index]].toString(),
-                //   maxLines: 2,
-                // ),
+                child : Text(getFormattedCellData(widget.headerNames[index], row), maxLines: 2)
               ),
             ),
           );
         }),
       );
     }).toList();
-  }
-
-  void _onSort(int columnIndex, bool ascending) {
-    // Implement sorting logic based on columnIndex and ascending
-    setState(() {
-      // Sort the tableData accordingly
-      tableData.sort((a, b) {
-        // Assuming data in each cell is of type String
-        String aValue = a[widget.headerNames[columnIndex]].toString();
-        String bValue = b[widget.headerNames[columnIndex]].toString();
-
-        return ascending ? aValue.compareTo(bValue) : bValue.compareTo(aValue);
-      });
-    });
   }
 
   void sortColumn(int colIndex) async {
@@ -399,9 +377,13 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
     }
     /////////////////////////// For DateTime type columns ////////////////////////////////////
     else if(dateTimeColumns.contains(columnName)){
-      if(detaildebug) log.d('Datetime column => ${row[columnName].toString()}');
-      String yyyymmdd = row[columnName].toString().split(' ')[0];
-      String hhmmss = row[columnName].toString().split(' ')[1].split('.')[0];
+      
+      // Convert UTC time to Local Time (+ 5.30 hrs)
+      DateTime localDateTime = DateTime.parse(row[columnName].toString()).add(const Duration(hours: 5, minutes: 30));
+
+      if(detaildebug) log.d('LocalDate Time column => ${localDateTime.toString()}');
+      String yyyymmdd = localDateTime.toString().split(' ')[0];
+      String hhmmss = localDateTime.toString().split(' ')[1].split('.')[0];
       String yy = yyyymmdd.split('-')[0].substring(2,4);
       String mm = yyyymmdd.split('-')[1];
       String dd = yyyymmdd.split('-')[2];

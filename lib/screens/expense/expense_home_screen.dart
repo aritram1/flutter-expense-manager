@@ -24,26 +24,26 @@ class ExpenseHomeScreen extends StatelessWidget {
           onPressed: isLoading
               ? null
               : () async {
-                  // Show dialog only if not loading
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (BuildContext context) {
-                      return _buildSyncDialog();
-                    },
-                  );
+                // Show dialog only if not loading
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return _buildSyncDialog();
+                  },
+                );
 
-                  // Simulate a syncing operation
-                  await syncMessage();
+                // Simulate a syncing operation
+                await syncMessage();
 
-                  // Close the dialog after syncMessage completes
-                  Navigator.of(context).pop();
-                },
+                // Close the dialog after syncMessage completes
+                Navigator.of(context).pop();
+              },
         ),
-        IconButton(
-          icon: const Icon(Icons.delete),
-          onPressed: () {},
-        ),
+        // IconButton(
+        //   icon: const Icon(Icons.delete),
+        //   onPressed: () {},
+        // ),
       ],
       tabBarViews: [
         ExpenseScreen0(),

@@ -52,12 +52,6 @@ class _ExpenseScreen1State extends State<ExpenseScreen1> {
                   child: Text('Error loading data here! ${snapshot.error.toString()}'),
                 );
               } 
-              // empty table is handed in the table widget itself, so not required here
-              // else if (!snapshot.hasData || snapshot.data!.isEmpty) { 
-              //   return const Center(
-              //     child: Text('No transactions found in the date range'),
-              //   );
-              // } 
               else {
                 return FinPlanTableWidget(
                   key: widget.key,

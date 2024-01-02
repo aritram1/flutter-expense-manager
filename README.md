@@ -120,7 +120,7 @@ Composite APIs are very useful in inserting, updating or deleting data from Sale
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-This app works with 2 other apps, one Salesforce app as backend and one android app to send sms to SF as soon as it is received. Details below.
+This app works with 2 other apps (see below repos), while installing any one of them, check with the dependencies in versions.
 
 ## Compatibility and Dependent Repositories
 
