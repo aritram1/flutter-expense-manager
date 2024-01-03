@@ -22,11 +22,14 @@ class ExpenseHomeScreen extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.refresh),
           onPressed: isLoading
-            ? null
+            ? null // Show dialog only if not loading
             : () async {
               BuildContext currentContext = context;
-              bool shouldProceed = await showConfirmationBox(currentContext, 'Sync');// Show dialog only if not loading
+              // Get an alert dialog as confirmation box
+              bool shouldProceed = await showConfirmationBox(currentContext, 'Sync');
+              
               if(shouldProceed){
+                // ignore: use_build_context_synchronously
                 await showDialog(
                   context: currentContext,
                   barrierDismissible: false,
@@ -35,11 +38,11 @@ class ExpenseHomeScreen extends StatelessWidget {
                   },
                 );
 
-                // Simulate a syncing operation
+                // Call the sync method
                 await syncMessage();
-
-                // Close the dialog after syncMessage completes
-                Navigator.of(currentContext).pop();
+                
+                // ignore: use_build_context_synchronously
+                Navigator.of(currentContext).pop(); // Close the dialog after syncMessage completes
               }
             },
         ),
@@ -51,6 +54,7 @@ class ExpenseHomeScreen extends StatelessWidget {
                 BuildContext currentContext = context;
                 bool shouldProceed = await showConfirmationBox(currentContext, 'Delete');// Show dialog only if not loading
                 if(shouldProceed){
+                  // ignore: use_build_context_synchronously
                   showDialog(
                     context: context,
                     barrierDismissible: false,
@@ -59,11 +63,11 @@ class ExpenseHomeScreen extends StatelessWidget {
                     },
                   );
 
-                  // Simulate a syncing operation
+                  // Call the delete method
                   await deleteMessageAndTransactions();
 
-                  // Close the dialog after syncMessage completes
-                  Navigator.of(context).pop();
+                  // ignore: use_build_context_synchronously
+                  Navigator.of(context).pop();  // Close the dialog after syncMessage completes
                 }
               },
         ),
@@ -76,6 +80,7 @@ class ExpenseHomeScreen extends StatelessWidget {
     );
   }
 
+  // This method shows the modal dialog when syncing and deleting
   Widget _buildSyncDialog(String opName) {
     return AlertDialog(
       content: Column(
@@ -89,17 +94,19 @@ class ExpenseHomeScreen extends StatelessWidget {
     );
   }
 
+  // Call the sync method
   Future<void> syncMessage() async {
     Map<String, dynamic> response = await DataGenerator.syncMessages();
     Logger().d('Sync Message Response from Expense Home : $response');
   }
 
+  // Call the delete method
   Future<void> deleteMessageAndTransactions() async {
     String response = await DataGenerator.hardDeleteMessagesAndTransactions();
     Logger().d('deleteMessageAndTransactions Message Response from Expense Home : $response');
   }
 
-
+  // A confirmation box to show if its ok to proceed with sync and delete operation
   static Future<dynamic> showConfirmationBox(BuildContext context, String opType){
     String title = 'Please confirm'; 
     String content =  (opType == 'Sync') ? 'Do you want to sync?' : 'Do you want to delete?' ;

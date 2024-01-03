@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import '../../utils/data_generator.dart';
 import '../../widgets/finplan_date_picker_panel_widget.dart';
 import '../../widgets/finplan_table_widget.dart';
@@ -12,33 +13,61 @@ class ExpenseScreen1 extends StatefulWidget {
 }
 
 class _ExpenseScreen1State extends State<ExpenseScreen1> {
+
+  // Declare the required state variables for this page
+  static DateTime selectedStartDate = DateTime.now().add(const Duration(days: -30));
+  static DateTime selectedEndDate = DateTime.now();
+  static bool showDatePickerPanel = false;
+  static late Future<List<Map<String, dynamic>>> data;
+
+  // Declare the final variables, they allow no modification
   static final Logger log = Logger();
+  static final Future<List<Map<String, dynamic>>> immutableData = DataGenerator.generateDataForExpenseScreen1(selectedStartDate, selectedEndDate);
 
-  DateTime selectedStartDate = DateTime.now().add(const Duration(days: -2));
-  DateTime selectedEndDate = DateTime.now();
-
+  // Table on load callback defined here
   dynamic Function(String) onLoadComplete = (result) {
     log.d('Table loaded Result from ExpenseScreen1 => $result');
   };
 
-  late Future<List<Map<String, dynamic>>> data;
-
+  // Init state method
+  // The data is initialized here for the first time
   @override
   void initState() {
     super.initState();
     data = DataGenerator.generateDataForExpenseScreen1(selectedStartDate, selectedEndDate);
+    // data = immutableData; // To be checked for in memory sorting/analysing
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        FinPlanDatepickerPanelWidget(
-          key: UniqueKey(),
-          onDateRangeSelected: handleDateRangeSelection,
-          startDate: selectedStartDate,
-          endDate: selectedEndDate,
+        // The button group that shows favorite date ranges like `Today`, `Last 7 days`
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0), 
+          child: Column(
+            children: [
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: getFavoriteDateRangedButtons(),
+                ),
+              ),
+            
+              // The date picker panel, this is shown when date range is selected as `Custom`
+              Visibility(
+                visible: (showDatePickerPanel == true), // same as `visible: showDatePickerPanel`
+                child: FinPlanDatepickerPanelWidget(
+                  key: UniqueKey(),
+                  onDateRangeSelected: handleDateRangeSelection,
+                  startDate: selectedStartDate,
+                  endDate: selectedEndDate,
+                ),
+              ),
+            ]
+          ),
         ),
+        // The table panel
         Expanded(
           child: FutureBuilder(
             future: data,
@@ -49,14 +78,14 @@ class _ExpenseScreen1State extends State<ExpenseScreen1> {
                 );
               } else if (snapshot.hasError) {
                 return Center(
-                  child: Text('Error loading data here! ${snapshot.error.toString()}'),
+                  child: Text('Error loading data in ExpenseScreen1 => ${snapshot.error.toString()}'),
                 );
               } 
               else {
                 return FinPlanTableWidget(
                   key: widget.key,
                   headerNames: const ['Paid To', 'Amount', 'Date'],
-                  noRecordFoundMessage: 'No transaction found in the date range',
+                  noRecordFoundMessage: 'No transactions are found for this date range',
                   caller: 'ExpenseScreen1',
                   columnWidths: const [0.3, 0.2, 0.2],
                   data: snapshot.data!,
@@ -70,14 +99,72 @@ class _ExpenseScreen1State extends State<ExpenseScreen1> {
       ],
     );
   }
-
+  
+  // A utility method to update the state once a button is clicked
   Future<void> handleDateRangeSelection(DateTime startDate, DateTime endDate) async {
     setState(() {
-      setState(() {
-        selectedStartDate = startDate;
-        selectedEndDate = endDate;
-      });
+      selectedStartDate = startDate;
+      selectedEndDate = endDate;
       data = Future.value(DataGenerator.generateDataForExpenseScreen1(selectedStartDate, selectedEndDate));
     });
+  }
+  
+  // A specialized function to show specific date ranges like `Today`, `Tomorrow`, `Last 7 days` etc.
+  dynamic getFavoriteDateRangedButtons() {
+    
+    List<String> favoriteDateRanges = ['Today', 'Yesterday', 'Last 7 days', 'Custom'];
+    List<Widget> rangedButtons = [];
+    ElevatedButton eButton;
+    SizedBox sBox = const SizedBox(width: 8);
+
+    for(String dateRange in favoriteDateRanges){
+      // Add the elevated button
+      eButton = ElevatedButton(onPressed: () { handleFavoriteDateRangeButtonClick(dateRange); }, child: Text(dateRange));
+      rangedButtons.add(eButton);
+      // Add the sized box to keep gap between buttons
+      rangedButtons.add(sBox);
+    }
+    return rangedButtons;
+  }
+
+  // An utility function to update the state variables e.g. `selectedStartDate`, `selectedEndDate`, `showDatePickerPanel`, `data` etc..
+  handleFavoriteDateRangeButtonClick(String range){
+    DateTime sDate, eDate;
+    bool showPanel = false;
+    switch (range) {
+      case 'Today':
+        sDate = DateTime.now();
+        eDate = sDate;
+        showPanel = false;
+        break;
+      case 'Yesterday':
+        sDate = DateTime.now().add(const Duration(days: -1));
+        eDate = sDate;
+        showPanel = false;
+        break;
+      case 'Last 7 days':
+        sDate = DateTime.now().add(const Duration(days: -7));
+        eDate = DateTime.now();
+        showPanel = false;
+        break;
+      case 'Custom':
+        sDate = DateTime.now();
+        eDate = DateTime.now();
+        showPanel = true;
+        break;
+      default:  // default is Today
+        sDate = DateTime.now();
+        eDate = DateTime.now();
+        break;
+    }
+    setState(() {
+      selectedStartDate = sDate;
+      selectedEndDate = eDate;
+      showDatePickerPanel = showPanel;
+      // showDatePickerPanel = true; // for debug
+      if(range != 'Custom'){ // Refresh the data only when any date range other than `Custom` is chosen
+        data = Future.value(DataGenerator.generateDataForExpenseScreen1(selectedStartDate, selectedEndDate)); 
+      }
+    });   
   }
 }
