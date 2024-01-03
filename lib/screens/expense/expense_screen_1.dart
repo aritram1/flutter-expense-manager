@@ -129,34 +129,30 @@ class _ExpenseScreen1State extends State<ExpenseScreen1> {
 
   // An utility function to update the state variables e.g. `selectedStartDate`, `selectedEndDate`, `showDatePickerPanel`, `data` etc..
   handleFavoriteDateRangeButtonClick(String range){
-    DateTime sDate, eDate;
+    DateTime sDate = DateTime.now();
+    DateTime eDate = DateTime.now();
     bool showPanel = false;
     switch (range) {
       case 'Today':
-        sDate = DateTime.now();
-        eDate = sDate;
-        showPanel = false;
+        // Dates are already initialized as Today, nothing to do
         break;
       case 'Yesterday':
         sDate = DateTime.now().add(const Duration(days: -1));
         eDate = sDate;
-        showPanel = false;
         break;
       case 'Last 7 days':
         sDate = DateTime.now().add(const Duration(days: -7));
         eDate = DateTime.now();
-        showPanel = false;
         break;
       case 'Custom':
-        sDate = DateTime.now();
-        eDate = DateTime.now();
+        // Dates are already set , no need to update them, just show the panel now for manual date range selection
         showPanel = true;
         break;
-      default:  // default is Today
-        sDate = DateTime.now();
-        eDate = DateTime.now();
+      default:  
+        // Default dates are already declared as today
         break;
     }
+    // 
     setState(() {
       selectedStartDate = sDate;
       selectedEndDate = eDate;

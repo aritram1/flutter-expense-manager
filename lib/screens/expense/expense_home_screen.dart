@@ -32,7 +32,7 @@ class ExpenseHomeScreen extends StatelessWidget {
                 // ignore: use_build_context_synchronously
                 await showDialog(
                   context: currentContext,
-                  barrierDismissible: false,
+                  barrierDismissible: true,
                   builder: (BuildContext context) {
                     return _buildSyncDialog('Syncing...');
                   },
