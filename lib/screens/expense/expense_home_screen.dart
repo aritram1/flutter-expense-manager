@@ -22,14 +22,16 @@ class ExpenseHomeScreen extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.refresh),
           onPressed: isLoading
-              ? null
-              : () async {
-                // Show dialog only if not loading
-                showDialog(
-                  context: context,
+            ? null
+            : () async {
+              BuildContext currentContext = context;
+              bool shouldProceed = await showConfirmationBox(currentContext, 'Sync');// Show dialog only if not loading
+              if(shouldProceed){
+                await showDialog(
+                  context: currentContext,
                   barrierDismissible: false,
                   builder: (BuildContext context) {
-                    return _buildSyncDialog();
+                    return _buildSyncDialog('Syncing...');
                   },
                 );
 
@@ -37,13 +39,34 @@ class ExpenseHomeScreen extends StatelessWidget {
                 await syncMessage();
 
                 // Close the dialog after syncMessage completes
-                Navigator.of(context).pop();
+                Navigator.of(currentContext).pop();
+              }
+            },
+        ),
+        IconButton(
+          icon: const Icon(Icons.delete),
+          onPressed: isLoading
+              ? null
+              : () async {
+                BuildContext currentContext = context;
+                bool shouldProceed = await showConfirmationBox(currentContext, 'Delete');// Show dialog only if not loading
+                if(shouldProceed){
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (BuildContext context) {
+                      return _buildSyncDialog('Deleting...');
+                    },
+                  );
+
+                  // Simulate a syncing operation
+                  await deleteMessageAndTransactions();
+
+                  // Close the dialog after syncMessage completes
+                  Navigator.of(context).pop();
+                }
               },
         ),
-        // IconButton(
-        //   icon: const Icon(Icons.delete),
-        //   onPressed: () {},
-        // ),
       ],
       tabBarViews: [
         ExpenseScreen0(),
@@ -53,14 +76,14 @@ class ExpenseHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSyncDialog() {
-    return const AlertDialog(
+  Widget _buildSyncDialog(String opName) {
+    return AlertDialog(
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CircularProgressIndicator(),
-          SizedBox(height: 16),
-          Text('Syncing...'),
+          const CircularProgressIndicator(),
+          const SizedBox(height: 16),
+          Text(opName),
         ],
       ),
     );
@@ -70,4 +93,41 @@ class ExpenseHomeScreen extends StatelessWidget {
     Map<String, dynamic> response = await DataGenerator.syncMessages();
     Logger().d('Sync Message Response from Expense Home : $response');
   }
+
+  Future<void> deleteMessageAndTransactions() async {
+    String response = await DataGenerator.hardDeleteMessagesAndTransactions();
+    Logger().d('deleteMessageAndTransactions Message Response from Expense Home : $response');
+  }
+
+
+  static Future<dynamic> showConfirmationBox(BuildContext context, String opType){
+    String title = 'Please confirm'; 
+    String content =  (opType == 'Sync') ? 'Do you want to sync?' : 'Do you want to delete?' ;
+    String choiceYes = 'Yes';
+    String choiceNo = 'No';
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false); // User clicked No
+              },
+              child: Text(choiceNo),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true); // User clicked Yes
+              },
+              child: Text(choiceYes),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  
 }

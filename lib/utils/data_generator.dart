@@ -246,5 +246,22 @@ class DataGenerator {
     return createResponse;
   }
 
+  static Future<String> hardDeleteMessagesAndTransactions() async{
+    
+    // Call the specific API to delete all messages and transactions
+    String mesageAndTransactionsDeleteMessage = await SalesforceUtil.callSalesforceAPI(
+        httpMethod: 'POST', 
+        endpointUrl: customEndpointForDeleteAllMessagesAndTransactions, 
+        body: {});
+    if(detaildebug) log.d('mesageAndTransactionsDeleteMessage is -> $mesageAndTransactionsDeleteMessage');
+    
+    return mesageAndTransactionsDeleteMessage;
+  }
+
+
+
+
+
+
   
 }
