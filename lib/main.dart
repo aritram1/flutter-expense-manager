@@ -5,15 +5,76 @@ import './screens/expense/expense_home_screen.dart';
 import './screens/home/home_home_screen.dart';
 import './screens/investment/investment_home_screen.dart';
 import './services/database_service.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+// Define navigatorKey as a global key
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
+
+  // initialize dot env
   await dotenv.load(fileName: ".env"); 
+
+  // initialize the db
   WidgetsFlutterBinding.ensureInitialized();
   final isDbCreated = await DatabaseService.instance.initializeDatabase();
   Logger().d('Created > $isDbCreated');
+
+  // If not granted, request for permissions (sms read etc) on app startup
+  PermissionStatus status = await Permission.sms.status;
+  if (status != PermissionStatus.granted) {
+    await Permission.sms.request();
+  }
+  
+  // to be implemented : urgent
+  // await checkAndRequestPermissions();
+
+  // Run the app finally
   runApp(MyApp());
+  
 }
 
+// to be implemented : urgent
+
+// // Check if the SMS permission is granted, if not, request the permission
+// // If Permission is still not granted, show an alert dialog
+// Future<void> checkAndRequestPermissions() async {
+//   // Check if the SMS permission is granted
+//   PermissionStatus status = await Permission.sms.status;
+
+//   if (status != PermissionStatus.granted) {
+//     // Request the permission
+//     PermissionStatus response = await Permission.sms.request();
+
+//     if (response != PermissionStatus.granted) {
+//       // Permission is still not granted, show an alert dialog
+//       await showDialog(
+//         context: navigatorKey.currentContext!,
+//         builder: (BuildContext context) {
+//           return AlertDialog(
+//             content: Center(
+//               child: Column(
+//                 mainAxisAlignment: MainAxisAlignment.center,
+//                 children: [
+//                   const Text('Please provide the permissions to let the app work properly!'),
+//                   const SizedBox(height: 16),
+//                   ElevatedButton(
+//                     onPressed: () async {
+//                       // Open app settings so the user can manually enable the permission
+//                       await openAppSettings();
+//                     },
+//                     child: const Text('Go to Settings'),
+//                   )
+//                 ],
+//               ),
+//             ),
+//           );
+//         },
+//       );
+//     }
+//   }
+// }
+  
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -77,4 +138,5 @@ class _MyAppHomePageState extends State<MyAppHomePage> {
         return Container(); // Handle unknown index gracefully
     }
   }
+
 }

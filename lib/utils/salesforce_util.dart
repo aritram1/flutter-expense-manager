@@ -375,7 +375,7 @@ class SalesforceUtil{
 
     if(detaildebug) log.d('instanceUrl inside _queryFromSalesforce $instanceUrl');
     
-    Map<String, dynamic> queryFromSlesforceResponse = {};
+    Map<String, dynamic> queryFromSalesforceResponse = {};
     
     try{
       dynamic resp = await http.get(
@@ -383,8 +383,11 @@ class SalesforceUtil{
         headers: generateHeader(),  
         // body: [], //not required for query call
       );
-      final Map<String, dynamic> body = json.decode(resp.body);
       if(detaildebug) log.d('_queryFromSalesforce response.statusCode ${resp.statusCode}');
+      if(detaildebug) log.d('_queryFromSalesforce response.body ${resp.body}');
+      
+      final Map<String, dynamic> body = json.decode(resp.body);
+      
       if(detaildebug) log.d('_queryFromSalesforce body : ${body.toString()}');
       // if(detaildebug) log.d('_queryFromSalesforce body : $body');
       if (resp.statusCode == 200) {
@@ -392,23 +395,23 @@ class SalesforceUtil{
         // if(detaildebug) log.d('_queryFromSalesforce resp[totalSize] : ${body['totalSize']}');
         // if(detaildebug) log.d('_queryFromSalesforce resp[nextRecordsUrl] : ${body['nextRecordsUrl']}');
 
-        queryFromSlesforceResponse['data'] = body['records'];
-        queryFromSlesforceResponse['totalSize'] = body['totalSize'];
-        queryFromSlesforceResponse['done'] = body['done'];
-        queryFromSlesforceResponse['nextRecordsUrl'] = body['nextRecordsUrl'];
+        queryFromSalesforceResponse['data'] = body['records'];
+        queryFromSalesforceResponse['totalSize'] = body['totalSize'];
+        queryFromSalesforceResponse['done'] = body['done'];
+        queryFromSalesforceResponse['nextRecordsUrl'] = body['nextRecordsUrl'];
       }
       else {
         // Log an error
         if(detaildebug) log.d('Response code other than 200 detected : ${resp.body}');
-        queryFromSlesforceResponse['error'] = resp.body;
+        queryFromSalesforceResponse['error'] = resp.body;
       }
     }
     catch(error){
       if(detaildebug) log.d('Error occurred while querying data from Salesforce. Error is : $error');
-      queryFromSlesforceResponse['error'] = error.toString();
+      queryFromSalesforceResponse['error'] = error.toString();
     }
     // if(detaildebug) log.d('queryFromSlesforceResponse=> $queryFromSlesforceResponse');
-    return queryFromSlesforceResponse;
+    return queryFromSalesforceResponse;
   }
   
   // Generic method to generate header for login and other operations

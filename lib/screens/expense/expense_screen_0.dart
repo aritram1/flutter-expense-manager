@@ -1,13 +1,29 @@
 import 'package:flutter/material.dart';
 // import '../../utils/data_generator_local.dart';
 import '../../utils/data_generator.dart';
+import '../../widgets/finplan_date_picker_panel_widget.dart';
 import '../../widgets/finplan_table_widget.dart';
 import 'package:logger/logger.dart';
 
-class ExpenseScreen0 extends StatelessWidget {
-  static final Logger log = Logger();
+class ExpenseScreen0 extends StatefulWidget {
 
-  ExpenseScreen0({super.key});
+  const ExpenseScreen0({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _ExpenseScreen0State createState() => _ExpenseScreen0State();
+}
+
+class _ExpenseScreen0State extends State<ExpenseScreen0>{
+
+  // Declare the required state variables for this page
+
+  static final Logger log = Logger();
+  static DateTime selectedStartDate = DateTime.now().add(const Duration(days: -30));
+  static DateTime selectedEndDate = DateTime.now();
+  static bool showDatePickerPanel = false;
+  static late Future<List<Map<String, dynamic>>> data;
+  // static final Future<List<Map<String, dynamic>>> immutableData = DataGenerator.generateDataForExpenseScreen0(startDate : selectedStartDate, endDate : selectedEndDate);
 
   dynamic Function(String) onLoadComplete = (result) {
     log.d('Table loaded Result from ExpenseScreen0 => $result');
@@ -31,15 +47,15 @@ class ExpenseScreen0 extends StatelessWidget {
                 ),
               
                 // The date picker panel, this is shown when date range is selected as `Custom`
-                // Visibility(
-                //   visible: (showDatePickerPanel == true), // same as `visible: showDatePickerPanel`
-                //   child: FinPlanDatepickerPanelWidget(
-                //     key: UniqueKey(),
-                //     onDateRangeSelected: handleDateRangeSelection,
-                //     startDate: selectedStartDate,
-                //     endDate: selectedEndDate,
-                //   ),
-                // ),
+                Visibility(
+                  visible: (showDatePickerPanel == true), // same as `visible: showDatePickerPanel`
+                  child: FinPlanDatepickerPanelWidget(
+                    key: UniqueKey(),
+                    onDateRangeSelected: handleDateRangeSelection,
+                    startDate: selectedStartDate,
+                    endDate: selectedEndDate,
+                  ),
+                ),
               ]
             ),
           ),
@@ -60,7 +76,7 @@ class ExpenseScreen0 extends StatelessWidget {
                 }
                 else {
                   return FinPlanTableWidget(
-                    key: key,
+                    key: widget.key,
                     headerNames: const ['Paid To', 'Amount', 'Date'],
                     noRecordFoundMessage: 'Nothing to approve',
                     caller: 'ExpenseScreen0',
@@ -131,15 +147,27 @@ class ExpenseScreen0 extends StatelessWidget {
         // Default dates are already declared as today
         break;
     }
-    // 
-    // setState(() {
-    //   selectedStartDate = sDate;
-    //   selectedEndDate = eDate;
-    //   showDatePickerPanel = showPanel;
-    //   // showDatePickerPanel = true; // for debug
-    //   if(range != 'Custom'){ // Refresh the data only when any date range other than `Custom` is chosen
-    //     data = Future.value(DataGenerator.generateDataForExpenseScreen1(selectedStartDate, selectedEndDate)); 
-    //   }
-    // });   
+    
+    setState(() {
+      selectedStartDate = sDate;
+      selectedEndDate = eDate;
+      showDatePickerPanel = showPanel;
+      // showDatePickerPanel = true; // for debug
+      if(range != 'Custom'){ // Refresh the data only when any date range other than `Custom` is chosen
+        data = Future.value(DataGenerator.generateDataForExpenseScreen0(startDate : selectedStartDate, endDate : selectedEndDate)); 
+      }
+      else{
+        data = Future.value([]); // If custom is chosen blank out existing data so user can manually search
+      }
+    });   
+  }
+
+  // A utility method to update the state once a button is clicked
+  Future<void> handleDateRangeSelection(DateTime startDate, DateTime endDate) async {
+    setState(() {
+      selectedStartDate = startDate;
+      selectedEndDate = endDate;
+      data = Future.value(DataGenerator.generateDataForExpenseScreen0(startDate : selectedStartDate, endDate : selectedEndDate));
+    });
   }
 }

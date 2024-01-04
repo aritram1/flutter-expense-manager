@@ -171,6 +171,9 @@ class _ExpenseScreen1State extends State<ExpenseScreen1> {
       if(range != 'Custom'){ // Refresh the data only when any date range other than `Custom` is chosen
         data = Future.value(DataGenerator.generateDataForExpenseScreen1(selectedStartDate, selectedEndDate)); 
       }
+      else{
+        data = Future.value([]); // If custom is chosen blank out existing data so user can manually search
+      }
     });   
   }
 }

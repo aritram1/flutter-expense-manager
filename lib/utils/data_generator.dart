@@ -1,6 +1,7 @@
 // data_generator.dart
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/intl.dart';
 import 'message_util.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:logger/logger.dart';
@@ -19,8 +20,8 @@ class DataGenerator {
   static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
   static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
 
-  static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen0() async {
-    return generateTab1Data();
+  static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen0({DateTime? startDate, DateTime? endDate}) async {
+    return generateTab1Data(startDate, endDate);
   }
 
   static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen1(DateTime startDate, DateTime endDate) async {
@@ -32,13 +33,21 @@ class DataGenerator {
   }
     
 
-  static Future<List<Map<String, dynamic>>> generateTab1Data() async {
-    // List<List<String>> generatedData = [];
+  static Future<List<Map<String, dynamic>>> generateTab1Data(DateTime? startDate, DateTime? endDate) async {
+    
+    String dateClause = '';
+    if(startDate != null && endDate != null){
+      String formattedStartDateTime = DateFormat('yyyy-MM-ddTHH:mm:ss.SSSZ').format(startDate);
+      String formattedEndDateTime = DateFormat('yyyy-MM-ddTHH:mm:ss.SSSZ').format(endDate);
+      dateClause = 'AND CreatedDate >= $formattedStartDateTime AND  CreatedDate <= $formattedEndDateTime';
+    }
+    log.d('StartDate is $startDate, endDate is $endDate and dateClause is=> $dateClause');
+
     List<Map<String, dynamic>> generatedData = [];
     Map<String, dynamic> response = await SalesforceUtil.queryFromSalesforce(
       objAPIName: 'FinPlan__SMS_Message__c', 
-      fieldList: ['Id', 'FinPlan__Received_At_formula__c', 'FinPlan__Transaction_Date__c', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c', 'FinPlan__Formula_Amount__c'], 
-      whereClause: 'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true AND FinPlan__Formula_Amount__c > 0',
+      fieldList: ['Id', 'CreatedDate', 'FinPlan__Received_At_formula__c', 'FinPlan__Transaction_Date__c', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c', 'FinPlan__Formula_Amount__c'], 
+      whereClause: 'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true AND FinPlan__Formula_Amount__c > 0 $dateClause',
       orderByClause: 'FinPlan__Received_At_formula__c desc',
       //count : 120
       );
