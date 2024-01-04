@@ -119,8 +119,18 @@ class _ExpenseScreen1State extends State<ExpenseScreen1> {
 
     for(String dateRange in favoriteDateRanges){
       // Add the elevated button
-      eButton = ElevatedButton(onPressed: () { handleFavoriteDateRangeButtonClick(dateRange); }, child: Text(dateRange));
+      eButton = ElevatedButton(
+        onPressed: () { handleFavoriteDateRangeButtonClick(dateRange); }, 
+        // style: ElevatedButton.styleFrom(
+        //   padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 6),
+        // ),
+        child: Text(
+          dateRange, 
+          style: const TextStyle(fontSize: 12) // Adjust font size as needed
+        )
+      );
       rangedButtons.add(eButton);
+
       // Add the sized box to keep gap between buttons
       rangedButtons.add(sBox);
     }

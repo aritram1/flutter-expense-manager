@@ -35,7 +35,7 @@ class MyAppHomePage extends StatefulWidget {
 }
 
 class _MyAppHomePageState extends State<MyAppHomePage> {
-  int _currentIndex = 0; // 0 : HomeScreen, 1 : ExpenseHomeScreen, 2 : InvestmentHomeScreen
+  int _currentIndex = 1; // 0 : HomeScreen, 1 : ExpenseHomeScreen, 2 : InvestmentHomeScreen
   @override
   Widget build(BuildContext context) {
     return Scaffold(
