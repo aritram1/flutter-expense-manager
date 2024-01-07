@@ -12,7 +12,6 @@ class DataGenerator {
 
   static String customEndpointForSyncMessages       = '/services/apexrest/FinPlan/api/sms/sync/*';
   static String customEndpointForApproveMessages    = '/services/apexrest/FinPlan/api/sms/approve/*';
-  static String customEndpointForDeleteMessages     = '/services/apexrest/FinPlan/api/sms/delete/*';
   static String customEndpointForDeleteTransactions = '/services/apexrest/FinPlan/api/transactions/delete/*';
   static String customEndpointForDeleteAllMessagesAndTransactions = '/services/apexrest/FinPlan/api/delete/*';
 
