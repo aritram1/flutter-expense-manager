@@ -297,7 +297,6 @@ class SalesforceUtil{
       );
       int statusCode = resp.statusCode;
       if(detaildebug) log.d('_insertToSalesforce StatusCode $statusCode');
-      if(detaildebug) log.d('_insertToSalesforce resp.body=> ${jsonEncode(resp.body)}');
       body = json.decode(resp.body);
       if(detaildebug) log.d('ResponseBody for _insertToSalesforce => ${body.toString()}');
       if(statusCode == 201 && !body['hasErrors']){

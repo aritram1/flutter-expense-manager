@@ -10,11 +10,10 @@ class ExpenseScreen0 extends StatefulWidget {
   const ExpenseScreen0({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _ExpenseScreen0State createState() => _ExpenseScreen0State();
+  ExpenseScreen0State createState() => ExpenseScreen0State();
 }
 
-class _ExpenseScreen0State extends State<ExpenseScreen0>{
+class ExpenseScreen0State extends State<ExpenseScreen0>{
 
   // Declare the required state variables for this page
 
@@ -152,7 +151,7 @@ class _ExpenseScreen0State extends State<ExpenseScreen0>{
       selectedStartDate = sDate;
       selectedEndDate = eDate;
       showDatePickerPanel = showPanel;
-      // showDatePickerPanel = true; // for debug
+      showDatePickerPanel = true; // for debug
       if(range != 'Custom'){ // Refresh the data only when any date range other than `Custom` is chosen
         data = Future.value(DataGenerator.generateDataForExpenseScreen0(startDate : selectedStartDate, endDate : selectedEndDate)); 
       }

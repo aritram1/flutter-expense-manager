@@ -17,7 +17,7 @@ class _ExpenseScreen1State extends State<ExpenseScreen1> {
   // Declare the required state variables for this page
   static DateTime selectedStartDate = DateTime.now().add(const Duration(days: -30));
   static DateTime selectedEndDate = DateTime.now();
-  static bool showDatePickerPanel = false;
+  static bool showDatePickerPanel = true;
   static late Future<List<Map<String, dynamic>>> data;
 
   // Declare the final variables, they allow no modification
@@ -166,8 +166,8 @@ class _ExpenseScreen1State extends State<ExpenseScreen1> {
     setState(() {
       selectedStartDate = sDate;
       selectedEndDate = eDate;
-      showDatePickerPanel = showPanel;
-      // showDatePickerPanel = true; // for debug
+      // showDatePickerPanel = showPanel;
+      showDatePickerPanel = true; // for debug
       if(range != 'Custom'){ // Refresh the data only when any date range other than `Custom` is chosen
         data = Future.value(DataGenerator.generateDataForExpenseScreen1(selectedStartDate, selectedEndDate)); 
       }

@@ -29,10 +29,10 @@ class FinPlanTableWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _FinPlanTableWidgetState createState() => _FinPlanTableWidgetState();
+  FinPlanTableWidgetState createState() => FinPlanTableWidgetState();
 }
 
-class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
+class FinPlanTableWidgetState extends State<FinPlanTableWidget> {
 
   final List<String> numericColumns = ['Amount', 'Balance'];
   final List<String> dateColumns = ['Date'];
@@ -261,8 +261,8 @@ class _FinPlanTableWidgetState extends State<FinPlanTableWidget> {
       int result = 0;
 
       if(detaildebug){
-        log.d('a => ${a}');
-        log.d('b => ${b}');
+        log.d('a => $a');
+        log.d('b => $b');
       }
       String columnName = widget.headerNames[sortColumnIndex];
 
