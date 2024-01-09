@@ -45,7 +45,6 @@ class ExpenseScreen0State extends State<ExpenseScreen0>{
             child: Column(
               children: [
                 FinPlanDatepickerPanelWidget(
-                  key: UniqueKey(),
                   onDateRangeSelected: handleDateRangeSelection,
                   //startDate: selectedStartDate,
                   //endDate: selectedEndDate,
