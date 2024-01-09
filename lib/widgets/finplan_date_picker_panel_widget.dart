@@ -24,23 +24,26 @@ class FinPlanDatepickerPanelWidget extends StatefulWidget {
 class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidget> {
 
   // Class variables
-  DateTime startDate = DateTime.now();
-  DateTime endDate = DateTime.now();
-  bool showDatePanel = true;
+  late DateTime startDate; // = DateTime.now();
+  late DateTime endDate; // = DateTime.now();
+  late bool showDatePanel; // = true;
 
   static Logger log = Logger();
   static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
   static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
   
   final String DATE_FORMAT_IN = 'dd-MM-yyyy';
-  
+    
   final List<String> FAVORITE_DATE_RANGES = ['Today', 'Yesterday', 'Last 7 days', 'Custom'];
     
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   log.d('The init state has run');
-  // }
+  @override
+  void initState() {
+    super.initState();
+    startDate = DateTime.now(); // default dates
+    endDate = DateTime.now(); // default dates
+    showDatePanel = true;
+    log.d('The init state has run');
+  }
   
   @override
   Widget build(BuildContext context) {
@@ -73,7 +76,7 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
                   TextButton(
                     onPressed: () => _selectDate(context, startDate, startOrEndDate: 'start'),
                     child: Text(
-                      DateFormat('dd-MM-yyyy').format(startDate),
+                      DateFormat(DATE_FORMAT_IN ).format(startDate), // DATE_FORMAT_IN is MM-DD-YYYY
                       style: const TextStyle(fontSize: 16),
                     ),
                   ),
@@ -94,7 +97,7 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
                   TextButton(
                     onPressed: () => _selectDate(context, endDate, startOrEndDate: 'end'),
                     child: Text(
-                      DateFormat('dd-MM-yyyy').format(endDate),
+                      DateFormat(DATE_FORMAT_IN).format(endDate), // DATE_FORMAT_IN is MM-DD-YYYY
                       style: const TextStyle(fontSize: 16),
                     ),
                   ),
@@ -115,7 +118,7 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
       picked = await showDatePicker(
         context: context,
         initialDate: selectedDate,
-        firstDate: DateTime.now().add(const Duration(days : -365)),
+        firstDate: DateTime.now().add(const Duration(days : -365)), // Can select date upto one year back
         lastDate: DateTime.now(),
       );
     } else {
@@ -127,17 +130,23 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
       );
     }
 
+    log.d('picked date is $picked');
+
+
     if (picked != null) {
       setState(() {
         if (startOrEndDate == 'start') {
+          log.d('start picked date is $picked');
           startDate = picked!;
         } else {
+          log.d('end picked date is $picked');
           endDate = picked!;
         }
+        // showDatePanel = true;
       });
       if(debug){
-        log.d('StartDate $startDate');
-        log.d('EndDate $endDate');
+        log.d('Manually changed StartDate $startDate');
+        log.d('Manually changed EndDate $endDate');
       }
       widget.onDateRangeSelected(startDate, endDate);
     }
@@ -174,7 +183,7 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
   handleFavoriteDateRangeButtonClick(String range){
     log.d('I am here with range $range');
     DateTime sDate, eDate;
-    bool show = false;
+    bool show;
     switch (range) {
       case 'Today':
         sDate = DateTime.now();
@@ -206,11 +215,11 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
     setState(() {
       startDate = sDate;
       endDate = eDate;
-      showDatePanel = show;
-      showDatePanel = true; // for debug
-      if(range != 'Custom'){ // Refresh the data only when any date range other than `Custom` is chosen
+      // showDatePanel = show;
+      // showDatePanel = true; // for debug
+      // if(range != 'Custom'){ // Refresh the data only when any date range other than `Custom` is chosen
         widget.onDateRangeSelected(startDate, endDate); 
-      }
+      // }
     });  
   }
 

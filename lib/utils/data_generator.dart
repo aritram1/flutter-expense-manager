@@ -20,16 +20,16 @@ class DataGenerator {
   static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
   static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
 
-  static const String DATETIME_START_OF_DAY_SF_FORMAT = "yyyy-MM-dd'T'00:00:00.000'Z'"; // Format to denote start of a day i.e. midnight time
-  static const  String DATETIME_END_OF_DAY_SF_FORMAT  = "yyyy-MM-dd'T'23:59:59.000'Z'"; // Format to denote till end of  day
+  static const String DATETIME_START_OF_DAY_SF_FORMAT = "yyyy-MM-dd'T'00:00:00.000'Z'"; // Format to denote start of the day i.e. midnight time in UTC
+  static const  String DATETIME_END_OF_DAY_SF_FORMAT  = "yyyy-MM-dd'T'23:59:59.000'Z'"; // Format to denote till end of the day in UTC
 
   static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen0({required DateTime startDate, required DateTime endDate}) async {
     
     log.d('generateDataForExpenseScreen0 : StartDate is $startDate, endDate is $endDate');
     
     // Format the dates accordingly
-    String formattedStartDateTime = DateFormat(DATETIME_START_OF_DAY_SF_FORMAT).format(startDate.toUtc());
-    String formattedEndDateTime = DateFormat(DATETIME_END_OF_DAY_SF_FORMAT).format(endDate.toUtc());
+    String formattedStartDateTime = DateFormat(DATETIME_START_OF_DAY_SF_FORMAT).format(startDate); // startDate.toUTC() is not required since startDate is already in UTC
+    String formattedEndDateTime = DateFormat(DATETIME_END_OF_DAY_SF_FORMAT).format(endDate);       // endDate.toUTC() is not required since endDate is already in UTC
     
     // Create the date clause to use in query later
     String dateClause =  'AND CreatedDate >= $formattedStartDateTime AND CreatedDate <= $formattedEndDateTime';
