@@ -1,4 +1,6 @@
 // data_generator.dart
+// ignore_for_file: constant_identifier_names
+
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
@@ -18,33 +20,19 @@ class DataGenerator {
   static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
   static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
 
-  static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen0({DateTime? startDate, DateTime? endDate}) async {
+  static const String DATETIME_START_OF_DAY_SF_FORMAT = "yyyy-MM-dd'T'00:00:00.000'Z'"; // Format to denote start of a day i.e. midnight time
+  static const  String DATETIME_END_OF_DAY_SF_FORMAT  = "yyyy-MM-dd'T'23:59:59.000'Z'"; // Format to denote till end of  day
+
+  static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen0({required DateTime startDate, required DateTime endDate}) async {
+    
     log.d('generateDataForExpenseScreen0 : StartDate is $startDate, endDate is $endDate');
-    try {
-        return Future.value(await generateTab1Data(startDate, endDate));
-    } catch (error) {
-        log.e('Error in generateDataForExpenseScreen0: $error');
-        // Return an empty list or handle the error as needed
-        return Future.value([]);
-    }
-  }
-
-  static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen1(DateTime startDate, DateTime endDate) async {
-    return await generateTab2Data(startDate, endDate);
-  }
-
-  static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen2() async {
-    return await generateTab3Data();
-  }
     
-  static Future<List<Map<String, dynamic>>> generateTab1Data(DateTime? startDate, DateTime? endDate) async {
+    // Format the dates accordingly
+    String formattedStartDateTime = DateFormat(DATETIME_START_OF_DAY_SF_FORMAT).format(startDate.toUtc());
+    String formattedEndDateTime = DateFormat(DATETIME_END_OF_DAY_SF_FORMAT).format(endDate.toUtc());
     
-    String dateClause = '';
-    if(startDate != null && endDate != null){
-      String formattedStartDateTime = DateFormat('yyyy-MM-ddTHH:mm:ss.SSSZ').format(startDate);
-      String formattedEndDateTime = DateFormat('yyyy-MM-ddTHH:mm:ss.SSSZ').format(endDate);
-      dateClause = 'AND CreatedDate >= $formattedStartDateTime AND CreatedDate <= $formattedEndDateTime';
-    }
+    // Create the date clause to use in query later
+    String dateClause =  'AND CreatedDate >= $formattedStartDateTime AND CreatedDate <= $formattedEndDateTime';
     log.d('StartDate is $startDate, endDate is $endDate and dateClause is=> $dateClause');
 
     List<Map<String, dynamic>> generatedData = [];
@@ -82,11 +70,19 @@ class DataGenerator {
         }
       }
       catch(error){
-        if(debug) log.d('Error Inside generateTab1Data : $error');
+        if(debug) log.e('Error Inside generateTab1Data : $error');
       }
     }
     if(detaildebug) log.d('Inside generateTab1Data=>$generatedData');
-    return Future.value(generatedData); // It needs to be wrapped with a Future.value since we want to return a future, explicitly
+    return generatedData; 
+  }
+
+  static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen1(DateTime startDate, DateTime endDate) async {
+    return await generateTab2Data(startDate, endDate);
+  }
+
+  static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen2() async {
+    return await generateTab3Data();
   }
   
   static Future<List<Map<String, dynamic>>> generateTab2Data(DateTime startDate, DateTime endDate) async {
@@ -128,7 +124,7 @@ class DataGenerator {
         }
       }
       catch(error){
-        if(debug) log.d('Error inside generateTab2Data : $error');
+        if(debug) log.e('Error inside generateTab2Data : $error');
       }
     }
     if(detaildebug) log.d('Inside generateTab2Data=>$generatedData');
@@ -181,7 +177,7 @@ class DataGenerator {
         }
       }
       catch(error){
-        if(debug) log.d('Error Inside generateTab3Data : $error');
+        if(debug) log.e('Error Inside generateTab3Data : $error');
       }
     }
     if(debug) log.d('Inside generateTab3Data=>$generatedDataTab3');

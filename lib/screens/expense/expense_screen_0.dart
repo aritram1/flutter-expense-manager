@@ -18,10 +18,10 @@ class ExpenseScreen0State extends State<ExpenseScreen0>{
   // Declare the required state variables for this page
 
   static final Logger log = Logger();
-  DateTime selectedStartDate = DateTime.now().add(const Duration(days: -30));
+  DateTime selectedStartDate = DateTime.now();//.add(const Duration(days: -30));
   DateTime selectedEndDate = DateTime.now();
   static bool showDatePickerPanel = false;
-  static Future<List<Map<String, dynamic>>> data = Future.value([]);//DataGenerator.generateDataForExpenseScreen0(startDate : selectedStartDate, endDate : selectedEndDate);
+  static late Future<List<Map<String, dynamic>>> data; // DataGenerator.generateDataForExpenseScreen0(startDate : selectedStartDate, endDate : selectedEndDate);
   // static final Future<List<Map<String, dynamic>>> immutableData = DataGenerator.generateDataForExpenseScreen0(startDate : selectedStartDate, endDate : selectedEndDate);
 
   dynamic Function(String) onLoadComplete = (result) {
@@ -29,9 +29,9 @@ class ExpenseScreen0State extends State<ExpenseScreen0>{
   };
 
   @override
-  void initState() {
+  void initState(){
     super.initState();
-    data = DataGenerator.generateDataForExpenseScreen0(startDate: selectedStartDate, endDate: selectedEndDate);
+    data = handleFutureData(); // generate the data for the first time
   }
 
   @override
@@ -56,7 +56,7 @@ class ExpenseScreen0State extends State<ExpenseScreen0>{
           ),
           Expanded(
             child: FutureBuilder(
-              future: data,
+              future: handleFutureData(),
               builder: (context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
@@ -96,6 +96,17 @@ class ExpenseScreen0State extends State<ExpenseScreen0>{
       selectedEndDate = endDate;
       data = DataGenerator.generateDataForExpenseScreen0(startDate: selectedStartDate, endDate: selectedEndDate);
     });
+  }
+  
+  Future<List<Map<String, dynamic>>> handleFutureData() async {
+    try {
+      return await DataGenerator.generateDataForExpenseScreen0(startDate: selectedStartDate, endDate: selectedEndDate);
+    } 
+    catch (error, stackTrace) {
+      log.e('Error in handleFutureData: $error');
+      log.e('Stack trace: $stackTrace');
+      return [];
+    }
   }
 
 }

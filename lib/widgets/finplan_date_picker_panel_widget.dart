@@ -1,6 +1,7 @@
 // ignore_for_file: must_be_immutable, non_constant_identifier_names
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 
@@ -24,13 +25,17 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
 
   // Class variables
   DateTime startDate = DateTime.now();
-  late DateTime endDate = DateTime.now();
-  late bool showDatePanel = true;
+  DateTime endDate = DateTime.now();
+  bool showDatePanel = true;
 
-  final Logger log = Logger();
-  final String DATE_FORMAT_IN = 'dd-MM-yyyy';
-  final List<String> FAVORITE_DATE_RANGES = ['Today', 'Yesterday', 'Last 7 days', 'Custom'];
+  static Logger log = Logger();
+  static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
+  static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
   
+  final String DATE_FORMAT_IN = 'dd-MM-yyyy';
+  
+  final List<String> FAVORITE_DATE_RANGES = ['Today', 'Yesterday', 'Last 7 days', 'Custom'];
+    
   // @override
   // void initState() {
   //   super.initState();
@@ -130,8 +135,10 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
           endDate = picked!;
         }
       });
-      log.d('StartDate $startDate');
-      log.d('EndDate $endDate');
+      if(debug){
+        log.d('StartDate $startDate');
+        log.d('EndDate $endDate');
+      }
       widget.onDateRangeSelected(startDate, endDate);
     }
   }
@@ -165,7 +172,7 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
 
   // An utility function to update the state variables e.g. `startDate`, `endDate`, `showDatePickerPanel`, `data` etc..
   handleFavoriteDateRangeButtonClick(String range){
-    Logger().d('I am here with range $range');
+    log.d('I am here with range $range');
     DateTime sDate, eDate;
     bool show = false;
     switch (range) {

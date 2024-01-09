@@ -10,6 +10,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SalesforceUtil{
 
+  // const static String VERSION = '59.0'
+
   // Declare required variables
   static String clientId = '';
   static String clientSecret = '';
@@ -42,11 +44,11 @@ class SalesforceUtil{
     tokenEndpoint         = dotenv.env['tokenEndpoint'] ?? '';
     tokenGrantType        = dotenv.env['tokenGrantType'] ?? '';
 
-    compositeUrlForInsert = dotenv.env['compositeUrlForInsert'] ?? ''; // Standard Insert API from Salesforce
-    compositeUrlForUpdate = dotenv.env['compositeUrlForUpdate'] ?? ''; // Standard Update API from Salesforce
-    compositeUrlForDelete = dotenv.env['compositeUrlForDelete'] ?? ''; // Standard Delete API from Salesforce
-    queryUrl              = dotenv.env['queryUrl'] ?? '';              // Standard Query API from Salesforce
-    
+    compositeUrlForInsert = dotenv.env['compositeUrlForInsert'] ?? ''; // Standard Insert API from Salesforce - '/services/data/v59.0/composite/tree/'
+    compositeUrlForUpdate = dotenv.env['compositeUrlForUpdate'] ?? ''; // Standard Update API from Salesforce - '/services/data/v59.0/composite/sobjects/'
+    compositeUrlForDelete = dotenv.env['compositeUrlForDelete'] ?? ''; // Standard Delete API from Salesforce - '/services/data/v59.0/composite/sobjects?ids='
+    queryUrl              = dotenv.env['queryUrl'] ?? '';              // Standard Query API from Salesforce  - '/services/data/v59.0/query?q='
+
     debug                 = bool.parse(dotenv.env['debug'] ?? 'false');
     detaildebug           = bool.parse(dotenv.env['detaildebug'] ?? 'false');
   }
@@ -233,7 +235,7 @@ class SalesforceUtil{
       // responseMap.add('data') = response.body;
     }
     catch(error){
-      // if(detaildebug) log.d('Error occurred while logging into Salesforce. Error is : $error');
+      if(detaildebug) log.e('Error occurred while logging into Salesforce. Error is : $error');
       loginResponse['error'] = error.toString();
     }
     return loginResponse;
@@ -406,7 +408,7 @@ class SalesforceUtil{
       }
     }
     catch(error){
-      if(detaildebug) log.d('Error occurred while querying data from Salesforce. Error is : $error');
+      if(detaildebug) log.e('Error occurred while querying data from Salesforce. Error is : $error');
       queryFromSalesforceResponse['error'] = error.toString();
     }
     // if(detaildebug) log.d('queryFromSlesforceResponse=> $queryFromSlesforceResponse');
@@ -497,10 +499,9 @@ class SalesforceUtil{
     String limitCount = (count != null && count > 0) ? 'LIMIT $count' : '';
 
     String query = 'SELECT $fields FROM $objAPIName $whereClause $orderByClause $limitCount';
-    if(detaildebug) log.d('Generated Query : $query');
+    if(debug) log.d('Generated Query : $query');
 
     query = query.replaceAll(' ', '+');
-    // // if(detaildebug) log.d('Encoded Query : $query');
     
     final String endpointUrl = '$instanceUrl$queryUrl$query';
     if(detaildebug) log.d('endpointUrl inside generateQueryEndpointUrl: $endpointUrl');

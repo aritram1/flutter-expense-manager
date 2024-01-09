@@ -93,7 +93,7 @@ class DataGeneratorLocal{
       // }
     }
     catch(error){
-      log.d('error in message : $error');
+      log.e('error in message : $error');
     }
 
     return data;
