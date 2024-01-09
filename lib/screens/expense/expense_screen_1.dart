@@ -46,24 +46,10 @@ class ExpenseScreen1State extends State<ExpenseScreen1> {
           padding: const EdgeInsets.only(left: 16.0), 
           child: Column(
             children: [
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: getFavoriteDateRangedButtons(),
-                ),
-              ),
-            
-              // The date picker panel, this is shown when date range is selected as `Custom`
-              Visibility(
-                visible: (showDatePickerPanel == true), // same as `visible: showDatePickerPanel`
-                child: FinPlanDatepickerPanelWidget(
-                  key: UniqueKey(),
-                  showFavoriteRanges: true,
-                  onDateRangeSelected: handleDateRangeSelection,
-                  //startDate: selectedStartDate,
-                  //endDate: selectedEndDate,
-                ),
-              ),
+              FinPlanDatepickerPanelWidget(
+                onDateRangeSelected: handleDateRangeSelection,
+                showFavoriteRanges: true,
+              )
             ]
           ),
         ),
