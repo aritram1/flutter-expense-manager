@@ -18,10 +18,10 @@ class ExpenseScreen0State extends State<ExpenseScreen0>{
   // Declare the required state variables for this page
 
   static final Logger log = Logger();
-  DateTime selectedStartDate = DateTime.now();//.add(const Duration(days: -30));
+  DateTime selectedStartDate = DateTime.now();
   DateTime selectedEndDate = DateTime.now();
   static bool showDatePickerPanel = false;
-  static late Future<List<Map<String, dynamic>>> data; // DataGenerator.generateDataForExpenseScreen0(startDate : selectedStartDate, endDate : selectedEndDate);
+  static late Future<List<Map<String, dynamic>>> data;
   // static final Future<List<Map<String, dynamic>>> immutableData = DataGenerator.generateDataForExpenseScreen0(startDate : selectedStartDate, endDate : selectedEndDate);
 
   dynamic Function(String) onLoadComplete = (result) {

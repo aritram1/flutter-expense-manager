@@ -77,24 +77,27 @@ class DataGenerator {
     return generatedData; 
   }
 
-  static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen1(DateTime startDate, DateTime endDate) async {
-    return await generateTab2Data(startDate, endDate);
-  }
-
   static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen2() async {
     return await generateTab3Data();
   }
   
-  static Future<List<Map<String, dynamic>>> generateTab2Data(DateTime startDate, DateTime endDate) async {
-    if(detaildebug) log.d('Inside generate tab2 data, startDate date is => $startDate');
-    if(detaildebug) log.d('Inside generate tab2 data, endDate date is => $endDate');
-    String formattedStartDate = startDate.toString().split(' ')[0];
-    String formattedEndDate = endDate.toString().split(' ')[0];
+  static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen1({required DateTime startDate, required DateTime endDate}) async {
+   
+    log.d('generateDataForExpenseScreen0 : StartDate is $startDate, endDate is $endDate');
+    
+    // Format the dates accordingly
+    String formattedStartDateTime = DateFormat(DATETIME_START_OF_DAY_SF_FORMAT).format(startDate); // startDate.toUTC() is not required since startDate is already in UTC
+    String formattedEndDateTime = DateFormat(DATETIME_END_OF_DAY_SF_FORMAT).format(endDate);       // endDate.toUTC() is not required since endDate is already in UTC
+    
+    // Create the date clause to use in query later
+    String dateClause =  'WHERE FinPlan__Transaction_Date__c >= $formattedStartDateTime AND FinPlan__Transaction_Date__c <= $formattedEndDateTime';
+    log.d('StartDate is $startDate, endDate is $endDate and dateClause is=> $dateClause');
+
     List<Map<String, dynamic>> generatedData = [];
     Map<String, dynamic> response = await SalesforceUtil.queryFromSalesforce(
       objAPIName: 'FinPlan__Bank_Transaction__c', 
       fieldList: ['Id', 'FinPlan__Beneficiary_Name__c','FinPlan__Transaction_Date__c', 'FinPlan__Amount__c','FinPlan__Type__c'],
-      whereClause: 'FinPlan__Transaction_Date__c >= $formattedStartDate AND FinPlan__Transaction_Date__c <= $formattedEndDate ',
+      whereClause: dateClause,
       orderByClause: 'FinPlan__Transaction_Date__c desc',
       //count : 120
     );
