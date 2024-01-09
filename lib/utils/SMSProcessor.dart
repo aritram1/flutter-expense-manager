@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 class SMSMessage {
   String? id;
@@ -154,7 +153,7 @@ class SMSProcessController {
       sms.saAvailableBalance = sms.content?.split('Avl bal: INR')[1] ?? '';
       sms.type = 'credit';
       
-      String str = sms.content?.split('Avl bal: INR')[0].split('by')[1]?.replaceAll('(', '')?.replaceAll(')', '') ?? '';
+      String str = sms.content?.split('Avl bal: INR')[0].split('by')[1].replaceAll('(', '').replaceAll(')', '') ?? '';
       sms.beneficiary = str.split('IMPS Ref No. ')[0];
       sms.beneficiary = toCamelCase(sms.beneficiary ?? ''); // convert to camel case for better readability
       
@@ -167,11 +166,11 @@ class SMSProcessController {
       sms.type = 'debit';
       sms.paymentVia = 'UPI';
       
-      String content = sms.content?.replaceAll('(', '')?.replaceAll(')', '') ?? '';
+      String content = sms.content?.replaceAll('(', '').replaceAll(')', '') ?? '';
       sms.beneficiary = content.split('to ')[1].split('. Not you?')[0].split('UPI Ref No ')[0];
       sms.beneficiary = toCamelCase(sms.beneficiary ?? ''); // convert to camel case for better readability
       
-      String paymentReferenceString = sms.content?.replaceAll('(', 'START_BRACKET')?.replaceAll(')', 'END_BRACKET') ?? '';
+      String paymentReferenceString = sms.content?.replaceAll('(', 'START_BRACKET').replaceAll(')', 'END_BRACKET') ?? '';
       sms.paymentReference = paymentReferenceString.split('START_BRACKET')[1].split('END_BRACKET')[0].replaceAll('UPI Ref No.', '').trim();
     } else if ((sms.content?.startsWith('Money Transfer:Rs') ?? false) && (sms.content?.contains('UPI') ?? false)) {
       sms.amountValue = double.parse(contentArray[2]);
@@ -198,7 +197,7 @@ class SMSProcessController {
     sms.amountValue = double.parse(contentArray[9].replaceAll('Rs.', ''));
     sms.type = 'credit';
     
-    String modifiedContent = sms.content?.replaceAll('(', 'START_BRACKET')?.replaceAll(')', 'END_BRACKET') ?? '';
+    String modifiedContent = sms.content?.replaceAll('(', 'START_BRACKET').replaceAll(')', 'END_BRACKET') ?? '';
     sms.beneficiary = modifiedContent.split('by')[2].split('START_BRACKET')[0] ?? '';
     sms.beneficiary = toCamelCase(sms.beneficiary ?? ''); // convert to camel case for better readability
     
@@ -208,7 +207,7 @@ class SMSProcessController {
     }
   } else if (sms.content?.contains('Your a/c no. XXXXXXXX6414 is debited for') ?? false) {
     sms.amountValue = double.parse(contentArray[9].replaceAll('Rs.', ''));
-    sms.beneficiary = sms.content?.split('and')[1].split('credited')[0]?.trim() ?? '';
+    sms.beneficiary = sms.content?.split('and')[1].split('credited')[0].trim() ?? '';
     sms.beneficiary = toCamelCase(sms.beneficiary ?? ''); // convert to camel case for better readability
     sms.type = 'debit';
   } else if (sms.content?.contains('withdrawn at SBI ATM') ?? false) {
@@ -302,33 +301,29 @@ void main() {
 }
 
 String toCamelCase(String inputString) {
-  if (inputString == null) {
-    return inputString;
-  } else {
-    try {
-      List<String> modifiedWords = [];
+  try {
+    List<String> modifiedWords = [];
 
-      inputString = inputString.trim();
+    inputString = inputString.trim();
 
-      // Split the string into words
-      List<String> words = inputString.trim().split(' ');
+    // Split the string into words
+    List<String> words = inputString.trim().split(' ');
 
-      for (String word in words) {
-        word = word.trim(); // trim the whitespaces
-        if (word.length == 1) {
-          modifiedWords.add(word.toUpperCase()); // if there is only one character in the word
-        } else if (word.length > 1) {
-          // if there are at least 2 characters in a word
-          String firstAlphabet = word.substring(0, 1).toUpperCase();
-          String rest = word.substring(1, word.length).toLowerCase();
-          modifiedWords.add(firstAlphabet + rest);
-        }
+    for (String word in words) {
+      word = word.trim(); // trim the whitespaces
+      if (word.length == 1) {
+        modifiedWords.add(word.toUpperCase()); // if there is only one character in the word
+      } else if (word.length > 1) {
+        // if there are at least 2 characters in a word
+        String firstAlphabet = word.substring(0, 1).toUpperCase();
+        String rest = word.substring(1, word.length).toLowerCase();
+        modifiedWords.add(firstAlphabet + rest);
       }
-
-      // Join the words back together
-      return modifiedWords.join(' ');
-    } catch (e) {
-      throw FinPlanException(e.toString());
     }
+
+    // Join the words back together
+    return modifiedWords.join(' ');
+  } catch (e) {
+    throw FinPlanException(e.toString());
   }
 }

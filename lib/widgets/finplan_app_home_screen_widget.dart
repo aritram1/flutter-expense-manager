@@ -3,6 +3,7 @@ import 'package:logger/logger.dart';
 
 class FinPlanAppHomeScreenWidget extends StatelessWidget {
   // declare the widget attributes
+  @override
   final Key? key;
   final int tabCount;
   final List<String> tabNames;

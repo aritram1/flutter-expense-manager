@@ -3,7 +3,7 @@ import './home_screen_0.dart';
 import '../../widgets/finplan_app_home_screen_widget.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key});
+  const HomeScreen({super.key});
   
   @override
   Widget build(BuildContext context) {

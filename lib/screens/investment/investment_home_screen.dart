@@ -7,7 +7,7 @@ import '../../widgets/finplan_app_home_screen_widget.dart';
 
 
 class InvestmentHomeScreen extends StatelessWidget {
-  const InvestmentHomeScreen({Key? key});
+  const InvestmentHomeScreen({super.key});
   
   @override
   Widget build(BuildContext context) {

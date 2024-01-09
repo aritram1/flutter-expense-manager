@@ -2,7 +2,6 @@ import 'dart:math';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:logger/logger.dart';
-import './SMSProcessor.dart';
 import 'message_util.dart';
 
 class DataGeneratorLocal{

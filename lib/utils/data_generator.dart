@@ -19,25 +19,31 @@ class DataGenerator {
   static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
 
   static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen0({DateTime? startDate, DateTime? endDate}) async {
-    return generateTab1Data(startDate, endDate);
+    log.d('generateDataForExpenseScreen0 : StartDate is $startDate, endDate is $endDate');
+    try {
+        return Future.value(await generateTab1Data(startDate, endDate));
+    } catch (error) {
+        log.e('Error in generateDataForExpenseScreen0: $error');
+        // Return an empty list or handle the error as needed
+        return Future.value([]);
+    }
   }
 
   static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen1(DateTime startDate, DateTime endDate) async {
-    return generateTab2Data(startDate, endDate);
+    return await generateTab2Data(startDate, endDate);
   }
 
   static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen2() async {
-    return generateTab3Data();
+    return await generateTab3Data();
   }
     
-
   static Future<List<Map<String, dynamic>>> generateTab1Data(DateTime? startDate, DateTime? endDate) async {
     
     String dateClause = '';
     if(startDate != null && endDate != null){
       String formattedStartDateTime = DateFormat('yyyy-MM-ddTHH:mm:ss.SSSZ').format(startDate);
       String formattedEndDateTime = DateFormat('yyyy-MM-ddTHH:mm:ss.SSSZ').format(endDate);
-      dateClause = 'AND CreatedDate >= $formattedStartDateTime AND  CreatedDate <= $formattedEndDateTime';
+      dateClause = 'AND CreatedDate >= $formattedStartDateTime AND CreatedDate <= $formattedEndDateTime';
     }
     log.d('StartDate is $startDate, endDate is $endDate and dateClause is=> $dateClause');
 
@@ -80,7 +86,7 @@ class DataGenerator {
       }
     }
     if(detaildebug) log.d('Inside generateTab1Data=>$generatedData');
-    return generatedData;
+    return Future.value(generatedData); // It needs to be wrapped with a Future.value since we want to return a future, explicitly
   }
   
   static Future<List<Map<String, dynamic>>> generateTab2Data(DateTime startDate, DateTime endDate) async {

@@ -1,4 +1,3 @@
-import 'package:ExpenseManager/screens/expense/expense_screen_3.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import './expense_screen_0.dart';
@@ -40,8 +39,8 @@ class ExpenseHomeScreenState extends State<ExpenseHomeScreen>{
       : FinPlanAppHomeScreenWidget(
         title: 'Expense Home',
         caller: 'ExpenseHomeScreen',
-        tabCount: 4,
-        tabNames: const ['Expense', 'Transactions', 'A/c Overview', 'test'],
+        tabCount: 3,
+        tabNames: const ['Expense', 'Transactions', 'A/c Overview'],
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -68,9 +67,8 @@ class ExpenseHomeScreenState extends State<ExpenseHomeScreen>{
         ],
         tabBarViews: [
           const ExpenseScreen0(),
-          ExpenseScreen1(),
+          const ExpenseScreen1(),
           ExpenseScreen2(),
-          const ExpenseScreen3()
         ],
       );
     }

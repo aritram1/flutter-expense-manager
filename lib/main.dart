@@ -30,7 +30,7 @@ void main() async {
   // await checkAndRequestPermissions();
 
   // Run the app finally
-  runApp(MyApp());
+  runApp(const MyApp());
   
 }
 
@@ -76,6 +76,8 @@ void main() async {
 // }
   
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -85,12 +87,14 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: MyAppHomePage(),
+      home: const MyAppHomePage(),
     );
   }
 }
 
 class MyAppHomePage extends StatefulWidget {
+  const MyAppHomePage({super.key});
+
   @override
   _MyAppHomePageState createState() => _MyAppHomePageState();
 }
@@ -131,7 +135,7 @@ class _MyAppHomePageState extends State<MyAppHomePage> {
       case 0:
         return const HomeScreen();
       case 1:
-        return ExpenseHomeScreen();
+        return const ExpenseHomeScreen();
       case 2:
         return const InvestmentHomeScreen();
       default:

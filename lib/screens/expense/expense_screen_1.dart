@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import '../../utils/data_generator.dart';
 import '../../widgets/finplan_date_picker_panel_widget.dart';
 import '../../widgets/finplan_table_widget.dart';
 import 'package:logger/logger.dart';
 
 class ExpenseScreen1 extends StatefulWidget {
-  ExpenseScreen1({Key? key}) : super(key: key);
+  const ExpenseScreen1({Key? key}) : super(key: key);
 
   @override
-  _ExpenseScreen1State createState() => _ExpenseScreen1State();
+  ExpenseScreen1State createState() => ExpenseScreen1State();
 }
 
-class _ExpenseScreen1State extends State<ExpenseScreen1> {
+class ExpenseScreen1State extends State<ExpenseScreen1> {
 
   // Declare the required state variables for this page
   static DateTime selectedStartDate = DateTime.now().add(const Duration(days: -30));
@@ -59,9 +58,10 @@ class _ExpenseScreen1State extends State<ExpenseScreen1> {
                 visible: (showDatePickerPanel == true), // same as `visible: showDatePickerPanel`
                 child: FinPlanDatepickerPanelWidget(
                   key: UniqueKey(),
+                  showFavoriteRanges: true,
                   onDateRangeSelected: handleDateRangeSelection,
-                  startDate: selectedStartDate,
-                  endDate: selectedEndDate,
+                  //startDate: selectedStartDate,
+                  //endDate: selectedEndDate,
                 ),
               ),
             ]

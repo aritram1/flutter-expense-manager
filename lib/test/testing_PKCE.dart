@@ -3,7 +3,6 @@
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
-import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:crypto/crypto.dart';
 
@@ -13,7 +12,7 @@ void main() async {
   print('Logging...');
 
   // SF constant endpoints
-  final String authorizationEndpoint = 'https://login.salesforce.com/services/oauth2/authorize';
+  const String authorizationEndpoint = 'https://login.salesforce.com/services/oauth2/authorize';
   String tokenEndpoint = 'https://login.salesforce.com/services/oauth2/token';
 
   // SF instant specific constants
