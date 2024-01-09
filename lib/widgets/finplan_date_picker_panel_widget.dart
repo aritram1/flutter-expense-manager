@@ -34,7 +34,7 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
   
   final String DATE_FORMAT_IN = 'dd-MM-yyyy';
     
-  final List<String> FAVORITE_DATE_RANGES = ['Today', 'Yesterday', 'Last 7 days', 'Custom'];
+  final List<String> FAVORITE_DATE_RANGES = ['Today', 'Yesterday', 'Last 7 days', 'Last 30 days', 'Custom'];
     
   @override
   void initState() {
@@ -119,7 +119,7 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
         context: context,
         initialDate: selectedDate,
         firstDate: DateTime.now().add(const Duration(days : -365)), // Can select date upto one year back
-        lastDate: DateTime.now(),
+        lastDate: endDate,
       );
     } else {
       picked = await showDatePicker(
@@ -152,7 +152,7 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
     }
   }
 
-  // A specialized function to show specific date ranges like `Today`, `Tomorrow`, `Last 7 days` etc.
+  // A specialized function to show specific date ranges like `Today`, `Tomorrow`, `Last 7 days`, `Last 30 days` etc.
   dynamic getFavoriteDateRangedButtons() {
     
     List<String> favoriteDateRanges = FAVORITE_DATE_RANGES;
@@ -200,6 +200,11 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
         eDate = DateTime.now();
         show = false;
         break;
+      case 'Last 30 days':
+        sDate = DateTime.now().add(const Duration(days: -30));
+        eDate = DateTime.now();
+        show = false;
+        break;
       case 'Custom':
         sDate = DateTime.now();
         eDate = DateTime.now();
@@ -215,11 +220,9 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
     setState(() {
       startDate = sDate;
       endDate = eDate;
-      // showDatePanel = show;
+      // showDatePanel = show; // TBD if it will be helpful
       // showDatePanel = true; // for debug
-      // if(range != 'Custom'){ // Refresh the data only when any date range other than `Custom` is chosen
-        widget.onDateRangeSelected(startDate, endDate); 
-      // }
+      widget.onDateRangeSelected(startDate, endDate); 
     });  
   }
 
