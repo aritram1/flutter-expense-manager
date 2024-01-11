@@ -50,8 +50,11 @@ class MessageUtil {
     else {
       await Permission.sms.request();
     }
-    if(debug) log.d('Inbox message count : ${messages.length}');
-    return sort(messages);
+    if(debug) log.d('Inbox all message count : ${messages.length}');
+    List<SmsMessage> filteredMsgList = getOnlyImportantMessages(messages); // Filter out the non transactional messages like personal sms and OTP messages
+    if(debug) log.d('Inbox transactional message count : ${messages.length}');
+  
+    return filteredMsgList;
   }
 
   // Method to convert the SMS Messages to a format that will be used for insert method later
@@ -77,15 +80,21 @@ class MessageUtil {
     return allRecords;
   }
 
-  // Method to sort the messages as per received at value, records are to be arranged by date asc
-  static List<SmsMessage> sort(List<SmsMessage> msgList){
-    // List<SmsMessage> sortedMsgList = [];
-    // for(int i = msgList.length-1; i >= 0; i--){
-    //   sortedMsgList.add(msgList[i]);
-    // }
-    // return sortedMsgList;
 
-    // sorting is not required at the moment, because balance update works when messages are arranged most recent on top
-    return msgList;
+  
+
+
+  // Method to filter out non transactional messages
+  static List<SmsMessage> getOnlyImportantMessages(List<SmsMessage> msgList){
+    List<SmsMessage> filteredMsgList = [];
+    for(int i = msgList.length-1; i >= 0; i--){
+      if(msgList[i].body!.contains('OTP') || msgList[i].sender!.startsWith('+')){
+        // pass on
+      }
+      else{
+        filteredMsgList.add(msgList[i]);
+      }
+    }
+    return filteredMsgList;
   }
 }
