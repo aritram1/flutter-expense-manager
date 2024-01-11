@@ -50,9 +50,9 @@ class MessageUtil {
     else {
       await Permission.sms.request();
     }
-    if(debug) log.d('Inbox all message count : ${messages.length}');
+    log.d('Inbox all message count : ${messages.length}');
     List<SmsMessage> filteredMsgList = getOnlyImportantMessages(messages); // Filter out the non transactional messages like personal sms and OTP messages
-    if(debug) log.d('Inbox transactional message count : ${messages.length}');
+    log.d('Inbox transactional message count : ${filteredMsgList.length}');
   
     return filteredMsgList;
   }
@@ -80,15 +80,11 @@ class MessageUtil {
     return allRecords;
   }
 
-
-  
-
-
   // Method to filter out non transactional messages
   static List<SmsMessage> getOnlyImportantMessages(List<SmsMessage> msgList){
     List<SmsMessage> filteredMsgList = [];
     for(int i = msgList.length-1; i >= 0; i--){
-      if(msgList[i].body!.contains('OTP') || msgList[i].sender!.startsWith('+')){
+      if(msgList[i].body!.toUpperCase().contains('OTP') || msgList[i].body!.toUpperCase().contains('VERIFICATION CODE') || msgList[i].sender!.startsWith('+')){
         // pass on
       }
       else{
