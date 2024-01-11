@@ -42,12 +42,12 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
     startDate = DateTime.now(); // default dates
     endDate = DateTime.now(); // default dates
     showDatePanel = true;
-    log.d('The init state has run');
+    if(detaildebug) log.d('The init state has run');
   }
   
   @override
   Widget build(BuildContext context) {
-    log.d('The build method has run');
+    if(detaildebug) log.d('The build method has run');
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 0.0),
       child: Column(

@@ -43,7 +43,7 @@ class ExpenseHomeScreenState extends State<ExpenseHomeScreen>{
         tabNames: const ['Expense', 'Transactions', 'A/c Overview'],
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.upload),
             onPressed: () async {
                 BuildContext currentContext = context;
                 // Get an alert dialog as confirmation box
@@ -110,9 +110,12 @@ class ExpenseHomeScreenState extends State<ExpenseHomeScreen>{
   // A confirmation box to show if its ok to proceed with sync and delete operation
   static Future<dynamic> showConfirmationBox(BuildContext context, String opType){
     String title = 'Please confirm'; 
-    String content =  (opType == 'Sync') ? 'This will delete and resync all. Proceed?' : 'This will delete all. Proceed?' ;
     String choiceYes = 'Yes';
     String choiceNo = 'No';
+    String content =  (opType == 'Sync') 
+                            ? 'This will delete existing messages and recreate them. Proceed?' 
+                            : 'This will delete all messages and transactions. Proceed?' ;
+    
     return showDialog(
       context: context,
       builder: (BuildContext context) {

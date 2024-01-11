@@ -15,7 +15,7 @@ class MessageUtil {
 
   static Logger log = Logger();
   
-  static int maximumMessageCount = int.parse(dotenv.env['maximumMessageCount'] ?? '1000');
+  static int maximumMessageCount = int.parse(dotenv.env['maximumMessageCount'] ?? '5');
 
   ///////////////////////////////Get SMS Messages//////////////////////////////////////
   static Future<List<SmsMessage>> getMessages({List<SmsQueryKind>? kinds, String? sender, int? count}) async {
@@ -42,7 +42,7 @@ class MessageUtil {
         messages = await SmsQuery().querySms(
           kinds: smsKinds,
           address: sender,
-          count: maximumMessageCount, // maximum message to be retrieved
+          // count: maximumMessageCount, // maximum message to be retrieved
         );
       }
       
@@ -83,14 +83,25 @@ class MessageUtil {
   // Method to filter out non transactional messages
   static List<SmsMessage> getOnlyImportantMessages(List<SmsMessage> msgList){
     List<SmsMessage> filteredMsgList = [];
+    bool isOTP = false;
+    bool isPersonal = false;
+    bool isTransactional = false;
     for(int i = msgList.length-1; i >= 0; i--){
-      if(msgList[i].body!.toUpperCase().contains('OTP') || msgList[i].body!.toUpperCase().contains('VERIFICATION CODE') || msgList[i].sender!.startsWith('+')){
-        // pass on
-      }
-      else{
+      
+      isOTP = msgList[i].body!.toUpperCase().contains('OTP') || msgList[i].body!.toUpperCase().contains('VERIFICATION CODE');
+      isPersonal = msgList[i].sender!.toUpperCase().startsWith('+');
+      isTransactional = msgList[i].body!.toUpperCase().contains('RS ') || msgList[i].body!.toUpperCase().contains('RS. ') || msgList[i].body!.toUpperCase().contains('INR ');
+      
+      if(!isOTP && !isPersonal && isTransactional){
         filteredMsgList.add(msgList[i]);
       }
     }
-    return filteredMsgList;
+
+    // Clip the required number of messages from the list
+    List<SmsMessage> listToReturn = filteredMsgList;
+    if(filteredMsgList.length > maximumMessageCount){
+      listToReturn = filteredMsgList.sublist(0, maximumMessageCount);
+    }
+    return listToReturn;
   }
 }
