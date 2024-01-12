@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import '../../utils/data_generator_local.dart';
+import '../../utils/local/data_generator_local.dart';
 import '../../widgets/finplan_table_widget.dart';
 import 'package:logger/logger.dart';
 
