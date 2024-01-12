@@ -20,20 +20,22 @@ class DataGenerator {
   static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
   static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
 
-  static const String DATETIME_START_OF_DAY_SF_FORMAT = "yyyy-MM-dd'T'00:00:00.000'Z'"; // Format to denote start of the day i.e. midnight time in UTC
-  static const String DATETIME_END_OF_DAY_SF_FORMAT  = "yyyy-MM-dd'T'23:59:59.000'Z'";  // Format to denote till end of the day in UTC
-  static const String DATE_SF_FORMAT  = 'yyyy-MM-dd';                                   // Format to denote yyyy-mm-dd format
+  // These two are not reuqired now
+  // static const String DATETIME_START_OF_DAY_SF_FORMAT = "yyyy-MM-dd'T'00:00:00.000'Z'"; // Format to denote start of the day i.e. midnight time in UTC
+  // static const String DATETIME_END_OF_DAY_SF_FORMAT  = "yyyy-MM-dd'T'23:59:59.000'Z'";  // Format to denote till end of the day in UTC
+  
+  static const String DATE_FORMAT_IN  = 'yyyy-MM-dd';                                   // Format to denote yyyy-mm-dd format
   
   static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen0({required DateTime startDate, required DateTime endDate}) async {
     
     log.d('generateDataForExpenseScreen0 : StartDate is $startDate, endDate is $endDate');
     
     // Format the dates accordingly
-    String formattedStartDateTime = DateFormat(DATETIME_START_OF_DAY_SF_FORMAT).format(startDate); // startDate.toUTC() is not required since startDate is already in UTC
-    String formattedEndDateTime = DateFormat(DATETIME_END_OF_DAY_SF_FORMAT).format(endDate);       // endDate.toUTC() is not required since endDate is already in UTC
+    String formattedStartDateTime = DateFormat(DATE_FORMAT_IN).format(startDate); // startDate.toUTC() is not required since startDate is already in UTC
+    String formattedEndDateTime = DateFormat(DATE_FORMAT_IN).format(endDate);       // endDate.toUTC() is not required since endDate is already in UTC
     
     // Create the date clause to use in query later
-    String dateClause =  'AND CreatedDate >= $formattedStartDateTime AND CreatedDate <= $formattedEndDateTime';
+    String dateClause =  'AND FinPlan__Transaction_Date__c >= $formattedStartDateTime AND FinPlan__Transaction_Date__c <= $formattedEndDateTime';
     log.d('StartDate is $startDate, endDate is $endDate and dateClause is=> $dateClause');
 
     List<Map<String, dynamic>> generatedData = [];
@@ -87,8 +89,8 @@ class DataGenerator {
     log.d('generateDataForExpenseScreen0 : StartDate is $startDate, endDate is $endDate');
     
     // Format the dateTime to date accordingly
-    String formattedStartDate = DateFormat(DATE_SF_FORMAT).format(startDate);
-    String formattedEndDate = DateFormat(DATE_SF_FORMAT).format(endDate);
+    String formattedStartDate = DateFormat(DATE_FORMAT_IN).format(startDate);
+    String formattedEndDate = DateFormat(DATE_FORMAT_IN).format(endDate);
     
     // Create the date clause to use in query later
     String dateClause =  'FinPlan__Transaction_Date__c >= $formattedStartDate AND FinPlan__Transaction_Date__c <= $formattedEndDate';
