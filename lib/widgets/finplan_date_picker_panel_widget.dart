@@ -34,7 +34,7 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
   
   final String DATE_FORMAT_IN = 'dd-MM-yyyy';
     
-  final List<String> FAVORITE_DATE_RANGES = ['Today', 'Yesterday', 'Last 7 days', 'Last 30 days', 'Custom'];
+  final List<String> FAVORITE_DATE_RANGES = ['All', 'Today', 'Yesterday', 'Last 7 days', 'Last 30 days', 'Custom'];
     
   @override
   void initState() {
@@ -185,6 +185,10 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
     DateTime sDate, eDate;
     bool show;
     switch (range) {
+      case 'All':
+        sDate = DateTime.now().add(const Duration(days: -365));
+        eDate = DateTime.now();
+        show = false;
       case 'Today':
         sDate = DateTime.now();
         eDate = DateTime.now();
