@@ -25,6 +25,7 @@ class ExpenseHomeScreenState extends State<ExpenseHomeScreen>{
   @override
   Widget build(BuildContext context) {
     return 
+      // show alert dialog during loading
       isLoading 
       ? AlertDialog(
           content: Column(
@@ -36,40 +37,53 @@ class ExpenseHomeScreenState extends State<ExpenseHomeScreen>{
             ],
           ),
         )
+      // once loading is completed, show the actual home screen
       : FinPlanAppHomeScreenWidget(
-        title: 'Expense Home',
-        caller: 'ExpenseHomeScreen',
-        tabCount: 3,
-        tabNames: const ['Expense', 'Transactions', 'A/c Overview'],
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.upload),
-            onPressed: () async {
-                BuildContext currentContext = context;
-                // Get an alert dialog as confirmation box
-                bool shouldProceed = await showConfirmationBox(currentContext, 'Sync');
-                if(shouldProceed){
-                  await syncMessage(); // Call the method now
-                }
+          title: 'Expense Home',
+          caller: 'ExpenseHomeScreen',
+          tabCount: 3,
+          tabNames: const ['Expense', 'Transactions', 'A/c Overview'],
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.add_box),
+              onPressed: () async {
+                setState(() {
+                  isLoading = true;
+                });
+                await Future.delayed(const Duration(seconds: 1));
+                setState(() {
+                  isLoading = false;
+                });
               },
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () async {
-                BuildContext currentContext = context;
-                // Get an alert dialog as confirmation box
-                bool shouldProceed = await showConfirmationBox(currentContext, 'Delete');
-                if(shouldProceed){
-                  await deleteMessageAndTransactions(); // Call the method now
-                }
-              },                
-          ),
-        ],
-        tabBarViews: [
-          const ExpenseScreen0(),
-          const ExpenseScreen1(),
-          ExpenseScreen2(),
-        ],
+            ),
+            IconButton(
+              icon: const Icon(Icons.sync_outlined),
+              onPressed: () async {
+                  BuildContext currentContext = context;
+                  // Get an alert dialog as confirmation box
+                  bool shouldProceed = await showConfirmationBox(currentContext, 'Sync');
+                  if(shouldProceed){
+                    await syncMessage(); // Call the method now
+                  }
+                },
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: () async {
+                  BuildContext currentContext = context;
+                  // Get an alert dialog as confirmation box
+                  bool shouldProceed = await showConfirmationBox(currentContext, 'Delete');
+                  if(shouldProceed){
+                    await deleteMessageAndTransactions(); // Call the method now
+                  }
+                },                
+            ),
+          ],
+          tabBarViews: [
+            const ExpenseScreen0(),
+            const ExpenseScreen1(),
+            ExpenseScreen2(),
+          ],
       );
     }
 

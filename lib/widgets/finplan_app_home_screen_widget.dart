@@ -51,19 +51,17 @@ class FinPlanAppHomeScreenWidget extends StatelessWidget {
         ),
         body: TabBarView(
           children: tabBarViews
-          ),
+        ),
         bottomNavigationBar: Visibility(
           visible: tabCount > 1,
           child: Container(
             margin: const EdgeInsets.all(14.0),
             decoration: BoxDecoration(
-              color: Colors.blue.shade50, // White background
-              borderRadius:
-                  BorderRadius.circular(15.0), // Adjust the border radius
+              color: Colors.blue.shade50.withOpacity(0.5), // White background
+              borderRadius: BorderRadius.circular(10.0), // Adjust the border radius
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black
-                      .withOpacity(0.1), // Add a shadow for a bit of depth
+                  color: Colors.black.withOpacity(0.1), // Add a shadow for a bit of depth
                   blurRadius: 5.0,
                   spreadRadius: 2.0,
                 ),
@@ -71,14 +69,11 @@ class FinPlanAppHomeScreenWidget extends StatelessWidget {
             ),
             child: TabBar(
               indicator: BoxDecoration(
-                borderRadius: BorderRadius.circular(
-                    1.0), // Border radius for the indicator
+                borderRadius: BorderRadius.circular(1.0), // Border radius for the indicator
                 color: Colors.transparent, // White color for the indicator
               ),
-              labelColor: Theme.of(context)
-                  .primaryColor, // Pink text for the selected tab
-              unselectedLabelColor:
-                  Colors.grey.shade500, // BlRack text for unselected tabs
+              labelColor: Theme.of(context).primaryColor, // Pink text for the selected tab
+              unselectedLabelColor:Colors.grey.shade500, // BlRack text for unselected tabs
               tabs: _buildTabsFromNames(tabNames),
               // isScrollable: true,
             ),

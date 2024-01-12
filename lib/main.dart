@@ -118,7 +118,7 @@ class _MyAppHomePageState extends State<MyAppHomePage> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.attach_money),
+            icon: Icon(Icons.currency_rupee),
             label: 'Expense',
           ),
           BottomNavigationBarItem(
