@@ -282,34 +282,28 @@ class FinPlanTableWidgetState extends State<FinPlanTableWidget> {
       }
       if(detaildebug) log.d('Interim result : $result');
 
-      // Second layer sorting will be implemented later
-      // TBD
-      // Urgent
+      // Second layer sorting 
       // If the first column comparison is equal, use another column for sorting. See the default order below
-      // if (result == 0) {
-      //   if (columnIndex == constNameColumnId) {
-      //     result = compareDates(a[constDateColumnId],
-      //         b[constDateColumnId]); // If still `amounts` are same finally sort by `date`
-      //     if (result == 0) {
-      //       result = compareNumeric(a[constAmountColumnId],
-      //           b[constAmountColumnId]); // If `names` are same sort by `amount`
-      //     }
-      //   } else if (columnIndex == constAmountColumnId) {
-      //     result = compareStrings(a[constNameColumnId],
-      //         b[constNameColumnId]); // If `amounts` are same sort by `name`
-      //     if (result == 0) {
-      //       result = compareDates(a[constDateColumnId],
-      //           b[constDateColumnId]); // If still `names` are same sort by `date`
-      //     }
-      //   } else if (columnIndex == constDateColumnId) {
-      //     result = compareStrings(a[constNameColumnId],
-      //         b[constNameColumnId]); // If dates are same sort by names
-      //     if (result == 0) {
-      //       result = compareNumeric(a[constAmountColumnId],
-      //           b[constAmountColumnId]); // If still names are same finally sort by amount
-      //     }
-      //   }
-      // }
+      if (result == 0) {
+        if (columnIndex == constNameColumnId) {
+          result = compareDates(a[widget.headerNames[constDateColumnId]], b[widget.headerNames[constDateColumnId]]); // If still `amounts` are same finally sort by `date`
+          if (result == 0) {
+            result = compareNumeric(a[widget.headerNames[constAmountColumnId]], b[widget.headerNames[constAmountColumnId]]); // If `names` are same sort by `amount`
+          }
+        } 
+        else if (columnIndex == constAmountColumnId) {
+          result = compareStrings(a[widget.headerNames[constNameColumnId]], b[widget.headerNames[constNameColumnId]]); // If `amounts` are same sort by `name`
+          if (result == 0) {
+            result = compareDates(a[widget.headerNames[constDateColumnId]], b[widget.headerNames[constDateColumnId]]); // If still `names` are same sort by `date`
+          }
+        } 
+        else if (columnIndex == constDateColumnId) {
+          result = compareStrings(a[widget.headerNames[constNameColumnId]], b[widget.headerNames[constNameColumnId]]); // If dates are same sort by names
+          if (result == 0) {
+            result = compareNumeric(a[widget.headerNames[constAmountColumnId]], b[widget.headerNames[constAmountColumnId]]); // If still names are same finally sort by amount
+          }
+        }
+      }
       if (detaildebug){
         log.d('_sortAscending ? result : -result => ${_sortAscending ? result : -result}');
       }
