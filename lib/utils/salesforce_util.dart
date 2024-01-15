@@ -81,7 +81,7 @@ class SalesforceUtil{
           eachDeleteBatch.add(recordIds.removeLast());
         }
         resp = await _deleteFromSalesforce(objAPIName, eachDeleteBatch, batchCount , hardDelete);
-        // if(detaildebug) log.d('resp in delete : $resp');
+        if(detaildebug) log.d('resp in delete : $resp');
 
         // Process the response
         dmlToSalesforceResponse = processDMLResponse1(resp : resp, inputResponse : dmlToSalesforceResponse);
@@ -111,7 +111,7 @@ class SalesforceUtil{
           eachInsertUpdateBatch.add(fieldNameValuePairs.removeLast());
         }
         resp = await _dmlToSalesforce(opType, objAPIName, eachInsertUpdateBatch, batchCount : batchCount);
-        // if(detaildebug) log.d('resp in insert update : $resp');
+        if(detaildebug) log.d('resp in insert update : $resp');
        
         // Process the response
         dmlToSalesforceResponse = processDMLResponse1(resp : resp, inputResponse : dmlToSalesforceResponse);
@@ -119,7 +119,7 @@ class SalesforceUtil{
         batchCount++;
       }
     }
-    // if(detaildebug) log.d('Final value of dmlToSalesforceResponse=>' + dmlToSalesforceResponse.toString());
+    if(detaildebug) log.d('Final value of dmlToSalesforceResponse=>' + dmlToSalesforceResponse.toString());
     return dmlToSalesforceResponse;
   }
 
@@ -173,7 +173,7 @@ class SalesforceUtil{
         // Handle when record count is more than 4000
       }
     }
-    // if(detaildebug) log.d('Result from queryFromSalesforceResponse $queryFromSalesforceResponse');
+    if(detaildebug) log.d('Result from queryFromSalesforceResponse $queryFromSalesforceResponse');
     return queryFromSalesforceResponse;
   }
 
@@ -298,7 +298,10 @@ class SalesforceUtil{
         body: jsonEncode(generateBody(opType : 'insert', objAPIName : objAPIName, fieldNameValuePairs : fieldNameValuePairs, batchCount : batchCount)),
       );
       int statusCode = resp.statusCode;
-      if(detaildebug) log.d('_insertToSalesforce StatusCode $statusCode');
+      if(detaildebug){
+        log.d('_insertToSalesforce StatusCode $statusCode');
+        log.d('_insertToSalesforce response ${resp.body.toString()}');
+      }
       body = json.decode(resp.body);
       if(detaildebug) log.d('ResponseBody for _insertToSalesforce => ${body.toString()}');
       if(statusCode == 201 && !body['hasErrors']){

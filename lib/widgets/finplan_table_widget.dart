@@ -261,14 +261,14 @@ class FinPlanTableWidgetState extends State<FinPlanTableWidget> {
       int result = 0;
 
       if(detaildebug){
-        log.d('a => $a');
-        log.d('b => $b');
+        // log.d('a => $a');
+        // log.d('b => $b');
       }
       String columnName = widget.headerNames[sortColumnIndex];
 
       if(detaildebug){
-        log.d('a => ${a[columnName]}');//I am here sortColumnIndex => $sortColumnIndex $_sortAscending');
-        log.d('b => ${b[columnName]}');//log.d('I am here sortColumnIndex => $sortColumnIndex $_sortAscending');
+        // log.d('a => ${a[columnName]}');//I am here sortColumnIndex => $sortColumnIndex $_sortAscending');
+        // log.d('b => ${b[columnName]}');//log.d('I am here sortColumnIndex => $sortColumnIndex $_sortAscending');
       }
       
       if (columnIndex == constNameColumnId) { // constNameColumnId = 0;
@@ -402,10 +402,11 @@ class FinPlanTableWidgetState extends State<FinPlanTableWidget> {
       isLoading = true;
     });
 
-    await Future.delayed(const Duration(milliseconds: 100));
 
     Map<String, dynamic> response = await DataGenerator.approveSelectedMessages(objAPIName :'FinPlan__SMS_Message__c', recordIds : recordIds);
-    if(debug) log.d('Response for handleApproveSMS ${response.toString()}');
+    if(debug) log.d('Responsefor handleApproveSMS ${response.toString()}');
+
+    await Future.delayed(const Duration(milliseconds: 100));
 
     setState(() {
       // Reset the flag when the approval process is completed

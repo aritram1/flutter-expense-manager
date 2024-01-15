@@ -7,14 +7,25 @@ import 'package:logger/logger.dart';
 
 class FinPlanDatepickerPanelWidget extends StatefulWidget {
 
-  final bool showFavoriteRanges;
+  final List<String> dateRanges;
   final void Function (DateTime sDate, DateTime eDate) onDateRangeSelected;
+
+  final List<String> validDateRanges = ['All', 'Today', 'Yesterday', 'Last 7 days', 'Last 30 days', 'Last 6 months', 'Last 12 months', 'Custom'];
   
-  const FinPlanDatepickerPanelWidget({
+  FinPlanDatepickerPanelWidget({
     Key? key,
-    required this.showFavoriteRanges,
+    this.dateRanges = const ['All', 'Today', 'Yesterday', 'Last 7 days', 'Last 30 days'],
     required this.onDateRangeSelected,
-  }) : super(key: key);
+  }) : super(key: key){
+    assert(() {
+      for (var range in dateRanges) {
+        if (!validDateRanges.contains(range)) {
+          throw AssertionError('Invalid date range: $range. Please provide any of these ranges : $validDateRanges');
+        }
+      }
+      return true;
+    }());
+  }
   
   @override
   FinPlanDatepickerPanelWidgetState createState() => FinPlanDatepickerPanelWidgetState();
@@ -33,9 +44,7 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
   static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
   
   final String DATE_FORMAT_IN = 'dd-MM-yyyy';
-    
-  final List<String> FAVORITE_DATE_RANGES = ['All', 'Today', 'Yesterday', 'Last 7 days', 'Last 30 days', 'Custom'];
-    
+      
   @override
   void initState() {
     super.initState();
@@ -55,7 +64,7 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
         children: [
           // Show the date ranges buttons if calling widget requires.
           Visibility(
-            visible: widget.showFavoriteRanges,
+            visible: widget.dateRanges.isNotEmpty,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -155,7 +164,7 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
   // A specialized function to show specific date ranges like `Today`, `Tomorrow`, `Last 7 days`, `Last 30 days` etc.
   dynamic getFavoriteDateRangedButtons() {
     
-    List<String> favoriteDateRanges = FAVORITE_DATE_RANGES;
+    List<String> favoriteDateRanges = widget.dateRanges; 
     List<Widget> rangedButtons = [];
     ElevatedButton eButton;
     SizedBox sBox = const SizedBox(width: 8);
@@ -206,6 +215,16 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
         break;
       case 'Last 30 days':
         sDate = DateTime.now().add(const Duration(days: -30));
+        eDate = DateTime.now();
+        show = false;
+        break;
+      case 'Last 6 months':
+        sDate = DateTime.now().add(const Duration(days: -180));
+        eDate = DateTime.now();
+        show = false;
+        break;
+      case 'Last 12 months':
+        sDate = DateTime.now().add(const Duration(days: -360));
         eDate = DateTime.now();
         show = false;
         break;

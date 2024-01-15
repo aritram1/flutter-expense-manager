@@ -100,7 +100,9 @@ class MyAppHomePage extends StatefulWidget {
 }
 
 class _MyAppHomePageState extends State<MyAppHomePage> {
-  int _currentIndex = 1; // 0 : HomeScreen, 1 : ExpenseHomeScreen, 2 : InvestmentHomeScreen
+  
+  static int _currentIndex = int.parse(dotenv.env['landingTabIndex'] ?? '0'); // 0 : HomeScreen, 1 : ExpenseHomeScreen, 2 : InvestmentHomeScreen
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(

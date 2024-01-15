@@ -47,7 +47,6 @@ class ExpenseScreen1State extends State<ExpenseScreen1> {
             children: [
               FinPlanDatepickerPanelWidget(
                 onDateRangeSelected: handleDateRangeSelection,
-                showFavoriteRanges: true,
               )
             ]
           ),

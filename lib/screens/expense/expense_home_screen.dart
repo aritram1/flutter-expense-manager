@@ -1,3 +1,4 @@
+import 'package:ExpenseManager/widgets/finplan_add_new_expense_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import './expense_screen_0.dart';
@@ -47,13 +48,10 @@ class ExpenseHomeScreenState extends State<ExpenseHomeScreen>{
             IconButton(
               icon: const Icon(Icons.add_box),
               onPressed: () async {
-                setState(() {
-                  isLoading = true;
-                });
-                await Future.delayed(const Duration(seconds: 1));
-                setState(() {
-                  isLoading = false;
-                });
+                // await Future.delayed(const Duration(milliseconds: 100));
+                // ignore: use_build_context_synchronously
+                BuildContext currentContext = context;
+                await showAddNewExpenseWidget(currentContext);
               },
             ),
             IconButton(
@@ -154,5 +152,22 @@ class ExpenseHomeScreenState extends State<ExpenseHomeScreen>{
       },
     );
   }
-  
+
+  // To show the widget for adding new expenses
+  static Future<dynamic> showAddNewExpenseWidget(BuildContext context) async {
+    // log.d('Inside showAddNewExpenseWidget async!');
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return FinPlanAddNewExpenseWidget(
+          onSave: (amount, paidTo, details, selectedDate) async {
+            Map<String, dynamic> response = await DataGenerator.addExpenseToSalesforce(amount, paidTo, details, selectedDate);
+            log.d('New expense created : ${response.toString()}');
+            Navigator.pop(context); // Close the dialog after saving
+          },
+        );
+      },
+    );
+  }
+
 }

@@ -31,7 +31,7 @@ class ExpenseScreen0State extends State<ExpenseScreen0>{
   @override
   void initState(){
     super.initState();
-    data = handleFutureData(); // generate the data for the first time
+    data = handleFutureDataForExpense0(); // generate the data for the first time
   }
 
   @override
@@ -46,14 +46,13 @@ class ExpenseScreen0State extends State<ExpenseScreen0>{
               children: [
                 FinPlanDatepickerPanelWidget(
                   onDateRangeSelected: handleDateRangeSelection,
-                  showFavoriteRanges: true,
                 ),
               ]
             ),
           ),
           Expanded(
             child: FutureBuilder(
-              future: handleFutureData(),
+              future: handleFutureDataForExpense0(),
               builder: (context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
@@ -95,12 +94,12 @@ class ExpenseScreen0State extends State<ExpenseScreen0>{
     });
   }
   
-  Future<List<Map<String, dynamic>>> handleFutureData() async {
+  Future<List<Map<String, dynamic>>> handleFutureDataForExpense0() async {
     try {
       return await DataGenerator.generateDataForExpenseScreen0(startDate: selectedStartDate, endDate: selectedEndDate);
     } 
     catch (error, stackTrace) {
-      log.e('Error in handleFutureData: $error');
+      log.e('Error in handleFutureDataForExpense0: $error');
       log.e('Stack trace: $stackTrace');
       return [];
     }

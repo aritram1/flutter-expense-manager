@@ -15,3 +15,4 @@ customEndpointForDeleteTransactions='/services/apexrest/FinPlan/api/transactions
 customEndpointForDeleteAllMessagesAndTransactions='/services/apexrest/FinPlan/api/delete/*'
 maximumMessageCount='2000'
 detaildebug='false'
+landingTabIndex = '2'

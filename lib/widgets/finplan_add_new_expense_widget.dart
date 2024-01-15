@@ -1,8 +1,10 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
 class FinPlanAddNewExpenseWidget extends StatefulWidget {
-  final Function(String, String, String, DateTime) onSave;
+  final Function(String amount, String paidTo, String details, DateTime selectedDate) onSave;
 
   const FinPlanAddNewExpenseWidget({Key? key, required this.onSave}) : super(key: key);
 
@@ -25,7 +27,7 @@ class _FinPlanAddNewExpenseWidgetState extends State<FinPlanAddNewExpenseWidget>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {   
     return AlertDialog(
       title: const Text('Enter Expense Data'),
       content: Column(
@@ -45,12 +47,30 @@ class _FinPlanAddNewExpenseWidgetState extends State<FinPlanAddNewExpenseWidget>
             controller: detailsController,
             decoration: const InputDecoration(labelText: 'Details'),
           ),
-          ElevatedButton(
-            onPressed: () async {
-              await _selectDate(context);
-            },
-            child: const Text('Select Date'),
-          ),
+          Row(
+            children: [
+              ElevatedButton(
+                onPressed: () async {
+                  await _selectDate(context);
+                },
+                child: Text(
+                  'Select Date',
+                  style: TextStyle(
+                    fontSize: 16, // Adjust the font size as needed
+                    color: Colors.purple.shade500, // Adjust the color as needed
+                  ),
+                ),
+              ),
+              SizedBox(width: 8), // Adjust the spacing between the button and the adjacent text
+              Text(
+                '${DateTime.now().day}-${DateTime.now().month}-${DateTime.now().year}',
+                style: TextStyle(
+                  fontSize: 16, // Adjust the font size to match the button
+                  color: Colors.purple.shade500, // Adjust the color as needed
+                ),
+              ),
+            ],
+          )
         ],
       ),
       actions: [
