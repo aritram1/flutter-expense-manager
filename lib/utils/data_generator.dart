@@ -245,10 +245,9 @@ class DataGenerator {
     
     Map<String, dynamic> each = {};
     each['FinPlan__Amount__c'] = amount;
-    each['FinPlan__Beneficiary__c'] = paidTo;
+    each['FinPlan__Beneficiary_Name__c'] = paidTo;
     each['FinPlan__Content__c'] = details;
-    each['FinPlan__Received_At__c'] = selectedDate.toString();
-    each['FinPlan__Sender__c'] = 'N/A';
+    each['FinPlan__Transaction_Date__c'] = selectedDate.toIso8601String().split('T')[0];
 
     AndroidDeviceInfo androidInfo = await DeviceInfoPlugin().androidInfo;
     String deviceName = androidInfo.model;

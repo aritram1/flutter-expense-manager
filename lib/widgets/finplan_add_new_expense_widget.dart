@@ -49,24 +49,26 @@ class _FinPlanAddNewExpenseWidgetState extends State<FinPlanAddNewExpenseWidget>
           ),
           Row(
             children: [
+              Text(
+                'Select Date',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade800,
+                ),
+              ),
+
+              SizedBox(width: 8),
+              
               ElevatedButton(
                 onPressed: () async {
                   await _selectDate(context);
                 },
                 child: Text(
-                  'Select Date',
+                  '${selectedDate.day}-${selectedDate.month}-${selectedDate.year}',
                   style: TextStyle(
                     fontSize: 16, // Adjust the font size as needed
-                    color: Colors.purple.shade500, // Adjust the color as needed
+                    color: Color.fromARGB(255, 179, 39, 230), // Adjust the color as needed
                   ),
-                ),
-              ),
-              SizedBox(width: 8), // Adjust the spacing between the button and the adjacent text
-              Text(
-                '${DateTime.now().day}-${DateTime.now().month}-${DateTime.now().year}',
-                style: TextStyle(
-                  fontSize: 16, // Adjust the font size to match the button
-                  color: Colors.purple.shade500, // Adjust the color as needed
                 ),
               ),
             ],
