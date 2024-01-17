@@ -82,6 +82,23 @@ class InvestmentHomeScreenState extends State<InvestmentHomeScreen>{
       );
     }
 
+  // To show the widget for adding new expenses
+  static Future<dynamic> showAddNewInvestmentWidget(BuildContext context) async {
+    // log.d('Inside showAddNewInvestmentWidget async!');
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return FinPlanAddNewInvestmentWidget(
+          onSave: (amount, paidTo, details, selectedDate) async {
+            Map<String, dynamic> response = await DataGenerator.insertNewInvestmentToSalesforce(amount, paidTo, details, selectedDate);
+            log.d('New investment created : ${response.toString()}');
+            Navigator.pop(context); // Close the dialog after saving
+          },
+        );
+      },
+    );
+  }
+
   // Call the sync method
   Future<void> syncMessage() async {
     
@@ -145,23 +162,6 @@ class InvestmentHomeScreenState extends State<InvestmentHomeScreen>{
               child: Text(choiceYes),
             ),
           ],
-        );
-      },
-    );
-  }
-  
-  // To show the widget for adding new expenses
-  static Future<dynamic> showAddNewInvestmentWidget(BuildContext context) async {
-    // log.d('Inside showAddNewInvestmentWidget async!');
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return FinPlanAddNewInvestmentWidget(
-          onSave: (amount, paidTo, details, selectedDate) async {
-            Map<String, dynamic> response = await DataGenerator.insertNewInvestmentToSalesforce(amount, paidTo, details, selectedDate);
-            log.d('New investment created : ${response.toString()}');
-            Navigator.pop(context); // Close the dialog after saving
-          },
         );
       },
     );
