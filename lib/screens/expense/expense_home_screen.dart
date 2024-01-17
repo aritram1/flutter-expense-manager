@@ -51,7 +51,6 @@ class ExpenseHomeScreenState extends State<ExpenseHomeScreen>{
               icon: const Icon(Icons.add_box),
               onPressed: () async {
                 // await Future.delayed(const Duration(milliseconds: 100));
-                // ignore: use_build_context_synchronously
                 BuildContext currentContext = context;
                 await showAddNewExpenseWidget(currentContext);
               },
@@ -163,7 +162,7 @@ class ExpenseHomeScreenState extends State<ExpenseHomeScreen>{
       builder: (BuildContext context) {
         return FinPlanAddNewExpenseWidget(
           onSave: (amount, paidTo, details, selectedDate) async {
-            Map<String, dynamic> response = await DataGenerator.addExpenseToSalesforce(amount, paidTo, details, selectedDate);
+            Map<String, dynamic> response = await DataGenerator.insertNewExpenseToSalesforce(amount, paidTo, details, selectedDate);
             log.d('New expense created : ${response.toString()}');
             Navigator.pop(context); // Close the dialog after saving
           },

@@ -1,6 +1,7 @@
 import 'package:ExpenseManager/screens/investment/investment_screen_0.dart';
 import 'package:ExpenseManager/screens/investment/investment_screen_1.dart';
 import 'package:ExpenseManager/utils/data_generator.dart';
+import 'package:ExpenseManager/widgets/finplan_add_new_investment_widget.dart';
 import 'package:ExpenseManager/widgets/finplan_app_home_screen_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
@@ -46,13 +47,9 @@ class InvestmentHomeScreenState extends State<InvestmentHomeScreen>{
             IconButton(
               icon: const Icon(Icons.add_box),
               onPressed: () async {
-                setState(() {
-                  isLoading = true;
-                });
-                await Future.delayed(const Duration(seconds: 1));
-                setState(() {
-                  isLoading = false;
-                });
+                // await Future.delayed(const Duration(milliseconds: 100));
+                BuildContext currentContext = context;
+                await showAddNewInvestmentWidget(currentContext);
               },
             ),
             IconButton(
@@ -148,6 +145,23 @@ class InvestmentHomeScreenState extends State<InvestmentHomeScreen>{
               child: Text(choiceYes),
             ),
           ],
+        );
+      },
+    );
+  }
+  
+  // To show the widget for adding new expenses
+  static Future<dynamic> showAddNewInvestmentWidget(BuildContext context) async {
+    // log.d('Inside showAddNewInvestmentWidget async!');
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return FinPlanAddNewInvestmentWidget(
+          onSave: (amount, paidTo, details, selectedDate) async {
+            Map<String, dynamic> response = await DataGenerator.insertNewInvestmentToSalesforce(amount, paidTo, details, selectedDate);
+            log.d('New expense created : ${response.toString()}');
+            Navigator.pop(context); // Close the dialog after saving
+          },
         );
       },
     );

@@ -5,7 +5,6 @@ import 'dart:convert';
 import 'package:ExpenseManager/utils/message_util.dart';
 import 'package:ExpenseManager/utils/salesforce_util.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:logger/logger.dart';
 import 'package:device_info/device_info.dart';
@@ -20,13 +19,7 @@ class DataGenerator {
   static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
   static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
 
-  // These two are not required now
-  // static const String DATETIME_START_OF_DAY_SF_FORMAT = "yyyy-MM-dd'T'00:00:00.000'Z'"; // Format to denote start of the day i.e. midnight time in UTC
-  // static const String DATETIME_END_OF_DAY_SF_FORMAT  = "yyyy-MM-dd'T'23:59:59.000'Z'";  // Format to denote till end of the day in UTC
-  
-  static const String DATE_FORMAT_IN  = 'yyyy-MM-dd'; // Format to denote yyyy-mm-dd format
-  
-  static Future<Map<String, dynamic>> addExpenseToSalesforce(String amount, String paidTo, String details, DateTime selectedDate) async {
+  static Future<Map<String, dynamic>> insertNewExpenseToSalesforce(String amount, String paidTo, String details, DateTime selectedDate) async {
     
     List<Map<String, dynamic>> data = [];
     
@@ -43,6 +36,27 @@ class DataGenerator {
     data.add(each);
     if(debug) log.d('Each entry in add new expense : $data');
     Map<String, dynamic> response =  await SalesforceUtil.dmlToSalesforce(opType: 'insert',objAPIName: 'FinPlan__Bank_Transaction__c', fieldNameValuePairs: data);
+    return response;
+    
+  }
+
+  static Future<Map<String, dynamic>> insertNewInvestmentToSalesforce(String amount, String paidTo, String details, DateTime selectedDate) async {
+    
+    List<Map<String, dynamic>> data = [];
+    
+    Map<String, dynamic> each = {};
+    each['FinPlan__Amount__c'] = amount;
+    each['FinPlan__Beneficiary_Name__c'] = paidTo;
+    each['FinPlan__Content__c'] = details;
+    each['FinPlan__Transaction_Date__c'] = selectedDate.toIso8601String().split('T')[0];
+
+    AndroidDeviceInfo androidInfo = await DeviceInfoPlugin().androidInfo;
+    String deviceName = androidInfo.model;
+    each['FinPlan__Device__c'] = deviceName;
+
+    data.add(each);
+    if(debug) log.d('Each entry in add new investment : $data');
+    Map<String, dynamic> response =  await SalesforceUtil.dmlToSalesforce(opType: 'insert',objAPIName: 'FinPlan__Investment_Transaction__c', fieldNameValuePairs: data);
     return response;
     
   }

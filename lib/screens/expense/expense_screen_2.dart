@@ -1,3 +1,5 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:ExpenseManager/screens/expense/expense_data_generator.dart';
 import 'package:ExpenseManager/widgets/finplan_table_widget.dart';
 import 'package:flutter/material.dart';
