@@ -1,11 +1,9 @@
+import 'package:ExpenseManager/screens/investment/investment_screen_0.dart';
+import 'package:ExpenseManager/screens/investment/investment_screen_1.dart';
+import 'package:ExpenseManager/utils/data_generator.dart';
+import 'package:ExpenseManager/widgets/finplan_app_home_screen_widget.dart';
 import 'package:flutter/material.dart';
-import './investment_screen_0.dart';
-import './investment_screen_1.dart';
-import '../../widgets/finplan_app_home_screen_widget.dart';
 import 'package:logger/logger.dart';
-import '../../utils/data_generator.dart';
-// import '../../utils/data_generator.dart';
-// import 'package:logger/logger.dart';
 
 class InvestmentHomeScreen extends StatefulWidget {
   

@@ -1,7 +1,7 @@
+import 'package:ExpenseManager/screens/investment/investment_data_generator.dart';
+import 'package:ExpenseManager/widgets/finplan_date_picker_panel_widget.dart';
+import 'package:ExpenseManager/widgets/finplan_table_widget.dart';
 import 'package:flutter/material.dart';
-import '../../utils/data_generator.dart';
-import '../../widgets/finplan_date_picker_panel_widget.dart';
-import '../../widgets/finplan_table_widget.dart';
 import 'package:logger/logger.dart';
 
 class InvestmentScreen0 extends StatefulWidget {
@@ -90,13 +90,13 @@ class InvestmentScreen0State extends State<InvestmentScreen0> {
     setState(() {
       selectedStartDate = startDate;
       selectedEndDate = endDate;
-      data = Future.value(DataGenerator.generateDataForInvestmentScreen0(startDate : selectedStartDate, endDate : selectedEndDate));
+      data = Future.value(InvestmentDataGenerator.generateDataForInvestmentScreen0(startDate : selectedStartDate, endDate : selectedEndDate));
     });
   }
 
   Future<List<Map<String, dynamic>>> handleFutureDataForInvestments() async {
     try {
-      return await DataGenerator.generateDataForInvestmentScreen0(startDate: selectedStartDate, endDate: selectedEndDate);
+      return await InvestmentDataGenerator.generateDataForInvestmentScreen0(startDate: selectedStartDate, endDate: selectedEndDate);
     } 
     catch (error, stackTrace) {
       log.e('Error in handleFutureDataForInvestments: $error');

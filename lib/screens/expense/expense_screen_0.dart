@@ -1,8 +1,7 @@
+import 'package:ExpenseManager/screens/expense/expense_data_generator.dart';
+import 'package:ExpenseManager/widgets/finplan_date_picker_panel_widget.dart';
+import 'package:ExpenseManager/widgets/finplan_table_widget.dart';
 import 'package:flutter/material.dart';
-// import '../../utils/data_generator_local.dart';
-import '../../utils/data_generator.dart';
-import '../../widgets/finplan_date_picker_panel_widget.dart';
-import '../../widgets/finplan_table_widget.dart';
 import 'package:logger/logger.dart';
 
 class ExpenseScreen0 extends StatefulWidget {
@@ -90,13 +89,13 @@ class ExpenseScreen0State extends State<ExpenseScreen0>{
     setState(() {
       selectedStartDate = startDate;
       selectedEndDate = endDate;
-      data = DataGenerator.generateDataForExpenseScreen0(startDate: selectedStartDate, endDate: selectedEndDate);
+      data = ExpenseDataGenerator.generateDataForExpenseScreen0(startDate: selectedStartDate, endDate: selectedEndDate);
     });
   }
   
   Future<List<Map<String, dynamic>>> handleFutureDataForExpense0() async {
     try {
-      return await DataGenerator.generateDataForExpenseScreen0(startDate: selectedStartDate, endDate: selectedEndDate);
+      return await ExpenseDataGenerator.generateDataForExpenseScreen0(startDate: selectedStartDate, endDate: selectedEndDate);
     } 
     catch (error, stackTrace) {
       log.e('Error in handleFutureDataForExpense0: $error');

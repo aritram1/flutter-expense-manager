@@ -1,11 +1,13 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'package:ExpenseManager/screens/expense/expense_screen_0.dart';
+import 'package:ExpenseManager/screens/expense/expense_screen_1.dart';
+import 'package:ExpenseManager/screens/expense/expense_screen_2.dart';
+import 'package:ExpenseManager/utils/data_generator.dart';
 import 'package:ExpenseManager/widgets/finplan_add_new_expense_widget.dart';
+import 'package:ExpenseManager/widgets/finplan_app_home_screen_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import './expense_screen_0.dart';
-import './expense_screen_1.dart';
-import './expense_screen_2.dart';
-import '../../widgets/finplan_app_home_screen_widget.dart';
-import '../../utils/data_generator.dart';
 
 class ExpenseHomeScreen extends StatefulWidget {
   

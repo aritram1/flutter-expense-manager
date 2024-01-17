@@ -1,6 +1,5 @@
 
 import 'package:flutter/material.dart';
-// import '../util/data_generator.dart';
 import 'package:logger/logger.dart';
 
 class InvestmentScreen1 extends StatelessWidget {
@@ -11,7 +10,7 @@ class InvestmentScreen1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: Text('Investment Content 0'),
+      child: Text('Investment Content 1'),
     );
   }
 }

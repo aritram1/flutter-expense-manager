@@ -2,15 +2,13 @@
 // ignore_for_file: constant_identifier_names
 
 import 'dart:convert';
-import 'package:ExpenseManager/utils/message_util.dart';
-import 'package:ExpenseManager/utils/salesforce_util.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:intl/intl.dart';
+import '../utils/message_util.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:logger/logger.dart';
-import 'package:device_info/device_info.dart';
+import '../utils/salesforce_util.dart';
 
-class DataGenerator {
+class Util {
 
   static String customEndpointForSyncMessages       = '/services/apexrest/FinPlan/api/sms/sync/*';
   static String customEndpointForApproveMessages    = '/services/apexrest/FinPlan/api/sms/approve/*';
@@ -25,35 +23,6 @@ class DataGenerator {
   // static const String DATETIME_END_OF_DAY_SF_FORMAT  = "yyyy-MM-dd'T'23:59:59.000'Z'";  // Format to denote till end of the day in UTC
   
   static const String DATE_FORMAT_IN  = 'yyyy-MM-dd'; // Format to denote yyyy-mm-dd format
-  
-  static Future<Map<String, dynamic>> addExpenseToSalesforce(String amount, String paidTo, String details, DateTime selectedDate) async {
-    
-    List<Map<String, dynamic>> data = [];
-    
-    Map<String, dynamic> each = {};
-    each['FinPlan__Amount__c'] = amount;
-    each['FinPlan__Beneficiary_Name__c'] = paidTo;
-    each['FinPlan__Content__c'] = details;
-    each['FinPlan__Transaction_Date__c'] = selectedDate.toIso8601String().split('T')[0];
-
-    AndroidDeviceInfo androidInfo = await DeviceInfoPlugin().androidInfo;
-    String deviceName = androidInfo.model;
-    each['FinPlan__Device__c'] = deviceName;
-
-    data.add(each);
-    if(debug) log.d('Each entry in add new expense : $data');
-    Map<String, dynamic> response =  await SalesforceUtil.dmlToSalesforce(opType: 'insert',objAPIName: 'FinPlan__Bank_Transaction__c', fieldNameValuePairs: data);
-    return response;
-    
-  }
-
-  static Future<Map<String, dynamic>> deleteAllMessagesAndTransactions() async {
-    String response = await SalesforceUtil.callSalesforceAPI(
-        endpointUrl: customEndpointForDeleteAllMessagesAndTransactions,
-        httpMethod: 'POST'
-    );
-    return jsonDecode(response);
-  }
 
   static Future<Map<String, dynamic>> approveSelectedMessages({required String objAPIName, required List<String> recordIds}) async {
     dynamic body = {

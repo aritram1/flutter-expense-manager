@@ -4,6 +4,7 @@ import 'package:logger/logger.dart';
 class FinPlanAppHomeScreenWidget extends StatelessWidget {
   // declare the widget attributes
   @override
+  // ignore: overridden_fields
   final Key? key;
   final int tabCount;
   final List<String> tabNames;
@@ -11,7 +12,7 @@ class FinPlanAppHomeScreenWidget extends StatelessWidget {
   final List<IconButton> actions;
   final List<Widget> tabBarViews;
 
-  Logger log = Logger();
+  final   Logger log = Logger();
 
   static List<IconButton> defaultActions = [
     IconButton(

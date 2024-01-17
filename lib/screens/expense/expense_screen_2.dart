@@ -1,7 +1,6 @@
+import 'package:ExpenseManager/screens/expense/expense_data_generator.dart';
+import 'package:ExpenseManager/widgets/finplan_table_widget.dart';
 import 'package:flutter/material.dart';
-// import '../../utils/data_generator_local.dart';
-import '../../utils/data_generator.dart';
-import '../../widgets/finplan_table_widget.dart';
 import 'package:logger/logger.dart';
 
 class ExpenseScreen2 extends StatelessWidget {
@@ -16,7 +15,7 @@ class ExpenseScreen2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: DataGenerator.generateDataForExpenseScreen2(),
+      future: ExpenseDataGenerator.generateDataForExpenseScreen2(),
       builder: (context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(

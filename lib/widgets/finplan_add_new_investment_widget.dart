@@ -3,17 +3,17 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
-class FinPlanAddNewExpenseWidget extends StatefulWidget {
+class FinPlanAddNewInvestmentWidget extends StatefulWidget {
   final Function(String amount, String paidTo, String details, DateTime selectedDate) onSave;
 
-  const FinPlanAddNewExpenseWidget({Key? key, required this.onSave}) : super(key: key);
+  const FinPlanAddNewInvestmentWidget({Key? key, required this.onSave}) : super(key: key);
 
   @override
   // ignore: library_private_types_in_public_api
-  _FinPlanAddNewExpenseWidgetState createState() => _FinPlanAddNewExpenseWidgetState();
+  _FinPlanAddNewInvestmentWidget createState() => _FinPlanAddNewInvestmentWidget();
 }
 
-class _FinPlanAddNewExpenseWidgetState extends State<FinPlanAddNewExpenseWidget> {
+class _FinPlanAddNewInvestmentWidget extends State<FinPlanAddNewInvestmentWidget> {
   final TextEditingController amountController = TextEditingController();
   final TextEditingController paidToController = TextEditingController();
   final TextEditingController detailsController = TextEditingController();
@@ -30,7 +30,7 @@ class _FinPlanAddNewExpenseWidgetState extends State<FinPlanAddNewExpenseWidget>
   @override
   Widget build(BuildContext context) {   
     return AlertDialog(
-      title: const Text('Record New Expense'),
+      title: const Text('Record New Investment'),
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,

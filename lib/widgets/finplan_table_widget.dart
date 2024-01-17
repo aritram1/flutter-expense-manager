@@ -1,4 +1,4 @@
-import 'package:ExpenseManager/utils/data_generator.dart';
+import 'package:ExpenseManager/widgets/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
@@ -397,13 +397,13 @@ class FinPlanTableWidgetState extends State<FinPlanTableWidget> {
 
 
   Future<void> handleApproveSMS(List<String> recordIds) async {
+    
     // Set the flag to true when starting the approval process
     setState(() {
       isLoading = true;
     });
-
-
-    Map<String, dynamic> response = await DataGenerator.approveSelectedMessages(objAPIName :'FinPlan__SMS_Message__c', recordIds : recordIds);
+    
+    Map<String, dynamic> response = await Util.approveSelectedMessages(objAPIName :'FinPlan__SMS_Message__c', recordIds : recordIds);
     if(debug) log.d('Responsefor handleApproveSMS ${response.toString()}');
 
     await Future.delayed(const Duration(milliseconds: 100));

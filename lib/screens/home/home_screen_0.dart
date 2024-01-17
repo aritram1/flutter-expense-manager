@@ -1,7 +1,8 @@
 
+import 'package:ExpenseManager/utils/local/data_generator_local.dart';
+import 'package:ExpenseManager/widgets/finplan_table_widget.dart';
 import 'package:flutter/material.dart';
-import '../../utils/local/data_generator_local.dart';
-import '../../widgets/finplan_table_widget.dart';
+
 import 'package:logger/logger.dart';
 
 class HomeScreen0 extends StatelessWidget {
