@@ -24,7 +24,7 @@ class ExpenseDataGenerator {
   
   static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen0({required DateTime startDate, required DateTime endDate}) async {
     
-    log.d('generateDataForExpenseScreen0 : StartDate is $startDate, endDate is $endDate');
+    if(debug) log.d('generateDataForExpenseScreen0 : StartDate is $startDate, endDate is $endDate');
     
     // Format the dates accordingly
     String formattedStartDateTime = DateFormat(DATE_FORMAT_IN).format(startDate); // startDate.toUTC() is not required since startDate is already in UTC
@@ -78,7 +78,7 @@ class ExpenseDataGenerator {
   
   static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen1({required DateTime startDate, required DateTime endDate}) async {
    
-    log.d('generateDataForExpenseScreen0 : StartDate is $startDate, endDate is $endDate');
+    if(debug) log.d('generateDataForExpenseScreen0 : StartDate is $startDate, endDate is $endDate');
     
     // Format the dateTime to date accordingly
     String formattedStartDate = DateFormat(DATE_FORMAT_IN).format(startDate);

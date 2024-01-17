@@ -56,7 +56,7 @@ class DataGenerator {
 
     data.add(each);
     if(debug) log.d('Each entry in add new investment : $data');
-    Map<String, dynamic> response =  await SalesforceUtil.dmlToSalesforce(opType: 'insert',objAPIName: 'FinPlan__Investment_Transaction__c', fieldNameValuePairs: data);
+    Map<String, dynamic> response =  await SalesforceUtil.dmlToSalesforce(opType: 'insert',objAPIName: 'FinPlan__Investment_Transaction2__c', fieldNameValuePairs: data);
     return response;
     
   }

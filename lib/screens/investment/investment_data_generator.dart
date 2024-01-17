@@ -24,7 +24,7 @@ class InvestmentDataGenerator {
 
   static Future<List<Map<String, dynamic>>> generateDataForInvestmentScreen0({required DateTime startDate, required DateTime endDate}) async {
    
-    log.d('generateDataForInvestmentScreen0 : StartDate is $startDate, endDate is $endDate');
+    if(debug) log.d('generateDataForInvestmentScreen0 : StartDate is $startDate, endDate is $endDate');
     
     // Format the dateTime to date accordingly
     String formattedStartDate = DateFormat(DATE_FORMAT_IN).format(startDate);

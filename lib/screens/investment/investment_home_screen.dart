@@ -159,7 +159,7 @@ class InvestmentHomeScreenState extends State<InvestmentHomeScreen>{
         return FinPlanAddNewInvestmentWidget(
           onSave: (amount, paidTo, details, selectedDate) async {
             Map<String, dynamic> response = await DataGenerator.insertNewInvestmentToSalesforce(amount, paidTo, details, selectedDate);
-            log.d('New expense created : ${response.toString()}');
+            log.d('New investment created : ${response.toString()}');
             Navigator.pop(context); // Close the dialog after saving
           },
         );

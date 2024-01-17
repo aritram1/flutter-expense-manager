@@ -23,7 +23,7 @@ class DataGenerator {
   
   static Future<List<Map<String, dynamic>>> generateDataForHomeScreen0({required DateTime startDate, required DateTime endDate}) async {
     
-    log.d('generateDataForHomeScreen0 : StartDate is $startDate, endDate is $endDate');
+    if(debug) log.d('generateDataForHomeScreen0 : StartDate is $startDate, endDate is $endDate');
     
     // Format the dates accordingly
     String formattedStartDateTime = DateFormat(DATE_FORMAT_IN).format(startDate); // startDate.toUTC() is not required since startDate is already in UTC
@@ -31,7 +31,7 @@ class DataGenerator {
     
     // Create the date clause to use in query later
     String dateClause =  'AND FinPlan__Transaction_Date__c >= $formattedStartDateTime AND FinPlan__Transaction_Date__c <= $formattedEndDateTime';
-    log.d('StartDate is $startDate, endDate is $endDate and dateClause is=> $dateClause');
+    if(debug) log.d('StartDate is $startDate, endDate is $endDate and dateClause is=> $dateClause');
 
     List<Map<String, dynamic>> generatedData = [];
     
