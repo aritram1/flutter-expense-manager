@@ -32,7 +32,7 @@ class ExpenseDataGenerator {
     
     // Create the date clause to use in query later
     String dateClause =  'AND FinPlan__Transaction_Date__c >= $formattedStartDateTime AND FinPlan__Transaction_Date__c <= $formattedEndDateTime';
-    log.d('StartDate is $startDate, endDate is $endDate and dateClause is=> $dateClause');
+    if(debug) log.d('StartDate is $startDate, endDate is $endDate and dateClause is=> $dateClause');
 
     List<Map<String, dynamic>> generatedData = [];
     Map<String, dynamic> response = await SalesforceUtil.queryFromSalesforce(
@@ -86,7 +86,7 @@ class ExpenseDataGenerator {
     
     // Create the date clause to use in query later
     String dateClause =  'FinPlan__Transaction_Date__c >= $formattedStartDate AND FinPlan__Transaction_Date__c <= $formattedEndDate';
-    log.d('StartDate is $startDate, endDate is $endDate and dateClause is=> $dateClause');
+    if(debug) log.d('StartDate is $startDate, endDate is $endDate and dateClause is=> $dateClause');
 
     List<Map<String, dynamic>> generatedData = [];
     Map<String, dynamic> response = await SalesforceUtil.queryFromSalesforce(

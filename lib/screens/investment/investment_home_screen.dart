@@ -113,7 +113,7 @@ class InvestmentHomeScreenState extends State<InvestmentHomeScreen>{
       isLoading = false;
     });
     
-    Logger().d('Sync Message Response from Expense Home : $response');
+    Logger().d('Message synced : ${response['data'].length}');
   }
 
   // Call the delete method
