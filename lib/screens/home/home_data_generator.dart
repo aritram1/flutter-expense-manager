@@ -33,13 +33,13 @@ class DataGenerator {
     String dateClause =  'AND FinPlan__Transaction_Date__c >= $formattedStartDateTime AND FinPlan__Transaction_Date__c <= $formattedEndDateTime';
     if(debug) log.d('StartDate is $startDate, endDate is $endDate and dateClause is=> $dateClause');
 
-    List<Map<String, dynamic>> generatedData = [];
+    List<Map<String, dynamic>> generateDataForHomeScreen0 = [];
     
     Map<String, dynamic> response = await SalesforceUtil.queryFromSalesforce(
       objAPIName: 'FinPlan__SMS_Message__c', 
-      fieldList: ['Id', 'CreatedDate', 'FinPlan__Received_At_formula__c', 'FinPlan__Transaction_Date__c', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c', 'FinPlan__Formula_Amount__c'], 
+      fieldList: ['Id', 'CreatedDate', 'FinPlan__Transaction_Date__c', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c', 'FinPlan__Formula_Amount__c'], 
       whereClause: 'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true AND FinPlan__Formula_Amount__c > 0 $dateClause',
-      orderByClause: 'FinPlan__Received_At_formula__c desc',
+      orderByClause: 'FinPlan__Transaction_Date__c desc',
       //count : 120
       );
     dynamic error = response['error'];
@@ -59,7 +59,7 @@ class DataGenerator {
         if(records != null && records.isNotEmpty){
           for (var record in records) {
             Map<String, dynamic> recordMap = Map.castFrom(record);
-            generatedData.add({
+            generateDataForHomeScreen0.add({
               'Paid To': recordMap['FinPlan__Beneficiary__c'] ?? 'Default Beneficiary',
               'Amount': recordMap['FinPlan__Formula_Amount__c'] ?? 0,
               'Date': DateTime.parse(recordMap['FinPlan__Transaction_Date__c'] ?? DateTime.now().toString()),
@@ -72,8 +72,8 @@ class DataGenerator {
         if(debug) log.e('Error Inside generateDataForHomeScreen0 : $error');
       }
     }
-    if(detaildebug) log.d('Inside generateDataForHomeScreen0=>$generatedData');
-    return generatedData; 
+    if(detaildebug) log.d('Inside generateDataForHomeScreen0=>$generateDataForHomeScreen0');
+    return generateDataForHomeScreen0; 
   }
   
 }

@@ -34,7 +34,7 @@ class InvestmentDataGenerator {
     String dateClause =  'FinPlan__Transaction_Date__c >= $formattedStartDate AND FinPlan__Transaction_Date__c <= $formattedEndDate';
     if(debug) log.d('StartDate is $startDate, endDate is $endDate and dateClause is=> $dateClause');
 
-    List<Map<String, dynamic>> generatedData = [];
+    List<Map<String, dynamic>> generatedDataForInvestmentScreen0 = [];
     Map<String, dynamic> response = await SalesforceUtil.queryFromSalesforce(
       objAPIName: 'FinPlan__Investment_Transaction2__c', 
       fieldList: ['Id', 'FinPlan__Beneficiary_Name__c','FinPlan__Transaction_Date__c', 'FinPlan__Amount__c','FinPlan__Type__c'],
@@ -58,7 +58,7 @@ class InvestmentDataGenerator {
         if (records != null && records.isNotEmpty) {
           for (var record in records) {
             Map<String, dynamic> recordMap = Map.castFrom(record);
-            generatedData.add({
+            generatedDataForInvestmentScreen0.add({
               'Paid To': recordMap['FinPlan__Beneficiary_Name__c'] ?? 'Default Beneficiary',
               'Amount': recordMap['FinPlan__Amount__c'] ?? 0,
               'Date': DateTime.parse(recordMap['FinPlan__Transaction_Date__c'] ?? DateTime.now().toString()),
@@ -71,8 +71,8 @@ class InvestmentDataGenerator {
         if(debug) log.e('Error inside generateDataForInvestmentScreen0 : $error');
       }
     }
-    if(detaildebug) log.d('Inside generateDataForInvestmentScreen0=>$generatedData');
-    return generatedData;
+    if(detaildebug) log.d('Inside generateDataForInvestmentScreen0=>$generatedDataForInvestmentScreen0');
+    return generatedDataForInvestmentScreen0;
   }
 
 }
