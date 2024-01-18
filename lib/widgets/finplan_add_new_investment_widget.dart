@@ -1,80 +1,119 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:ExpenseManager/widgets/util.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
 class FinPlanAddNewInvestmentWidget extends StatefulWidget {
-  final Function(String amount, String paidTo, String details, DateTime selectedDate) onSave;
+  final Function(String amount, String paidTo, String investmentId, String details, DateTime selectedDate) onSave;
 
   const FinPlanAddNewInvestmentWidget({Key? key, required this.onSave}) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _FinPlanAddNewInvestmentWidget createState() => _FinPlanAddNewInvestmentWidget();
 }
 
 class _FinPlanAddNewInvestmentWidget extends State<FinPlanAddNewInvestmentWidget> {
-  final TextEditingController amountController = TextEditingController();
-  final TextEditingController paidToController = TextEditingController();
-  final TextEditingController detailsController = TextEditingController();
+  static TextEditingController amountController = TextEditingController();
+  static TextEditingController paidToController = TextEditingController();
+  static TextEditingController detailsController = TextEditingController();
   late DateTime selectedDate; // Declare as late
 
   final Logger log = Logger();
 
+  static List<dynamic> allInvestments = [];
+
+  static bool isLoading = false;
+
   @override
   void initState() {
     super.initState();
-    selectedDate = DateTime.now(); // Initialize in initState
+    selectedDate = DateTime.now();
+    getInvestmentsList();
   }
 
   @override
-  Widget build(BuildContext context) {   
-    return AlertDialog(
+  Widget build(BuildContext context) {
+    return isLoading 
+    ? CircularProgressIndicator(value: Checkbox.width)
+    : AlertDialog(
       title: const Text('Record New Investment'),
-      content: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: amountController,
-            decoration: const InputDecoration(labelText: 'Amount'),
-            keyboardType: TextInputType.number,
-          ),
-          TextField(
-            controller: paidToController,
-            decoration: const InputDecoration(labelText: 'Paid To'),
-          ),
-          TextField(
-            controller: detailsController,
-            decoration: const InputDecoration(labelText: 'Details'),
-          ),
-          Row(
-            children: [
-              Text(
-                'Select Date',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey.shade800,
-                ),
-              ),
+      content: FutureBuilder<List<dynamic>>(
+        future: Future.value(allInvestments),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // Loading indicator while waiting for the future
+            return CircularProgressIndicator();
+          } 
+          else if (snapshot.hasError) {
+            // Handle error
+            return Text('Error: ${snapshot.error}');
+          } 
+          else {
+            // Data has been received, build the form
+            // Set first value only if not already set
+            if (paidToController.text.isEmpty && snapshot.data!.isNotEmpty) {
+              paidToController.text = snapshot.data![0]['Name'];
+            }
 
-              SizedBox(width: 8),
-              
-              ElevatedButton(
-                onPressed: () async {
-                  await _selectDate(context);
-                },
-                child: Text(
-                  '${selectedDate.day}-${selectedDate.month}-${selectedDate.year}',
-                  style: TextStyle(
-                    fontSize: 16, // Adjust the font size as needed
-                    color: Color.fromARGB(255, 179, 39, 230), // Adjust the color as needed
-                  ),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: amountController,
+                  decoration: const InputDecoration(labelText: 'Amount'),
+                  keyboardType: TextInputType.number,
                 ),
-              ),
-            ],
-          )
-        ],
+                DropdownButtonFormField<String>(
+                  value: paidToController.text,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      paidToController.text = newValue!;
+                    });
+                  },
+                  items: snapshot.data!.isEmpty
+                      ? []
+                      : snapshot.data!.map((dynamic each) {
+                          return DropdownMenuItem<String>(
+                            value: each['Name'],
+                            child: Text(each['Name']),
+                          );
+                        }).toList(),
+                  decoration: const InputDecoration(labelText: 'Paid To'),
+                ),
+                TextField(
+                  controller: detailsController,
+                  decoration: const InputDecoration(labelText: 'Details'),
+                ),
+                Row(
+                  children: [
+                    Text(
+                      'Select Date',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () async {
+                        await _selectDate(context);
+                      },
+                      child: Text(
+                        '${selectedDate.day}-${selectedDate.month}-${selectedDate.year}',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Color.fromARGB(255, 179, 39, 230),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            );
+          }
+        },
       ),
       actions: [
         TextButton(
@@ -92,6 +131,7 @@ class _FinPlanAddNewInvestmentWidget extends State<FinPlanAddNewInvestmentWidget
       ],
     );
   }
+
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -112,13 +152,36 @@ class _FinPlanAddNewInvestmentWidget extends State<FinPlanAddNewInvestmentWidget
     String amount = amountController.text;
     String paidTo = paidToController.text;
     String details = detailsController.text;
+    String investmentId = '';
+    for(dynamic each in allInvestments){
+      if(each['Name'] == paidTo){
+        investmentId = each['Id'];
+        break;
+      }
+    }
 
-    if (amount.isNotEmpty && paidTo.isNotEmpty && details.isNotEmpty) {
-      widget.onSave(amount, paidTo, details, selectedDate);
+    log.d('investment Id => $investmentId');
+
+    if (amount.isNotEmpty && paidTo.isNotEmpty && details.isNotEmpty && investmentId.isNotEmpty) {
+      widget.onSave(amount, paidTo, investmentId, details, selectedDate);
       Navigator.of(context).pop();
-    } else {
-      // Handle empty fields
+    } 
+    else {
       log.d('All fields are required');
     }
+  }
+
+  Future<void> getInvestmentsList() async {
+    setState(() {
+      isLoading = true;
+    });
+    
+    allInvestments = await Util.getInvestmentsData();
+    log.d('data received as=> $allInvestments');
+    
+    setState(() {
+      isLoading = false;
+    });
+
   }
 }

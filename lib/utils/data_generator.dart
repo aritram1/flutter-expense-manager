@@ -40,13 +40,14 @@ class DataGenerator {
     
   }
 
-  static Future<Map<String, dynamic>> insertNewInvestmentToSalesforce(String amount, String paidTo, String details, DateTime selectedDate) async {
+  static Future<Map<String, dynamic>> insertNewInvestmentToSalesforce(String amount, String paidTo, String investmentId, String details, DateTime selectedDate) async {
     
     List<Map<String, dynamic>> data = [];
     
     Map<String, dynamic> each = {};
     each['FinPlan__Amount__c'] = amount;
     each['FinPlan__Beneficiary_Name__c'] = paidTo;
+    each['FinPlan__Investment__c'] = investmentId;
     each['FinPlan__Content__c'] = details;
     each['FinPlan__Transaction_Date__c'] = selectedDate.toIso8601String().split('T')[0];
 

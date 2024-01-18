@@ -121,4 +121,5 @@ class _FinPlanAddNewExpenseWidgetState extends State<FinPlanAddNewExpenseWidget>
       log.d('All fields are required');
     }
   }
+
 }

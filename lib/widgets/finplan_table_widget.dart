@@ -404,7 +404,7 @@ class FinPlanTableWidgetState extends State<FinPlanTableWidget> {
     });
     
     Map<String, dynamic> response = await Util.approveSelectedMessages(objAPIName :'FinPlan__SMS_Message__c', recordIds : recordIds);
-    if(debug) log.d('Responsefor handleApproveSMS ${response.toString()}');
+    if(debug) log.d('Response for handleApproveSMS ${response.toString()}');
 
     await Future.delayed(const Duration(milliseconds: 100));
 

@@ -41,7 +41,7 @@ class ExpenseDataGenerator {
       whereClause: 'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true AND FinPlan__Formula_Amount__c > 0 $dateClause',
       orderByClause: 'FinPlan__Transaction_Date__c desc',
       //count : 120
-      );
+    );
     dynamic error = response['error'];
     dynamic data = response['data'];
 
