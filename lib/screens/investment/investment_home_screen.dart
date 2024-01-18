@@ -20,7 +20,8 @@ class InvestmentHomeScreenState extends State<InvestmentHomeScreen>{
   
   static bool isLoading = false;
 
-  static String action = ''; // This will be name of the current running action that are available to the page (like sync, delete etc)
+  // This will be name of the current running action that are available to the page (like sync, delete etc)
+  static String action = ''; 
 
   @override
   Widget build(BuildContext context) {

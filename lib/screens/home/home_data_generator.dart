@@ -7,18 +7,10 @@ import 'package:logger/logger.dart';
 
 class DataGenerator {
 
-  static String customEndpointForSyncMessages       = '/services/apexrest/FinPlan/api/sms/sync/*';
-  static String customEndpointForApproveMessages    = '/services/apexrest/FinPlan/api/sms/approve/*';
-  static String customEndpointForDeleteAllMessagesAndTransactions = '/services/apexrest/FinPlan/api/delete/*';
-
   static Logger log = Logger();
   static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
   static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
 
-  // These two are not required now
-  // static const String DATETIME_START_OF_DAY_SF_FORMAT = "yyyy-MM-dd'T'00:00:00.000'Z'"; // Format to denote start of the day i.e. midnight time in UTC
-  // static const String DATETIME_END_OF_DAY_SF_FORMAT  = "yyyy-MM-dd'T'23:59:59.000'Z'";  // Format to denote till end of the day in UTC
-  
   static const String DATE_FORMAT_IN  = 'yyyy-MM-dd'; // Format to denote yyyy-mm-dd format
   
   static Future<List<Map<String, dynamic>>> generateDataForHomeScreen0({required DateTime startDate, required DateTime endDate}) async {

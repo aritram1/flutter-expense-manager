@@ -11,8 +11,7 @@ import 'package:device_info/device_info.dart';
 
 class DataGenerator {
 
-  static String customEndpointForSyncMessages       = '/services/apexrest/FinPlan/api/sms/sync/*';
-  static String customEndpointForApproveMessages    = '/services/apexrest/FinPlan/api/sms/approve/*';
+  static String customEndpointForApproveMessages                  = '/services/apexrest/FinPlan/api/sms/approve/*';
   static String customEndpointForDeleteAllMessagesAndTransactions = '/services/apexrest/FinPlan/api/delete/*';
 
   static Logger log = Logger();
@@ -47,9 +46,10 @@ class DataGenerator {
     Map<String, dynamic> each = {};
     each['FinPlan__Amount__c'] = amount;
     each['FinPlan__Beneficiary_Name__c'] = paidTo;
+    each['FinPlan__Type__c'] = paidTo;
     each['FinPlan__Investment__c'] = investmentId;
     each['FinPlan__Content__c'] = details;
-    each['FinPlan__Transaction_Date__c'] = selectedDate.toIso8601String().split('T')[0];
+    each['FinPlan__Transaction_Date__c'] = selectedDate.toIso8601String().split('T')[0]; // splitting by 'T' only the date part is considered
 
     AndroidDeviceInfo androidInfo = await DeviceInfoPlugin().androidInfo;
     String deviceName = androidInfo.model;
@@ -60,14 +60,6 @@ class DataGenerator {
     Map<String, dynamic> response =  await SalesforceUtil.dmlToSalesforce(opType: 'insert',objAPIName: 'FinPlan__Investment_Transaction2__c', fieldNameValuePairs: data);
     return response;
     
-  }
-
-  static Future<Map<String, dynamic>> deleteAllMessagesAndTransactions() async {
-    String response = await SalesforceUtil.callSalesforceAPI(
-        endpointUrl: customEndpointForDeleteAllMessagesAndTransactions,
-        httpMethod: 'POST'
-    );
-    return jsonDecode(response);
   }
 
   static Future<Map<String, dynamic>> approveSelectedMessages({required String objAPIName, required List<String> recordIds}) async {
