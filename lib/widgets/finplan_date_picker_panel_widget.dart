@@ -48,8 +48,8 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
   @override
   void initState() {
     super.initState();
-    startDate = DateTime.now(); // default dates
-    endDate = DateTime.now(); // default dates
+    startDate = DateTime.now().add(const Duration(days: -7)); // default start date is today - 7
+    endDate = DateTime.now(); // default end date is now
     showDatePanel = true;
     if(detaildebug) log.d('The init state has run');
   }
@@ -234,7 +234,7 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
     setState(() {
       startDate = sDate;
       endDate = eDate;
-      // showDatePanel = show; // TBD if it will be helpful to hide/show the panel for some date ranges, <3 suggested to drop this ;)
+      // showDatePanel = show; // TBD if it will be helpful to hide/show the panel for specific date ranges, <3 suggested to drop this ;)
       widget.onDateRangeSelected(startDate, endDate); 
     });  
   }

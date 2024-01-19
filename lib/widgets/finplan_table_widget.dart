@@ -15,7 +15,6 @@ class FinPlanTableWidget extends StatefulWidget {
   final String defaultSortcolumnName;
   final bool showSelectionBoxes;
 
-
   const FinPlanTableWidget({
     Key? key,
     required this.headerNames,

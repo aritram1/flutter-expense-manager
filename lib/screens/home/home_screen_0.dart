@@ -1,14 +1,24 @@
 
-import 'package:ExpenseManager/utils/local/data_generator_local.dart';
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+
+import 'package:ExpenseManager/screens/home/home_data_generator.dart';
+import 'package:ExpenseManager/test/testing.dart';
+import 'package:ExpenseManager/widgets/finplan_listview_widget.dart';
 import 'package:ExpenseManager/widgets/finplan_table_widget.dart';
 import 'package:flutter/material.dart';
-
 import 'package:logger/logger.dart';
 
-class HomeScreen0 extends StatelessWidget {
-  static final Logger log = Logger();
+class HomeScreen0 extends StatefulWidget {
+  const HomeScreen0({super.key});
 
-  HomeScreen0({super.key});
+  @override
+  HomeScreen0State createState() => HomeScreen0State();
+
+}
+
+class HomeScreen0State extends State<HomeScreen0>{
+
+  static final Logger log = Logger();
 
   dynamic Function(String) onLoadComplete = (result) {
     log.d('Table loaded Result from HomeScreen0 => $result');
@@ -16,47 +26,62 @@ class HomeScreen0 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: DataGeneratorLocal.generateMockDataForHome(),
-      builder: (context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        } else if (snapshot.hasError) {
-          return const Center(
-            child: Text('Error loading data in HomeScreen0'),
-          );
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(
-            child: Text('No data available in HomeScreen0'),
-          );
-        } else {
-          return FinPlanTableWidget(
-            key: key,
-            headerNames: const ['Paid To', 'Amount', 'Date'],
-            noRecordFoundMessage: 'Nothing to approve',
-            caller: 'HomeScreen0',
-            columnWidths: const [0.3, 0.2, 0.2],
-            data: snapshot.data!,
-            onLoadComplete: onLoadComplete,
-            defaultSortcolumnName: 'Date',
-          );
-        }
-      },
-    );
-  }
-}
+    return 
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          FutureBuilder(
+            future: generateData(),
+            builder: (context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              } 
+              else if (snapshot.hasError) {
+                return const Center(
+                  child: Text('Error loading data in HomeScreen0'),
+                );
+              } 
+              else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return 
+                // const Center(child: 
+                Column( 
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children : [
+                      Text('No data available in HomeScreen0'),
+                      SizedBox(height: 12.0),
+                      Icon(Icons.refresh),
+                    ]
+                  );
+                //);
+              } 
+              else {
+                return Expanded(
+                  child: FinPlanListViewWidget(
+                    data : snapshot.data ?? [],
+                    onComplete: (String a, String b){},
+                  )
+                );
 
-//   case 0:
-//     message = 'Nothing to approve';
-//     break;
-//   case 1:
-//     message = 'No transactions are available between the dates';
-//     break;
-//   case 2:
-//     message = 'No bank accounts are available to show';
-//     break;
-//   // Add more cases if needed
-//   default:
-//     message = 'Default Message : No data found';
+                // return FinPlanTableWidget(
+                //   headerNames: const ['Paid To', 'Amount', 'Date'],
+                //   noRecordFoundMessage: 'Nothing to display',
+                //   caller: 'HomeScreen0',
+                //   columnWidths: const [0.3, 0.2, 0.1],
+                //   data: snapshot.data!,
+                //   onLoadComplete: onLoadComplete,
+                //   defaultSortcolumnName: 'Date',
+                // );
+              }
+            },
+          ),
+        ],
+      );
+    }
+    
+    // A layer is added
+    Future<List<Map<String, dynamic>>> generateData() {
+      return HomeDataGenerator.generateDataForHomeScreen0();
+    }
+  }

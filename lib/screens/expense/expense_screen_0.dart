@@ -17,7 +17,7 @@ class ExpenseScreen0State extends State<ExpenseScreen0>{
   // Declare the required state variables for this page
 
   static final Logger log = Logger();
-  DateTime selectedStartDate = DateTime.now();
+  DateTime selectedStartDate = DateTime.now();//.add(const Duration(days: -7));
   DateTime selectedEndDate = DateTime.now();
   static bool showDatePickerPanel = false;
   static late Future<List<Map<String, dynamic>>> data;
@@ -30,7 +30,7 @@ class ExpenseScreen0State extends State<ExpenseScreen0>{
   @override
   void initState(){
     super.initState();
-    data = handleFutureDataForExpense0(); // generate the data for the first time
+    data = handleFutureDataForExpense0(selectedStartDate, selectedEndDate); // generate the data for the first time
   }
 
   @override
@@ -51,7 +51,7 @@ class ExpenseScreen0State extends State<ExpenseScreen0>{
           ),
           Expanded(
             child: FutureBuilder(
-              future: handleFutureDataForExpense0(),
+              future: handleFutureDataForExpense0(selectedStartDate, selectedEndDate),
               builder: (context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
@@ -86,21 +86,23 @@ class ExpenseScreen0State extends State<ExpenseScreen0>{
   // A utility method to update the state once a button is clicked
   void handleDateRangeSelection(DateTime startDate, DateTime endDate) async {
     log.d('In callback startDate $startDate, endDate $endDate');
-    setState(() {
+    setState(() async {
       selectedStartDate = startDate;
       selectedEndDate = endDate;
-      data = ExpenseDataGenerator.generateDataForExpenseScreen0(startDate: selectedStartDate, endDate: selectedEndDate);
+      data = Future.value(await handleFutureDataForExpense0(selectedStartDate, selectedEndDate));
+      // data = ExpenseDataGenerator.generateDataForExpenseScreen0(startDate: selectedStartDate, endDate: selectedEndDate);
     });
+    // await handleFutureDataForExpense0();
   }
   
-  Future<List<Map<String, dynamic>>> handleFutureDataForExpense0() async {
+  Future<List<Map<String, dynamic>>> handleFutureDataForExpense0(DateTime startDate, DateTime endDate) async {
     try {
-      return await ExpenseDataGenerator.generateDataForExpenseScreen0(startDate: selectedStartDate, endDate: selectedEndDate);
+      return ExpenseDataGenerator.generateDataForExpenseScreen0(startDate: startDate, endDate: endDate);
     } 
     catch (error, stackTrace) {
       log.e('Error in handleFutureDataForExpense0: $error');
       log.e('Stack trace: $stackTrace');
-      return [];
+      return Future.value([]);
     }
   }
 

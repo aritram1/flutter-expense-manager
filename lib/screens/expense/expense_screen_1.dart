@@ -14,7 +14,7 @@ class ExpenseScreen1 extends StatefulWidget {
 class ExpenseScreen1State extends State<ExpenseScreen1> {
 
   // Declare the required state variables for this page
-  static DateTime selectedStartDate = DateTime.now();
+  static DateTime selectedStartDate = DateTime.now();//.add(const Duration(days: -7));
   static DateTime selectedEndDate = DateTime.now();
   static bool showDatePickerPanel = false;
   static late Future<List<Map<String, dynamic>>> data;

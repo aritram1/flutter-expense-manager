@@ -5,55 +5,46 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 
-class DataGenerator {
+class HomeDataGenerator {
 
   static Logger log = Logger();
   static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
   static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
+  static const int TOP5 = 5;
 
   static const String DATE_FORMAT_IN  = 'yyyy-MM-dd'; // Format to denote yyyy-mm-dd format
   
-  static Future<List<Map<String, dynamic>>> generateDataForHomeScreen0({required DateTime startDate, required DateTime endDate}) async {
+  static Future<List<Map<String, dynamic>>> generateDataForHomeScreen0({ DateTime? startDate, DateTime? endDate }) async {
     
     if(debug) log.d('generateDataForHomeScreen0 : StartDate is $startDate, endDate is $endDate');
     
-    // Format the dates accordingly
-    String formattedStartDateTime = DateFormat(DATE_FORMAT_IN).format(startDate); // startDate.toUTC() is not required since startDate is already in UTC
-    String formattedEndDateTime = DateFormat(DATE_FORMAT_IN).format(endDate);       // endDate.toUTC() is not required since endDate is already in UTC
-    
-    // Create the date clause to use in query later
-    String dateClause =  'AND FinPlan__Transaction_Date__c >= $formattedStartDateTime AND FinPlan__Transaction_Date__c <= $formattedEndDateTime';
-    if(debug) log.d('StartDate is $startDate, endDate is $endDate and dateClause is=> $dateClause');
-
     List<Map<String, dynamic>> generateDataForHomeScreen0 = [];
     
     Map<String, dynamic> response = await SalesforceUtil.queryFromSalesforce(
-      objAPIName: 'FinPlan__SMS_Message__c', 
-      fieldList: ['Id', 'CreatedDate', 'FinPlan__Transaction_Date__c', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c', 'FinPlan__Formula_Amount__c'], 
-      whereClause: 'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true AND FinPlan__Formula_Amount__c > 0 $dateClause',
-      orderByClause: 'FinPlan__Transaction_Date__c desc',
-      //count : 120
-      );
-    dynamic error = response['error'];
-    dynamic data = response['data'];
+      objAPIName: 'FinPlan__Bank_Transaction__c', 
+      fieldList: ['Id', 'FinPlan__Beneficiary_Name__c','FinPlan__Transaction_Date__c', 'FinPlan__Amount__c','FinPlan__Type__c'],
+      whereClause: "FinPlan__Type__c = 'Debit'",
+      orderByClause: 'FinPlan__Amount__c desc',
+      count : TOP5
+    );
 
-    if(debug) log.d('Error inside generateDataForHomeScreen0 : ${error.toString()}');
-    if(debug) log.d('Data inside generateDataForHomeScreen0 : ${data.toString()}');
+    if(debug) log.d('Error inside generateDataForHomeScreen0 : ${response['error'].toString()}');
+    if(debug) log.d('Data inside generateDataForHomeScreen0 : ${response['data'].toString()}');
     
-    if(error != null && error.isNotEmpty){
+    if(response['error'] != null && response['error'].isNotEmpty){
       if(debug) log.d('Error occurred while querying inside generateDataForHomeScreen0 : ${response['error']}');
       //return null;
     }
-    else if (data != null && data.isNotEmpty) {
+    else if (response['data'] != null && response['data'].isNotEmpty) {
       try{
         if(detaildebug) log.d('Inside generateDataForHomeScreen0 Data where data is not empty');
-        dynamic records = data['data'];
+        dynamic records = response['data']['data']; // both the objects have the primary key as `data`
         if(records != null && records.isNotEmpty){
           for (var record in records) {
             Map<String, dynamic> recordMap = Map.castFrom(record);
             generateDataForHomeScreen0.add({
-              'Paid To': recordMap['FinPlan__Beneficiary__c'] ?? 'Default Beneficiary',
-              'Amount': recordMap['FinPlan__Formula_Amount__c'] ?? 0,
+              'Paid To': recordMap['FinPlan__Beneficiary_Name__c'] ?? 'Default Beneficiary',
+              'Amount': recordMap['FinPlan__Amount__c'] ?? 0,
               'Date': DateTime.parse(recordMap['FinPlan__Transaction_Date__c'] ?? DateTime.now().toString()),
               'Id': recordMap['Id'] ?? 'Default Id',
             });
@@ -65,7 +56,7 @@ class DataGenerator {
       }
     }
     if(detaildebug) log.d('Inside generateDataForHomeScreen0=>$generateDataForHomeScreen0');
-    return generateDataForHomeScreen0; 
+    return Future.value(generateDataForHomeScreen0); 
   }
   
 }
