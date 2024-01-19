@@ -192,59 +192,49 @@ class FinPlanDatepickerPanelWidgetState extends State<FinPlanDatepickerPanelWidg
   handleFavoriteDateRangeButtonClick(String range){
     log.d('I am here with range $range');
     DateTime sDate, eDate;
-    bool show;
+    // bool show;
     switch (range) {
       case 'All':
         sDate = DateTime.now().add(const Duration(days: -365));
         eDate = DateTime.now();
-        show = false;
       case 'Today':
         sDate = DateTime.now();
         eDate = DateTime.now();
-        show = false;
         break;
       case 'Yesterday':
         sDate = DateTime.now().add(const Duration(days: -1));
         eDate = DateTime.now().add(const Duration(days: -1));
-        show = false;
         break;
       case 'Last 7 days':
         sDate = DateTime.now().add(const Duration(days: -7));
         eDate = DateTime.now();
-        show = false;
         break;
       case 'Last 30 days':
         sDate = DateTime.now().add(const Duration(days: -30));
         eDate = DateTime.now();
-        show = false;
         break;
       case 'Last 6 months':
         sDate = DateTime.now().add(const Duration(days: -180));
         eDate = DateTime.now();
-        show = false;
         break;
       case 'Last 12 months':
         sDate = DateTime.now().add(const Duration(days: -360));
         eDate = DateTime.now();
-        show = false;
         break;
       case 'Custom':
         sDate = DateTime.now();
         eDate = DateTime.now();
-        show = true;
         break;
       default:  
         sDate = DateTime.now();
         eDate = DateTime.now();
-        show = true;
         break;
     }
     
     setState(() {
       startDate = sDate;
       endDate = eDate;
-      // showDatePanel = show; // TBD if it will be helpful
-      // showDatePanel = true; // for debug
+      // showDatePanel = show; // TBD if it will be helpful to hide/show the panel for some date ranges, <3 suggested to drop this ;)
       widget.onDateRangeSelected(startDate, endDate); 
     });  
   }
