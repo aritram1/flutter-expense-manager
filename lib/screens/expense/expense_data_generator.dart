@@ -65,7 +65,7 @@ class ExpenseDataGenerator {
       }
     }
     if(detaildebug) log.d('Inside generateDataForExpenseScreen0=>$generatedDataForExpenseScreen0');
-    return generatedDataForExpenseScreen0; 
+    return Future.value(generatedDataForExpenseScreen0); 
   }
   
   static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen1({required DateTime startDate, required DateTime endDate}) async {

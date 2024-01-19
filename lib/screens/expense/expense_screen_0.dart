@@ -17,7 +17,7 @@ class ExpenseScreen0State extends State<ExpenseScreen0>{
   // Declare the required state variables for this page
 
   static final Logger log = Logger();
-  DateTime selectedStartDate = DateTime.now();//.add(const Duration(days: -7));
+  DateTime selectedStartDate = DateTime.now().add(const Duration(days: -7));
   DateTime selectedEndDate = DateTime.now();
   static bool showDatePickerPanel = false;
   static late Future<List<Map<String, dynamic>>> data;
@@ -51,7 +51,7 @@ class ExpenseScreen0State extends State<ExpenseScreen0>{
           ),
           Expanded(
             child: FutureBuilder(
-              future: handleFutureDataForExpense0(selectedStartDate, selectedEndDate),
+              future: data,
               builder: (context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
@@ -86,18 +86,17 @@ class ExpenseScreen0State extends State<ExpenseScreen0>{
   // A utility method to update the state once a button is clicked
   void handleDateRangeSelection(DateTime startDate, DateTime endDate) async {
     log.d('In callback startDate $startDate, endDate $endDate');
-    setState(() async {
+    setState(() {
       selectedStartDate = startDate;
       selectedEndDate = endDate;
-      data = Future.value(await handleFutureDataForExpense0(selectedStartDate, selectedEndDate));
-      // data = ExpenseDataGenerator.generateDataForExpenseScreen0(startDate: selectedStartDate, endDate: selectedEndDate);
+      data = handleFutureDataForExpense0(startDate, endDate);
     });
-    // await handleFutureDataForExpense0();
   }
   
   Future<List<Map<String, dynamic>>> handleFutureDataForExpense0(DateTime startDate, DateTime endDate) async {
     try {
-      return ExpenseDataGenerator.generateDataForExpenseScreen0(startDate: startDate, endDate: endDate);
+      return Future.value(await ExpenseDataGenerator.generateDataForExpenseScreen0(startDate: startDate, endDate: endDate));
+      // return data;
     } 
     catch (error, stackTrace) {
       log.e('Error in handleFutureDataForExpense0: $error');
