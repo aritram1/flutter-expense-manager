@@ -2,7 +2,6 @@
 // ignore_for_file: constant_identifier_names
 import 'package:ExpenseManager/utils/salesforce_util.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 
 class HomeDataGenerator {

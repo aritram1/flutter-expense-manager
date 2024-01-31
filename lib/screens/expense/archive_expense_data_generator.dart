@@ -121,59 +121,6 @@ class ExpenseDataGenerator {
     return generatedDataForExpenseScreen1;
   } 
  
-  static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen2v2() async {
-    List<Map<String, dynamic>> generatedDataForExpenseScreen2v2 = [];
-
-    Map<String, dynamic> response = await SalesforceUtil.queryFromSalesforce(
-      objAPIName: 'FinPlan__Bank_Account__c',
-      fieldList: ['Id', 'FinPlan__Account_Code__c', 'Name', 'FinPlan__Last_Balance__c', 'FinPlan__CC_Available_Limit__c', 'FinPlan__CC_Max_Limit__c', 'LastModifiedDate'], 
-      // whereClause: 'FinPlan__Last_Balance__c > 0',
-      orderByClause: 'LastModifiedDate desc',
-      //count : 120
-      );
-    dynamic error = response['error'];
-    dynamic data = response['data'];
-
-    if(debug) log.d('Error inside generatedDataForExpenseScreen2v2 : ${error.toString()}');
-    if(debug) log.d('Datainside generatedDataForExpenseScreen2v2: ${data.toString()}');
-    
-    if(error != null && error.isNotEmpty){
-      if(debug) log.d('Error occurred while querying inside generatedDataForExpenseScreen2v2 : ${response['error']}');
-      //return null;
-    }
-    else if (data != null && data.isNotEmpty) {
-      try{
-        dynamic records = data['data'];
-        if(detaildebug) log.d('Inside generatedDataForExpenseScreen2v2 Records=> $records');
-        if(records != null && records.isNotEmpty){
-          for (var record in records) {
-            Map<String, dynamic> recordMap = Map.castFrom(record);
-            generatedDataForExpenseScreen2v2.add(recordMap);
-            // String accountCode = recordMap['FinPlan__Account_Code__c'] ?? 'N/Av';  
-            // double balance = accountCode.contains('-CC') 
-            //   ? recordMap['FinPlan__CC_Available_Limit__c'] ?? 0
-            //   : recordMap['FinPlan__Last_Balance__c'] ?? 0
-            // ;
-            // DateTime lastmodifiedDate = DateTime.parse(recordMap['LastModifiedDate'] ?? DateTime.now().toString()); // example 2023-12-12T19:56:13.000+0000
-            // String id = recordMap['Id'] ?? 'Default Id';          
-            
-            // generatedDataForExpenseScreen2v2.add({
-            //   'Name': accountCode,
-            //   'Balance': balance,
-            //   'Last Updated': lastmodifiedDate,
-            //   'Id': id ,
-            // });
-          }
-        }
-      }
-      catch(error){
-        if(debug) log.e('Error Inside generatedDataForExpenseScreen2v2 : $error');
-      }
-    }
-    if(debug) log.d('Inside generatedDataForExpenseScreen2v2=>$generatedDataForExpenseScreen2v2');
-    return generatedDataForExpenseScreen2v2;
-  }
-
   static Future<List<Map<String, dynamic>>> generateDataForExpenseScreen2() async {
     List<Map<String, dynamic>> generatedDataForExpenseScreen2 = [];
 

@@ -22,6 +22,14 @@ class HomeScreen0State extends State<HomeScreen0>{
     log.d('Table loaded Result from HomeScreen0 => $result');
   };
 
+  Future<List<Map<String, dynamic>>> data = Future.value([]);
+
+  @override
+  void initState() {
+    super.initState();
+    data = generateData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return 
@@ -29,7 +37,7 @@ class HomeScreen0State extends State<HomeScreen0>{
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           FutureBuilder(
-            future: generateData(),
+            future: data,
             builder: (context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
@@ -79,7 +87,7 @@ class HomeScreen0State extends State<HomeScreen0>{
     }
     
     // A layer is added
-    Future<List<Map<String, dynamic>>> generateData() {
+    generateData() {
       return HomeDataGenerator.generateDataForHomeScreen0();
     }
   }

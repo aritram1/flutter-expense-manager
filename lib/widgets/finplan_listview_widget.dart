@@ -25,17 +25,12 @@ class FinPlanListViewWidget extends StatefulWidget {
 class FinPlanListViewWidgetState extends State<FinPlanListViewWidget> {
 
   late List<Map<String, dynamic>> items;
-  // late Future<List<Map<String, dynamic>>> itemsFuture;
 
   @override
   void initState(){
     super.initState();
-    items = widget.data; // generateData();
+    items = widget.data;
   }
-
-  // generateData() async{
-  //   return Future.value(HomeDataGenerator.generateDataForHomeScreen0());
-  // }
 
   @override
   Widget build(BuildContext context) {
