@@ -126,7 +126,7 @@ class ExpenseDataGenerator {
 
     Map<String, dynamic> response = await SalesforceUtil.queryFromSalesforce(
       objAPIName: 'FinPlan__Bank_Account__c',
-      fieldList: ['Id', 'FinPlan__Account_Code__c', 'Name', 'FinPlan__Last_Balance__c', 'FinPlan__CC_Available_Limit__c', 'FinPlan__CC_Max_Limit__c', 'LastModifiedDate'], 
+      fieldList: ['Id', 'FinPlan__CC_Last_Paid_Amount__c', 'FinPlan__Account_Code__c', 'Name', 'FinPlan__CC_Billing_Cycle_Date__c', 'FinPlan__CC_Last_Bill_Paid_Date__c', 'FinPlan__Last_Balance__c', 'FinPlan__CC_Available_Limit__c', 'FinPlan__CC_Max_Limit__c', 'LastModifiedDate'], 
       // whereClause: 'FinPlan__Last_Balance__c > 0',
       orderByClause: 'LastModifiedDate desc',
       //count : 120

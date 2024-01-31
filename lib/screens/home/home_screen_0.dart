@@ -87,7 +87,7 @@ class HomeScreen0State extends State<HomeScreen0>{
     }
     
     // A layer is added
-    generateData() {
+    Future<List<Map<String, dynamic>>> generateData() {
       return HomeDataGenerator.generateDataForHomeScreen0();
     }
   }
