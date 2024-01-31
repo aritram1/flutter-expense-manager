@@ -51,6 +51,7 @@ class MessageUtil {
       await Permission.sms.request();
     }
     log.d('Inbox all message count : ${messages.length}');
+
     List<SmsMessage> filteredMsgList = getOnlyImportantMessages(messages); // Filter out the non transactional messages like personal sms and OTP messages
     log.d('Inbox transactional message count : ${filteredMsgList.length}');
   
@@ -86,7 +87,7 @@ class MessageUtil {
     bool isOTP = false;
     bool isPersonal = false;
     bool isTransactional = false;
-    for(int i = msgList.length-1; i >= 0; i--){
+    for(int i = 0; i < msgList.length; i++){
       
       isOTP = msgList[i].body!.toUpperCase().contains('OTP') || msgList[i].body!.toUpperCase().contains('VERIFICATION CODE');
       isPersonal = msgList[i].sender!.toUpperCase().startsWith('+');
@@ -98,7 +99,7 @@ class MessageUtil {
     }
 
     // Clip the required number of messages from the list
-    List<SmsMessage> listToReturn = filteredMsgList;
+    List<SmsMessage> listToReturn = [];
     if(filteredMsgList.length > maximumMessageCount){
       listToReturn = filteredMsgList.sublist(0, maximumMessageCount);
     }

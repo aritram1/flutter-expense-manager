@@ -90,6 +90,7 @@ class DataGenerator {
     
     // Then retrieve, convert and call the insert API for inserting messages
     List<SmsMessage> messages = await MessageUtil.getMessages();
+  
     List<Map<String, dynamic>> processedMessages = await MessageUtil.convert(messages);
     
     Map<String, dynamic> createResponse = await SalesforceUtil.dmlToSalesforce(
