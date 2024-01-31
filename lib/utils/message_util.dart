@@ -98,11 +98,10 @@ class MessageUtil {
       }
     }
 
-    // Clip the required number of messages from the list
-    List<SmsMessage> listToReturn = [];
-    if(filteredMsgList.length > maximumMessageCount){
-      listToReturn = filteredMsgList.sublist(0, maximumMessageCount);
-    }
+    // Clip the required number of messages from the list if the list contains sufficient items
+    List<SmsMessage> listToReturn = (filteredMsgList.length <= maximumMessageCount) 
+                                        ? filteredMsgList 
+                                        : filteredMsgList.sublist(0, maximumMessageCount);
     return listToReturn;
   }
 }
