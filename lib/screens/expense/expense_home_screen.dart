@@ -76,7 +76,9 @@ class ExpenseHomeScreenState extends State<ExpenseHomeScreen>{
                   // Get an alert dialog as confirmation box
                   bool shouldProceed = await showConfirmationBox(currentContext, 'Delete');
                   if(shouldProceed){
-                    await deleteMessageAndTransactions(); // Call the method now
+                    AndroidDeviceInfo androidInfo = await DeviceInfoPlugin().androidInfo;
+                    String deviceId = androidInfo.model;
+                    await deleteMessageAndTransactions(deviceId); // Call the method now
                   }
                 },                
             ),
@@ -107,14 +109,14 @@ class ExpenseHomeScreenState extends State<ExpenseHomeScreen>{
   }
 
   // Call the delete method
-  Future<void> deleteMessageAndTransactions() async {
+  Future<void> deleteMessageAndTransactions(String deviceId) async {
 
     setState((){
       action = 'Delete';
       isLoading = true;
     });
 
-    String response = await DataGenerator.hardDeleteMessagesAndTransactions();
+    String response = await DataGenerator.hardDeleteMessagesAndTransactions(deviceId);
     
     setState((){
       isLoading = false;

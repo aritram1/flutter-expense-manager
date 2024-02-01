@@ -53,28 +53,28 @@ class InvestmentHomeScreenState extends State<InvestmentHomeScreen>{
                 await showAddNewInvestmentWidget(currentContext);
               },
             ),
-            IconButton(
-              icon: const Icon(Icons.sync_outlined),
-              onPressed: () async {
-                  BuildContext currentContext = context;
-                  // Get an alert dialog as confirmation box
-                  bool shouldProceed = await showConfirmationBox(currentContext, 'Sync');
-                  if(shouldProceed){
-                    await syncMessage(); // Call the method now
-                  }
-                },
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: () async {
-                  BuildContext currentContext = context;
-                  // Get an alert dialog as confirmation box
-                  bool shouldProceed = await showConfirmationBox(currentContext, 'Delete');
-                  if(shouldProceed){
-                    await deleteMessageAndTransactions(); // Call the method now
-                  }
-                },                
-            ),
+            // IconButton(
+            //   icon: const Icon(Icons.sync_outlined),
+            //   onPressed: () async {
+            //       BuildContext currentContext = context;
+            //       // Get an alert dialog as confirmation box
+            //       bool shouldProceed = await showConfirmationBox(currentContext, 'Sync');
+            //       if(shouldProceed){
+            //         await syncMessage(); // Call the method now
+            //       }
+            //     },
+            // ),
+            // IconButton(
+            //   icon: const Icon(Icons.delete),
+            //   onPressed: () async {
+            //       BuildContext currentContext = context;
+            //       // Get an alert dialog as confirmation box
+            //       bool shouldProceed = await showConfirmationBox(currentContext, 'Delete');
+            //       if(shouldProceed){
+            //         await deleteMessageAndTransactions(); // Call the method now
+            //       }
+            //     },                
+            // ),
           ],
           tabBarViews: [
             const InvestmentScreen0(),
@@ -101,71 +101,71 @@ class InvestmentHomeScreenState extends State<InvestmentHomeScreen>{
   }
 
   // Call the sync method
-  Future<void> syncMessage() async {
+  // Future<void> syncMessage() async {
     
-    setState((){
-      action = 'Sync';
-      isLoading = true;
-    });
+  //   setState((){
+  //     action = 'Sync';
+  //     isLoading = true;
+  //   });
     
-    Map<String, dynamic> response = await DataGenerator.syncMessages();
+  //   Map<String, dynamic> response = await DataGenerator.syncMessages();
     
-    setState((){
-      isLoading = false;
-    });
+  //   setState((){
+  //     isLoading = false;
+  //   });
     
-    Logger().d('Message synced : ${response['data'].length}');
-  }
+  //   Logger().d('Message synced : ${response['data'].length}');
+  // }
 
   // Call the delete method
-  Future<void> deleteMessageAndTransactions() async {
+  // Future<void> deleteMessageAndTransactions() async {
 
-    setState((){
-      action = 'Delete';
-      isLoading = true;
-    });
+  //   setState((){
+  //     action = 'Delete';
+  //     isLoading = true;
+  //   });
 
-    String response = await DataGenerator.hardDeleteMessagesAndTransactions();
+  //   String response = await DataGenerator.hardDeleteMessagesAndTransactions();
     
-    setState((){
-      isLoading = false;
-    });
+  //   setState((){
+  //     isLoading = false;
+  //   });
 
-    Logger().d('deleteMessageAndTransactions Message Response from Expense Home : $response');
-  }
+  //   Logger().d('deleteMessageAndTransactions Message Response from Expense Home : $response');
+  // }
 
   // A confirmation box to show if its ok to proceed with sync and delete operation
-  static Future<dynamic> showConfirmationBox(BuildContext context, String opType){
-    String title = 'Please confirm'; 
-    String choiceYes = 'Yes';
-    String choiceNo = 'No';
-    String content =  (opType == 'Sync') 
-                            ? 'This will delete existing messages and recreate them. Proceed?' 
-                            : 'This will delete all messages and transactions. Proceed?' ;
+  // static Future<dynamic> showConfirmationBox(BuildContext context, String opType){
+  //   String title = 'Please confirm'; 
+  //   String choiceYes = 'Yes';
+  //   String choiceNo = 'No';
+  //   String content =  (opType == 'Sync') 
+  //                           ? 'This will delete existing messages and recreate them. Proceed?' 
+  //                           : 'This will delete all messages and transactions. Proceed?' ;
     
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(content),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false); // User clicked No
-              },
-              child: Text(choiceNo),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(true); // User clicked Yes
-              },
-              child: Text(choiceYes),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  //   return showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: Text(title),
+  //         content: Text(content),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.of(context).pop(false); // User clicked No
+  //             },
+  //             child: Text(choiceNo),
+  //           ),
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.of(context).pop(true); // User clicked Yes
+  //             },
+  //             child: Text(choiceYes),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
   
 }
