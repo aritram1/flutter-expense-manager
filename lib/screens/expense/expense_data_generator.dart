@@ -2,6 +2,7 @@
 // ignore_for_file: constant_identifier_names
 
 import 'package:ExpenseManager/utils/salesforce_util.dart';
+import 'package:device_info/device_info.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
@@ -23,14 +24,18 @@ class ExpenseDataGenerator {
     String formattedEndDateTime = DateFormat(DATE_FORMAT_IN).format(endDate);       // endDate.toUTC() is not required since endDate is already in UTC
     
     // Create the date clause to use in query later
-    String dateClause =  'AND FinPlan__Transaction_Date__c >= $formattedStartDateTime AND FinPlan__Transaction_Date__c <= $formattedEndDateTime';
+    String dateClause = 'AND FinPlan__Transaction_Date__c >= $formattedStartDateTime AND FinPlan__Transaction_Date__c <= $formattedEndDateTime';
     if(debug) log.d('StartDate is $startDate, endDate is $endDate and dateClause is=> $dateClause');
 
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    String deviceId = "'${androidInfo.model}'";
+    
     List<Map<String, dynamic>> generatedDataForExpenseScreen0 = [];
     Map<String, dynamic> response = await SalesforceUtil.queryFromSalesforce(
       objAPIName: 'FinPlan__SMS_Message__c', 
       fieldList: ['Id', 'CreatedDate', 'FinPlan__Transaction_Date__c', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c'], 
-      whereClause: 'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true $dateClause',
+      whereClause: 'FinPlan__Device__c = $deviceId AND FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true $dateClause',
       orderByClause: 'FinPlan__Transaction_Date__c desc',
       //count : 120
     );
