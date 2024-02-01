@@ -9,7 +9,6 @@ main() async{
   // String customEndpointForSyncMessages = '/services/apexrest/FinPlan/api/sms/sync/*';
   // String customEndpointForApproveMessages = '/services/apexrest/FinPlan/api/sms/approve/*';
   // String customEndpointForDeleteMessages = '/services/apexrest/FinPlan/api/sms/delete/*';
-  // String customEndpointForDeleteTransactions = '/services/apexrest/FinPlan/api/transactions/delete/*';
 
   // // ------------------------------------------------------------------------------------------------ // 
   // // Login

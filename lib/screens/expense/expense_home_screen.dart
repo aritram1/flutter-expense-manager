@@ -6,6 +6,7 @@ import 'package:ExpenseManager/screens/expense/expense_screen_2.dart';
 import 'package:ExpenseManager/utils/data_generator.dart';
 import 'package:ExpenseManager/widgets/finplan_add_new_expense_widget.dart';
 import 'package:ExpenseManager/widgets/finplan_app_home_screen_widget.dart';
+import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
@@ -62,7 +63,9 @@ class ExpenseHomeScreenState extends State<ExpenseHomeScreen>{
                   // Get an alert dialog as confirmation box
                   bool shouldProceed = await showConfirmationBox(currentContext, 'Sync');
                   if(shouldProceed){
-                    await syncMessage(); // Call the method now
+                    AndroidDeviceInfo androidInfo = await DeviceInfoPlugin().androidInfo;
+                    String deviceId = androidInfo.model;
+                    await syncMessage(deviceId); // Call the method now
                   }
                 },
             ),
@@ -87,14 +90,14 @@ class ExpenseHomeScreenState extends State<ExpenseHomeScreen>{
     }
 
   // Call the sync method
-  Future<void> syncMessage() async {
+  Future<void> syncMessage(String deviceId) async {
     
     setState((){
       action = 'Sync';
       isLoading = true;
     });
     
-    Map<String, dynamic> response = await DataGenerator.syncMessages();
+    Map<String, dynamic> response = await DataGenerator.syncMessages(deviceId);
     
     setState((){
       isLoading = false;

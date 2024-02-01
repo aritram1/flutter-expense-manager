@@ -79,20 +79,15 @@ class DataGenerator {
     return response;
   } 
 
-  static Future<Map<String, dynamic>> syncMessages() async{
-    
+  static Future<Map<String, dynamic>> syncMessages(String deviceId) async{
+
     // Call the specific API to delete all messages and transactions
-    String mesageAndTransactionsDeleteMessage = await SalesforceUtil.callSalesforceAPI(
-        httpMethod: 'POST', 
-        endpointUrl: customEndpointForDeleteAllMessagesAndTransactions, 
-        body: {});
+    String mesageAndTransactionsDeleteMessage = await hardDeleteMessagesAndTransactions(deviceId);
     if(detaildebug) log.d('mesageAndTransactionsDeleteMessage is -> $mesageAndTransactionsDeleteMessage');
     
     // Then retrieve, convert and call the insert API for inserting messages
     List<SmsMessage> messages = await MessageUtil.getMessages();
-  
     List<Map<String, dynamic>> processedMessages = await MessageUtil.convert(messages);
-    
     Map<String, dynamic> createResponse = await SalesforceUtil.dmlToSalesforce(
         opType: 'insert',
         objAPIName : 'FinPlan__SMS_Message__c', 
@@ -104,13 +99,13 @@ class DataGenerator {
     return createResponse;
   }
 
-  static Future<String> hardDeleteMessagesAndTransactions() async{
+  static Future<String> hardDeleteMessagesAndTransactions(String deviceId) async{
     
     // Call the specific API to delete all messages and transactions
     String mesageAndTransactionsDeleteMessage = await SalesforceUtil.callSalesforceAPI(
         httpMethod: 'POST', 
         endpointUrl: customEndpointForDeleteAllMessagesAndTransactions, 
-        body: {});
+        body: {'deviceId' : deviceId});
     if(detaildebug) log.d('mesageAndTransactionsDeleteMessage is -> $mesageAndTransactionsDeleteMessage');
     
     return mesageAndTransactionsDeleteMessage;

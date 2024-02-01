@@ -29,8 +29,8 @@ class ExpenseDataGenerator {
     List<Map<String, dynamic>> generatedDataForExpenseScreen0 = [];
     Map<String, dynamic> response = await SalesforceUtil.queryFromSalesforce(
       objAPIName: 'FinPlan__SMS_Message__c', 
-      fieldList: ['Id', 'CreatedDate', 'FinPlan__Transaction_Date__c', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c', 'FinPlan__Formula_Amount__c'], 
-      whereClause: 'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true AND FinPlan__Formula_Amount__c > 0 $dateClause',
+      fieldList: ['Id', 'CreatedDate', 'FinPlan__Transaction_Date__c', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c'], 
+      whereClause: 'FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true $dateClause',
       orderByClause: 'FinPlan__Transaction_Date__c desc',
       //count : 120
     );
@@ -53,7 +53,7 @@ class ExpenseDataGenerator {
             Map<String, dynamic> recordMap = Map.castFrom(record);
             generatedDataForExpenseScreen0.add({
               'Paid To': recordMap['FinPlan__Beneficiary__c'] ?? 'Default Beneficiary',
-              'Amount': recordMap['FinPlan__Formula_Amount__c'] ?? 0,
+              'Amount': double.parse(recordMap['FinPlan__Amount_Value__c'] ?? '0'),
               'Date': DateTime.parse(recordMap['FinPlan__Transaction_Date__c'] ?? DateTime.now().toString()),
               'Id': recordMap['Id'] ?? 'Default Id',
             });
