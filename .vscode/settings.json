@@ -1,4 +1,5 @@
 {
     "dart.hotReloadOnSave": "manualIfDirty",
-    "dart.flutterHotReloadOnSave": "manualIfDirty"
+    "dart.flutterHotReloadOnSave": "manualIfDirty",
+    "editor.formatOnSave": false
 }

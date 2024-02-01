@@ -7,22 +7,25 @@ import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-    
+
 class SalesforceUtil{
 
-  static String clientId = dotenv.env['clientId'] ?? '';
-  static String clientSecret = dotenv.env['clientSecret'] ?? '';
-  static String userName = dotenv.env['userName'] ?? '';
-  static String pwdWithToken = dotenv.env['pwdWithToken'] ?? '';
-  static String tokenEndpoint = dotenv.env['tokenEndpoint'] ?? '';
-  static String tokenGrantType = dotenv.env['tokenGrantType'] ?? '';
-  static String compositeUrlForInsert = dotenv.env['compositeUrlForInsert'] ?? '';
-  static String compositeUrlForUpdate = dotenv.env['compositeUrlForUpdate'] ?? '';
-  static String compositeUrlForDelete = dotenv.env['compositeUrlForDelete'] ?? '';
-  static String queryUrl = dotenv.env['queryUrl'] ?? '';
-  static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
-  static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
-  
+  // const static String VERSION = '59.0'
+
+  // Declare required variables
+  static String clientId = '';
+  static String clientSecret = '';
+  static String userName = '';
+  static String pwdWithToken = '';
+  static String tokenEndpoint = '';
+  static String tokenGrantType = '';
+  static String compositeUrlForInsert = '';
+  static String compositeUrlForUpdate = '';
+  static String compositeUrlForDelete = '';
+  static String queryUrl = '';
+  static bool debug = false; 
+  static bool detaildebug = false;
+
   static String accessToken = '';
   static String instanceUrl = '';
   static Logger log = Logger();
@@ -31,9 +34,28 @@ class SalesforceUtil{
   static String getAccessToken() => (accessToken);
   static String getInstanceUrl() => (instanceUrl);
 
+  static Future<void> init() async {
+    // Load environment variables from the .env file and assign to class variables
+    await dotenv.load(fileName: ".env");
+    clientId              = dotenv.env['clientId'] ?? '';
+    clientSecret          = dotenv.env['clientSecret'] ?? '';
+    userName              = dotenv.env['userName'] ?? '';
+    pwdWithToken          = dotenv.env['pwdWithToken'] ?? '';
+    tokenEndpoint         = dotenv.env['tokenEndpoint'] ?? '';
+    tokenGrantType        = dotenv.env['tokenGrantType'] ?? '';
+
+    compositeUrlForInsert = dotenv.env['compositeUrlForInsert'] ?? ''; // Standard Insert API from Salesforce - '/services/data/v59.0/composite/tree/'
+    compositeUrlForUpdate = dotenv.env['compositeUrlForUpdate'] ?? ''; // Standard Update API from Salesforce - '/services/data/v59.0/composite/sobjects/'
+    compositeUrlForDelete = dotenv.env['compositeUrlForDelete'] ?? ''; // Standard Delete API from Salesforce - '/services/data/v59.0/composite/sobjects?ids='
+    queryUrl              = dotenv.env['queryUrl'] ?? '';              // Standard Query API from Salesforce  - '/services/data/v59.0/query?q='
+
+    debug                 = bool.parse(dotenv.env['debug'] ?? 'false');
+    detaildebug           = bool.parse(dotenv.env['detaildebug'] ?? 'false');
+  }
+
   // Method to Login to SalesforceR
   static Future<Map<String, dynamic>> loginToSalesforce() async{
-    // await init();
+    await init();
     Map<String, dynamic> response = await _login();
     return response;
   }
@@ -97,7 +119,7 @@ class SalesforceUtil{
         batchCount++;
       }
     }
-    if(debug) log.d('Response inside dmlToSalesforceResponse=>' + dmlToSalesforceResponse.toString());
+    if(detaildebug) log.d('Final value of dmlToSalesforceResponse=>' + dmlToSalesforceResponse.toString());
     return dmlToSalesforceResponse;
   }
 
@@ -151,14 +173,12 @@ class SalesforceUtil{
         // Handle when record count is more than 4000
       }
     }
-    if(debug) log.d('Result from queryFromSalesforceResponse $queryFromSalesforceResponse');
+    if(detaildebug) log.d('Result from queryFromSalesforceResponse $queryFromSalesforceResponse');
     return queryFromSalesforceResponse;
   }
 
   // Method to connect to custom REST API
   static Future<String> callSalesforceAPI({required String endpointUrl, required httpMethod, dynamic body}) async{
-    
-    String response = '';
     
     if(!isLoggedIn()) await loginToSalesforce();
   
@@ -166,9 +186,8 @@ class SalesforceUtil{
 
     if(detaildebug) log.d('epUrl=>' + epUrl);   
     dynamic resp = await _callSalesforceAPI(httpMethod : httpMethod, epUrl : epUrl, body : body);
-    response = resp.body;
-
-    if(debug) log.d('Result from callSalesforceAPI ${resp.body}');
+    
+    if(detaildebug) log.d('resp.body=> ${resp.body}');
     
     return resp.body;
   }
@@ -188,7 +207,7 @@ class SalesforceUtil{
     else if(httpMethod == 'DELETE'){
       resp = await http.delete(Uri.parse(epUrl), headers: generateHeader(), body: jsonEncode(body));
     }
-    if(debug) log.d('Inside _callSalesforceAPI response : $resp');
+    if(detaildebug) log.d('epUrl $epUrl');
     return resp;
   }
   
@@ -210,16 +229,15 @@ class SalesforceUtil{
       } 
       else {
         // Log an error
-        if(detaildebug) log.d('Response code other than 200 detected : ${resp.body}');
+        // if(detaildebug) log.d('Response code other than 200 detected : ${resp.body}');
         loginResponse['error'] = body.toString();
       }
       // responseMap.add('data') = response.body;
     }
     catch(error){
-      if(detaildebug) log.d('Error occurred while logging into Salesforce. Error is : $error');
+      if(detaildebug) log.e('Error occurred while logging into Salesforce. Error is : $error');
       loginResponse['error'] = error.toString();
     }
-    if(detaildebug) log.d('loginResponse inside _login is : $loginResponse');
     return loginResponse;
   }
 
@@ -231,18 +249,17 @@ class SalesforceUtil{
     try{
       if(opType == 'insert'){
         body = await _insertToSalesforce(objAPIName, fieldNameValuePairs, batchCount);
-        if(detaildebug) log.d('body for insert : $body');
+        // if(detaildebug) log.d('body for insert : $body');
       }
       else{
         body = await _updateToSalesforce(objAPIName, fieldNameValuePairs, batchCount);
-        if(detaildebug) log.d('body for update : $body');
+        // if(detaildebug) log.d('body for update : $body');
       }
 
       if(detaildebug) log.d('I am here line 236');
       if(detaildebug) log.d('body[] : ${body.toString()}');
       // Collate the response for all batches
       if(body.containsKey('data') && body['data'].isNotEmpty){
-        if(detaildebug) log.d('I am here line 227 and data is ${body['data']}');
         List<dynamic> existingData = dmlResponse['data'];
         for(dynamic each in body['data'] as List<dynamic>){
           existingData.add(each);
@@ -256,15 +273,14 @@ class SalesforceUtil{
         }
         dmlResponse['errors'] = existingErrors;
       }
-      if(detaildebug) log.d('I am here line 253');
     }
     catch(error){
-      if(detaildebug) log.d('body for error scenario : $body');
+      // if(detaildebug) log.d('body for error scenario : $body');
       List<dynamic> catchBlockErrors = [];
       catchBlockErrors.add(error.toString());
       dmlResponse['errors'] = catchBlockErrors;
     }
-    if(debug) log.d('DML response inside _dmlToSalesforce for $batchCount : $dmlResponse');
+    if(detaildebug) log.d('DML response for $batchCount : $dmlResponse');
     return dmlResponse;
   }
 
@@ -282,8 +298,10 @@ class SalesforceUtil{
         body: jsonEncode(generateBody(opType : 'insert', objAPIName : objAPIName, fieldNameValuePairs : fieldNameValuePairs, batchCount : batchCount)),
       );
       int statusCode = resp.statusCode;
-      if(detaildebug) log.d('_insertToSalesforce StatusCode $statusCode');
-      if(detaildebug) log.d('_insertToSalesforce resp.body=> ${jsonEncode(resp.body)}');
+      if(detaildebug){
+        log.d('_insertToSalesforce StatusCode $statusCode');
+        log.d('_insertToSalesforce response ${resp.body.toString()}');
+      }
       body = json.decode(resp.body);
       if(detaildebug) log.d('ResponseBody for _insertToSalesforce => ${body.toString()}');
       if(statusCode == 201 && !body['hasErrors']){
@@ -291,7 +309,7 @@ class SalesforceUtil{
         insertResponse['data'] = body['results'];
       }
       else{ // non 201 code is returned
-        if(detaildebug) log.d('Response code other than 200/201 detected $statusCode');
+        // if(detaildebug) log.d('Response code other than 200/201 detected $statusCode');
         if(detaildebug) log.d('outside 201 $body');
         if(body['hasErrors']){
           insertResponse['errors'] = body['results'];
@@ -301,7 +319,7 @@ class SalesforceUtil{
     catch(error){
       insertResponse['errors'] = error.toString();
     }
-    if(detaildebug) log.d('Final _insertToSalesforce output : $insertResponse');
+    if(detaildebug) log.d('Final insertResponse output : $insertResponse');
     return insertResponse;
   }
 
@@ -316,13 +334,13 @@ class SalesforceUtil{
         body: jsonEncode(generateBody(opType : 'update', objAPIName : objAPIName, fieldNameValuePairs : fieldNameValuePairs, batchCount : batchCount)),
       );
       final List<dynamic> body = json.decode(resp.body);
-      if(detaildebug) log.d('Inside _updateToSalesforce StatusCode: ${resp.statusCode} || body: $body || updateResponse: $updateResponse');
+      // if(detaildebug) log.d('Inside _updateToSalesforce StatusCode: ${resp.statusCode} || body: $body || updateResponse: $updateResponse');
       updateResponse = processDMLResponse2(statusCode : resp.statusCode, inputBody : body, inputResponse : updateResponse);
     }
     catch(error){
       updateResponse['error'] = error.toString();
     }
-    if(detaildebug) log.d('Response from _updateToSalesforce $updateResponse');
+    // if(detaildebug) log.d('Response from _updateToSalesforce $updateResponse');
     return updateResponse;
   }
 
@@ -343,14 +361,14 @@ class SalesforceUtil{
         // body : not required for delete call
       );
       final List<dynamic> body = json.decode(resp.body);
-      if(detaildebug) log.d('StatusCode: ${resp.statusCode} || body: $body || deleteResponse : $deleteResponse');
+      // if(detaildebug) log.d('StatusCode: ${resp.statusCode} || body: $body || deleteResponse : $deleteResponse');
       deleteResponse = processDMLResponse2(statusCode : resp.statusCode, inputBody : body, inputResponse: deleteResponse);
-      if(detaildebug) log.d('After processResponse $deleteResponse');
+      // if(detaildebug) log.d('After processResponse $deleteResponse');
     }
     catch(error){
       deleteResponse['error'] = error.toString();
     }
-    if(detaildebug) log.d('Response from _deleteResponse $deleteResponse');
+    // if(detaildebug) log.d('Response from _deleteResponse $deleteResponse');
     return deleteResponse;  
   }
 
@@ -361,7 +379,7 @@ class SalesforceUtil{
 
     if(detaildebug) log.d('instanceUrl inside _queryFromSalesforce $instanceUrl');
     
-    Map<String, dynamic> queryFromSlesforceResponse = {};
+    Map<String, dynamic> queryFromSalesforceResponse = {};
     
     try{
       dynamic resp = await http.get(
@@ -369,34 +387,35 @@ class SalesforceUtil{
         headers: generateHeader(),  
         // body: [], //not required for query call
       );
-      final Map<String, dynamic> body = json.decode(resp.body);
       if(detaildebug) log.d('_queryFromSalesforce response.statusCode ${resp.statusCode}');
+      if(detaildebug) log.d('_queryFromSalesforce response.body ${resp.body}');
+      
+      final Map<String, dynamic> body = json.decode(resp.body);
+      
       if(detaildebug) log.d('_queryFromSalesforce body : ${body.toString()}');
-      if(detaildebug) log.d('_queryFromSalesforce body : $body');
+      // if(detaildebug) log.d('_queryFromSalesforce body : $body');
       if (resp.statusCode == 200) {
-        if(detaildebug) log.d('_queryFromSalesforce resp[done] : ${body['done']}');
-        if(detaildebug) log.d('_queryFromSalesforce resp[totalSize] : ${body['totalSize']}');
-        if(detaildebug) log.d('_queryFromSalesforce resp[nextRecordsUrl] : ${body['nextRecordsUrl']}');
+        // if(detaildebug) log.d('_queryFromSalesforce resp[done] : ${body['done']}');
+        // if(detaildebug) log.d('_queryFromSalesforce resp[totalSize] : ${body['totalSize']}');
+        // if(detaildebug) log.d('_queryFromSalesforce resp[nextRecordsUrl] : ${body['nextRecordsUrl']}');
 
-        queryFromSlesforceResponse['data'] = body['records'];
-        queryFromSlesforceResponse['totalSize'] = body['totalSize'];
-        queryFromSlesforceResponse['done'] = body['done'];
-        queryFromSlesforceResponse['nextRecordsUrl'] = body['nextRecordsUrl'];
+        queryFromSalesforceResponse['data'] = body['records'];
+        queryFromSalesforceResponse['totalSize'] = body['totalSize'];
+        queryFromSalesforceResponse['done'] = body['done'];
+        queryFromSalesforceResponse['nextRecordsUrl'] = body['nextRecordsUrl'];
       }
       else {
         // Log an error
         if(detaildebug) log.d('Response code other than 200 detected : ${resp.body}');
-        queryFromSlesforceResponse['error'] = resp.body;
+        queryFromSalesforceResponse['error'] = resp.body;
       }
     }
     catch(error){
-      if(detaildebug) log.d('Error occurred while querying data from Salesforce. Error is : $error');
-      queryFromSlesforceResponse['error'] = error.toString();
+      if(detaildebug) log.e('Error occurred while querying data from Salesforce. Error is : $error');
+      queryFromSalesforceResponse['error'] = error.toString();
     }
-    
-    if(debug) log.d('Response from _queryFromSalesforce $queryFromSlesforceResponse');
-
-    return queryFromSlesforceResponse;
+    // if(detaildebug) log.d('queryFromSlesforceResponse=> $queryFromSlesforceResponse');
+    return queryFromSalesforceResponse;
   }
   
   // Generic method to generate header for login and other operations
@@ -410,9 +429,6 @@ class SalesforceUtil{
       header['Content-Type'] = 'application/json';
       header['Authorization'] = 'Bearer $accessToken';
     }
-    
-    if(detaildebug) log.d('Generated header : $header');
-
     return header;
   }
 
@@ -434,7 +450,7 @@ class SalesforceUtil{
         endpointUrl = '$instanceUrl$compositeUrlForDelete$ids';
       }
     }
-    if(detaildebug) log.d('Generated endpoint : $endpointUrl');
+    // if(detaildebug) log.d('Generated endpoint : $endpointUrl');
     return endpointUrl;
   }
 
@@ -461,7 +477,7 @@ class SalesforceUtil{
       body['records'] = allRecords;
       if(opType == 'update'){
         body['allOrNone'] = 'false';
-      }if(detaildebug) log.d('body=>' + body.toString());
+      }// if(detaildebug) log.d('body=>' + body.toString());
     }
     else if(opType == 'delete'){
       //no body element is required for delete
@@ -474,8 +490,7 @@ class SalesforceUtil{
       dataMap['data'] = recordIds;
       body['input'] = dataMap;
     }
-    
-    if(detaildebug) log.d('Generated endpoint : $body');
+    // // if(detaildebug) log.d(body);
     return body;
   }
 
@@ -487,13 +502,12 @@ class SalesforceUtil{
     String limitCount = (count != null && count > 0) ? 'LIMIT $count' : '';
 
     String query = 'SELECT $fields FROM $objAPIName $whereClause $orderByClause $limitCount';
-    if(detaildebug) log.d('Generated Query : $query');
+    if(debug) log.d('Generated Query : $query');
 
     query = query.replaceAll(' ', '+');
-    if(detaildebug) log.d('Encoded Query : $query');
     
     final String endpointUrl = '$instanceUrl$queryUrl$query';
-    if(debug) log.d('endpointUrl inside generateQueryEndpointUrl: $endpointUrl');
+    if(detaildebug) log.d('endpointUrl inside generateQueryEndpointUrl: $endpointUrl');
 
     return endpointUrl;
   }
@@ -519,9 +533,6 @@ class SalesforceUtil{
       }
       inputResponse['errors'] = existingErrors;
     }
-    
-    if(detaildebug) log.d('From processDMLResponse1 response is : $inputResponse');
-
     return inputResponse;
   }
 
@@ -550,9 +561,6 @@ class SalesforceUtil{
         inputResponse['errors'] = ['${inputBody.toString()} url: $compositeUrlForUpdate}'];
       }
     }
-    
-    if(detaildebug) log.d('From processDMLResponse2 response is : $inputResponse');
-
     return inputResponse;
   }
   

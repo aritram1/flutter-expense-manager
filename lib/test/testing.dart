@@ -1,14 +1,14 @@
 // ignore_for_file: avoid_print
 
 // import 'dart:convert';
-// import '../util/salesforce_util.dart';
+
+// import '../lib2/util/salesforce_util.dart';
 
 main() async{
 
   // String customEndpointForSyncMessages = '/services/apexrest/FinPlan/api/sms/sync/*';
   // String customEndpointForApproveMessages = '/services/apexrest/FinPlan/api/sms/approve/*';
   // String customEndpointForDeleteMessages = '/services/apexrest/FinPlan/api/sms/delete/*';
-  // String customEndpointForDeleteTransactions = '/services/apexrest/FinPlan/api/transactions/delete/*';
 
   // // ------------------------------------------------------------------------------------------------ // 
   // // Login

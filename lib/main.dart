@@ -1,170 +1,148 @@
-// main.dart
-
-// ignore_for_file: library_private_types_in_public_api, use_key_in_widget_constructors
-
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
-import 'util/data_generator.dart';
-import './widget/tab_widget.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:logger/logger.dart';
+import './screens/expense/expense_home_screen.dart';
+import './screens/home/home_home_screen.dart';
+import './screens/investment/investment_home_screen.dart';
+import './services/database_service.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+// Define navigatorKey as a global key
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
+
+  // initialize dot env
   await dotenv.load(fileName: ".env"); 
-  runApp(MyApp());
+
+  // initialize the db
+  WidgetsFlutterBinding.ensureInitialized();
+  final isDbCreated = await DatabaseService.instance.initializeDatabase();
+  Logger().d('Created > $isDbCreated');
+
+  // If not granted, request for permissions (sms read etc) on app startup
+  PermissionStatus status = await Permission.sms.status;
+  if (status != PermissionStatus.granted) {
+    await Permission.sms.request();
+  }
+  
+  // to be implemented : urgent
+  // await checkAndRequestPermissions();
+
+  // Run the app finally
+  runApp(const MyApp());
+  
 }
 
+// to be implemented : urgent
+
+// // Check if the SMS permission is granted, if not, request the permission
+// // If Permission is still not granted, show an alert dialog
+// Future<void> checkAndRequestPermissions() async {
+//   // Check if the SMS permission is granted
+//   PermissionStatus status = await Permission.sms.status;
+
+//   if (status != PermissionStatus.granted) {
+//     // Request the permission
+//     PermissionStatus response = await Permission.sms.request();
+
+//     if (response != PermissionStatus.granted) {
+//       // Permission is still not granted, show an alert dialog
+//       await showDialog(
+//         context: navigatorKey.currentContext!,
+//         builder: (BuildContext context) {
+//           return AlertDialog(
+//             content: Center(
+//               child: Column(
+//                 mainAxisAlignment: MainAxisAlignment.center,
+//                 children: [
+//                   const Text('Please provide the permissions to let the app work properly!'),
+//                   const SizedBox(height: 16),
+//                   ElevatedButton(
+//                     onPressed: () async {
+//                       // Open app settings so the user can manually enable the permission
+//                       await openAppSettings();
+//                     },
+//                     child: const Text('Go to Settings'),
+//                   )
+//                 ],
+//               ),
+//             ),
+//           );
+//         },
+//       );
+//     }
+//   }
+// }
+  
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MyTabs(),
+      debugShowCheckedModeBanner: false, // Set to true for debug build
+      title: 'Expense Manager',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      home: const MyAppHomePage(),
     );
   }
 }
 
-class MyTabs extends StatefulWidget {
+class MyAppHomePage extends StatefulWidget {
+  const MyAppHomePage({super.key});
+
   @override
-  _MyTabsState createState() => _MyTabsState();
+  _MyAppHomePageState createState() => _MyAppHomePageState();
 }
 
-class _MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  final String title = 'Expense Manager';
-  final Logger log = Logger();
-  String messageSyncStatus = 'Default';
-
-  static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
-  static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-  }
-
+class _MyAppHomePageState extends State<MyAppHomePage> {
+  
+  static int _currentIndex = int.parse(dotenv.env['landingTabIndex'] ?? '0'); // 0 : HomeScreen, 1 : ExpenseHomeScreen, 2 : InvestmentHomeScreen
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () async {
-              // Show loading dialog
-              showDialog(
-                context: context,
-                barrierDismissible: false, // Prevent dialog dismissal on tap outside
-                builder: (BuildContext dialogContext) {
-                  return const Dialog(
-                    child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircularProgressIndicator(),
-                          SizedBox(width: 16.0),
-                          Text("Deleting Messages..."),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              );
-
-              // Perform the sync operation
-              String result = await handleSMSAndTransactionsDelete();
-              if(detaildebug) log.d('Handle handleSMSAndTransactionsDelete Result => $result');
-
-              // Close the loading dialog
-              Navigator.of(context).pop();
-            },
-            tooltip: 'Delete All Messages and Transactions',
+      body: _getBody(),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
           ),
-          
-          IconButton(
-            icon: const Icon(Icons.sync),
-            onPressed: () async {
-              // Show loading dialog
-              showDialog(
-                context: context,
-                barrierDismissible: false, // Prevent dialog dismissal on tap outside
-                builder: (BuildContext dialogContext) {
-                  return Dialog(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const CircularProgressIndicator(),
-                          const SizedBox(width: 16.0),
-                          Text('$messageSyncStatus...'),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              );
-
-              // Perform the sync operation
-              String result = await handleSMSSync();
-              if(detaildebug) log.d('Handle Sync Message Result => $result');
-
-              // Close the loading dialog
-              Navigator.of(context).pop();
-            },
-            tooltip: 'Sync from Phone',
+          BottomNavigationBarItem(
+            icon: Icon(Icons.currency_rupee),
+            label: 'Expense',
           ),
-          // Add more action buttons if needed
-        ],
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: const [
-          TabWidget(tabIndex: 0, title: 'Transactions'),
-          TabWidget(tabIndex: 1, title: 'View Expenses'),
-          TabWidget(tabIndex: 2, title: 'Bank Accounts'),
-        ],
-      ),
-      bottomNavigationBar: TabBar(
-        controller: _tabController,
-        tabs: const [
-          Tab(text: 'Transactions'),
-          Tab(text: 'View Expenses'),
-          Tab(text: 'Bank Accounts'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.trending_up),
+            label: 'Investment',
+          ),
         ],
       ),
     );
   }
 
-
-  Future<String> handleSMSSync() async {
-    log.d('Syncing SMS data...');
-    
-    // refresh the state
-    // setState(() {
-     messageSyncStatus = 'Syncing';
-    // });
-    
-    Map<String, dynamic> response = await DataGenerator.deleteAllMessagesAndTransactions();
-    log.d('Deleting completed.');
-
-    // refresh the state
-    
-    // setState(() {
-    //   messageSyncStatus = 'Critting';
-    // });
-
-    Map<String, dynamic> result = await DataGenerator.syncMessages();
-    log.d('Syncing SMS data completed.');// Response : $result');
-    return result.toString();
+  Widget _getBody() {
+    switch (_currentIndex) {
+      case 0:
+        return const HomeScreen();
+      case 1:
+        return const ExpenseHomeScreen();
+      case 2:
+        return const InvestmentHomeScreen();
+      default:
+        return Container(); // Handle unknown index gracefully
+    }
   }
 
-  // Method to help mass deletion of SMS messages by calling the SF API `/api/sms/delete/*`
-  Future<String> handleSMSAndTransactionsDelete() async {
-    log.d('Deleting SMS data...');
-    Map<String, dynamic> response = await DataGenerator.deleteAllMessagesAndTransactions();
-    log.d('Deleting completed');//. encoded response is -> ${jsonEncode(response)}'); 
-    return response.toString();
-  }
 }

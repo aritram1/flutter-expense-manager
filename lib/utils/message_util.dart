@@ -14,6 +14,8 @@ class MessageUtil {
   static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
 
   static Logger log = Logger();
+  
+  static int maximumMessageCount = int.parse(dotenv.env['maximumMessageCount'] ?? '5');
 
   ///////////////////////////////Get SMS Messages//////////////////////////////////////
   static Future<List<SmsMessage>> getMessages({List<SmsQueryKind>? kinds, String? sender, int? count}) async {
@@ -38,9 +40,9 @@ class MessageUtil {
       }
       else{
         messages = await SmsQuery().querySms(
-          kinds: smsKinds, // SmsQueryKind.inbox ,SmsQueryKind.sent, SmsMessageKind.draft
-          address: sender, // +1234567890
-          count: 300, //default value
+          kinds: smsKinds,
+          address: sender,
+          // count: maximumMessageCount, // maximum message to be retrieved
         );
       }
       
@@ -48,8 +50,12 @@ class MessageUtil {
     else {
       await Permission.sms.request();
     }
-    if(debug) log.d('Inbox message count : ${messages.length}');
-    return sort(messages);
+    log.d('Inbox all message count : ${messages.length}');
+
+    List<SmsMessage> filteredMsgList = getOnlyImportantMessages(messages); // Filter out the non transactional messages like personal sms and OTP messages
+    log.d('Inbox transactional message count : ${filteredMsgList.length}');
+  
+    return filteredMsgList;
   }
 
   // Method to convert the SMS Messages to a format that will be used for insert method later
@@ -75,15 +81,27 @@ class MessageUtil {
     return allRecords;
   }
 
-  // Method to sort the messages as per received at value, records are to be arranged by date asc
-  static List<SmsMessage> sort(List<SmsMessage> msgList){
-    // List<SmsMessage> sortedMsgList = [];
-    // for(int i = msgList.length-1; i >= 0; i--){
-    //   sortedMsgList.add(msgList[i]);
-    // }
-    // return sortedMsgList;
+  // Method to filter out non transactional messages
+  static List<SmsMessage> getOnlyImportantMessages(List<SmsMessage> msgList){
+    List<SmsMessage> filteredMsgList = [];
+    bool isOTP = false;
+    bool isPersonal = false;
+    bool isTransactional = false;
+    for(int i = 0; i < msgList.length; i++){
+      
+      isOTP = msgList[i].body!.toUpperCase().contains('OTP') || msgList[i].body!.toUpperCase().contains('VERIFICATION CODE');
+      isPersonal = msgList[i].sender!.toUpperCase().startsWith('+');
+      isTransactional = msgList[i].body!.toUpperCase().contains('RS ') || msgList[i].body!.toUpperCase().contains('RS. ') || msgList[i].body!.toUpperCase().contains('INR ');
+      
+      if(!isOTP && !isPersonal && isTransactional){
+        filteredMsgList.add(msgList[i]);
+      }
+    }
 
-    // sorting is not required at the moment, because balance update works when messages are arranged most recent on top
-    return msgList;
+    // Clip the required number of messages from the list if the list contains sufficient items
+    List<SmsMessage> listToReturn = (filteredMsgList.length <= maximumMessageCount) 
+                                        ? filteredMsgList 
+                                        : filteredMsgList.sublist(0, maximumMessageCount);
+    return listToReturn;
   }
 }
