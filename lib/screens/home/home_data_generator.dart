@@ -9,6 +9,8 @@ class HomeDataGenerator {
   static Logger log = Logger();
   static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
   static bool detaildebug = bool.parse(dotenv.env['detaildebug'] ?? 'false');
+  static bool specialdebug = bool.parse(dotenv.env['specialdebug'] ?? 'false');
+
   // static const int TOP5 = 5;
 
   static const String DATE_FORMAT_IN  = 'yyyy-MM-dd'; // Format to denote yyyy-mm-dd format
@@ -18,6 +20,14 @@ class HomeDataGenerator {
     if(debug) log.d('generateDataForHomeScreen0 : StartDate is $startDate, endDate is $endDate');
     
     List<Map<String, Map<String, dynamic>>> generateDataForHomeScreen0 = [];
+
+    // Expected Format
+    // Map<String, Map<String, dynamic>> oneYearData = {
+    //   '01' : {}, '02' : {}, '03' : {}, '04' : {},
+    //   '05' : {}, '06' : {}, '07' : {}, '08' : {},
+    //   '09' : {}, '10' : {}, '11' : {}, '12' : {},
+    // };
+    Map<String, Map<String, dynamic>> oneYearData = {};
     
     Map<String, dynamic> response = await SalesforceUtil.queryFromSalesforce(
       objAPIName: 'FinPlan__Bank_Transaction__c', 
@@ -36,11 +46,6 @@ class HomeDataGenerator {
       //return null;
     }
     else if (response['data'] != null && response['data'].isNotEmpty) {
-      Map<String, Map<String, dynamic>> eachMonthData = {
-        '01' : {}, '02' : {}, '03' : {}, '04' : {},
-        '05' : {}, '06' : {}, '07' : {}, '08' : {},
-        '09' : {}, '10' : {}, '11' : {}, '12' : {},
-      };
       try{
         if(detaildebug) log.d('Inside generateDataForHomeScreen0 Data where data is not empty');
         
@@ -57,11 +62,11 @@ class HomeDataGenerator {
 
             log.d('Data=>${recordMap['FinPlan__Transaction_Date__c']}');
 
-            String month = recordMap['FinPlan__Transaction_Date__c'].split('-')[1];
+            String timeFrame = '${recordMap['FinPlan__Transaction_Date__c'].split('-')[1]} ${recordMap['FinPlan__Transaction_Date__c'].split('-')[0]}';
+            log.d('timeFrame=>$timeFrame');
+            // time frame expected format is 01 2024 (for Jan 2024)
 
-            log.d('month=>$month');
-
-            data = eachMonthData[month] ?? {'Credit' : 0.0, 'Debit' : 0.0,};
+            data = oneYearData[timeFrame] ?? {'Credit' : 0.0, 'Debit' : 0.0,};
 
             double amount = recordMap['FinPlan__Amount__c'];
             if(recordMap['FinPlan__Type__c'] == 'Credit'){
@@ -78,25 +83,41 @@ class HomeDataGenerator {
               log.e('the transaction type is => ${recordMap['FinPlan__Type__c']}');
             }
 
-            log.d('TOTAL=> ${eachMonthData}');
+            oneYearData[timeFrame] = data;
 
-            //eachMonthData.add(data);
-
-            // generateDataForHomeScreen0.add({
-            //   'Paid To': recordMap['FinPlan__Beneficiary_Name__c'] ?? 'Default Beneficiary',
-            //   'Amount': recordMap['FinPlan__Amount__c'] ?? 0,
-            //   'Date': DateTime.parse(recordMap['FinPlan__Transaction_Date__c'] ?? DateTime.now().toString()),
-            //   'Id': recordMap['Id'] ?? 'Default Id',
-            // });
+            log.d('TOTAL=> $oneYearData');
           }
         }
       }
       catch(error){
-        if(debug) log.e('Error Inside generateDataForHomeScreen0 : $error');
+        log.e('Error Inside generateDataForHomeScreen0 : $error');
       }
     }
-    if(detaildebug) log.d('Inside generateDataForHomeScreen0=>$generateDataForHomeScreen0');
+    try{generateDataForHomeScreen0 = convert(oneYearData);}
+    catch(err){
+      log.e(err);
+    }
+    if(specialdebug) log.d('Inside generateDataForHomeScreen0=>$generateDataForHomeScreen0');
     return Future.value(generateDataForHomeScreen0); 
+  }
+  
+  // This method converts map of <String, dynamic> to a list<dynamic> and also reverse adds them since the 
+  // existing oneYearData Map data is added by ascending month - year. We need to convert them to descending
+  // month - year format to show in UI
+  static List<Map<String, Map<String, dynamic>>> convert(Map<String, Map<String, dynamic>> oneYearData) {
+    log.d('Inside convert method 1');
+    List<Map<String, Map<String, dynamic>>> data = [];
+    String timeFrame;
+    for(int i=1 ; i<oneYearData.keys.length; i++){
+      timeFrame = oneYearData.keys.elementAt(i-1); // The format is 01 2024 i.e. mm <space> yyyy
+      log.d('Time frame is=> $timeFrame');
+      Map<String, dynamic> monthData = oneYearData[timeFrame] ?? {};
+      data.add({
+        timeFrame : monthData
+      });
+    }
+    log.d('Reversed data is=> $data');
+    return data;
   }
   
 }

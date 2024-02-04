@@ -30,7 +30,7 @@ class HomeScreen0State extends State<HomeScreen0>{
   @override
   void initState() {
     super.initState();
-    data = generateData();
+    data = getDataForLast1Year();
   }
 
   @override
@@ -57,8 +57,10 @@ class HomeScreen0State extends State<HomeScreen0>{
                 // const Center(child: 
                 Column( 
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children : [
-                      Text('No data available in HomeScreen0'),
+                    children : const [
+                      Text('No data available,'), 
+                      Text('please check messages are approved'),
+                      Text('in expense tab'), 
                       SizedBox(height: 12.0),
                       Icon(Icons.refresh),
                     ]
@@ -89,8 +91,10 @@ class HomeScreen0State extends State<HomeScreen0>{
       );
     }
     
-    // A layer is added
-    Future<List<Map<String, dynamic>>> generateData() {
-      return HomeDataGenerator.generateDataForHomeScreen0(); // startDate: startDate, endDate: endDate);
+    // Generate the data for Last 1 year
+    Future<List<Map<String, Map<String, dynamic>>>> getDataForLast1Year() {
+      DateTime endDate = DateTime.now();
+      DateTime startDate = endDate.add(Duration(days: -350));
+      return HomeDataGenerator.generateDataForHomeScreen0(startDate: startDate, endDate: endDate);
     }
   }

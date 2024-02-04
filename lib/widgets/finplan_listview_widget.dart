@@ -26,6 +26,10 @@ class FinPlanListViewWidgetState extends State<FinPlanListViewWidget> {
 
   late List<Map<String, dynamic>> items;
 
+  static bool debug = bool.parse(dotenv.env['debug'] ?? 'false');
+
+  static final log = Logger(); 
+
   @override
   void initState(){
     super.initState();
@@ -57,64 +61,81 @@ class FinPlanListViewWidgetState extends State<FinPlanListViewWidget> {
               },
             ),
           ),
-          // Expanded(
-          //   child: 
-          //   ListView.builder(
-          //     itemCount: items.length,
-          //     itemBuilder: (context, index){
-          //       Map<String, dynamic> item = items[index];
-          //       return 
-          //       Padding(
-          //         padding: const EdgeInsets.all(2.0),
-          //         child: 
-          //           Column(
-          //             children : 
-          //               [
-          //                 getListTileWidget(item : item, color: Colors.lightBlue)
-          //               ]
-          //           )
-          //       );
-          //     },
-          //   )
-          // ),
         ],
       );
   }
   
   Widget getListTileWidget({required Map<String, dynamic> item, required Color? color}) {
-    IconData iconData = item['icon'] ?? Icons.access_alarm;
-    String paidTo = item['Paid To']!.toString();
-    DateTime date = item['Date']; // DateFormat('YYYY-MM-DD').format( as DateTime).toString();
-    double amount = item['Amount'];
+    late String timeFrame;
+    late String month;
+    late String year;
+    for (String key in item.keys) { // Get the month value
+      timeFrame = key;
+      month = timeFrame.split(' ')[0];
+      year = timeFrame.split(' ')[1];
+    }
+    log.d('item $item');
+    log.d('month $month, year $year');
+    // Now use the month value ot get other data
+    double debit = item[timeFrame]['Debit'];
+    double credit = item[timeFrame]['Credit'];
+    double savings = credit - debit;
+    Color color = savings >= 0 ? Colors.green.shade100 : Colors.amber.shade100;
+    IconData iconData = savings >= 0 ? Icons.savings : Icons.paid;
+
+    // convert the month number to name (e.g. 01 translates to January)
+    // int numericMonth = int.tryParse(month) ?? 1;
+    month = DateFormat('MMMM yyyy').format(DateTime.parse('$year-$month-01'));
+
     return 
-    Card(
-      color: color ?? Colors.grey,
-      child : 
-      ListTile(
-        leading: 
-          Padding( 
-            padding: EdgeInsets.only(left : 12.0),
-            child: Icon(iconData),
+      Card(
+        color: color,
+        child : 
+        ListTile(
+          leading: 
+            Padding( 
+              padding: EdgeInsets.only(left : 2.0),
+              child: Icon(iconData),
+            ),
+          title: Padding(
+            padding: const EdgeInsets.all(2.0),
+            child: Text(month),
           ),
-        title: Padding(
-          padding: const EdgeInsets.all(0.0),
-          child: Text(NumberFormat.currency(locale: 'en_IN').format(amount)),
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.all(0.0),
-          child: SizedBox(
-            child: Text(paidTo),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(2.0),
+                    child: Icon(Icons.add_circle),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(2.0),
+                    child: Text(NumberFormat.currency(locale: 'en_IN').format(credit)),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(2.0),
+                    child: Icon(Icons.outbound),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(2.0),
+                    child: Text(NumberFormat.currency(locale: 'en_IN').format(debit)),
+                  ),
+                ],
+              )
+            ],
           ),
-        ),
-        trailing:  Padding(
-          padding: const EdgeInsets.only(right: 18.0),
-          child: Text(DateFormat('dd-MM-yyyy').format(date)),
-        ),
-        // tileColor: Colors.amber,
-        contentPadding: EdgeInsets.all(2.0),
-      )
-    );
-  }
-  
+          trailing:  Padding(
+            padding: const EdgeInsets.only(right: 0.0),
+            child: Text(NumberFormat.currency(locale: 'en_IN').format(savings)),
+          ),
+        )
+      );
+    }
 
 }
