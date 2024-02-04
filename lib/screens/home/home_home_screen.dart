@@ -8,7 +8,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FinPlanAppHomeScreenWidget(
-      title: 'Just Home', 
+      title: 'Home', 
       tabCount: 1, 
       tabNames: const ['Home0'], 
       tabBarViews: const [
