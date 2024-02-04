@@ -22,7 +22,7 @@
 //   final Function(FinancialData) onBarTap;
 //   final Function onLoadComplete;
 
-//   FinancialBarChart({
+//   const FinancialBarChart({super.key, 
 //     required this.data,
 //     required this.onBarTap,
 //     required this.onLoadComplete,

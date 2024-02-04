@@ -18,6 +18,9 @@ class HomeScreen0State extends State<HomeScreen0>{
 
   static final Logger log = Logger();
 
+  // DateTime startDate = DateTime.now().add(const Duration(days: -365));
+  // DateTime endDate = DateTime.now();
+
   dynamic Function(String) onLoadComplete = (result) {
     log.d('Table loaded Result from HomeScreen0 => $result');
   };
@@ -88,6 +91,6 @@ class HomeScreen0State extends State<HomeScreen0>{
     
     // A layer is added
     Future<List<Map<String, dynamic>>> generateData() {
-      return HomeDataGenerator.generateDataForHomeScreen0();
+      return HomeDataGenerator.generateDataForHomeScreen0(); // startDate: startDate, endDate: endDate);
     }
   }

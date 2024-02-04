@@ -81,7 +81,7 @@ class FinPlanBankAccountWidget extends StatelessWidget {
       child: ListTile(
         leading: const Icon(Icons.savings),
         title: Text(name),
-        subtitle: Text('Last Updated on $lastUpdatedOn'),
+        subtitle: Text('Last Updated on $lastUpdatedOn', style: const TextStyle(fontSize: 10)),
         trailing: Text(NumberFormat.currency(locale: 'en_IN').format(lastBalance))
       )
     );
@@ -101,7 +101,7 @@ class FinPlanBankAccountWidget extends StatelessWidget {
       child: ListTile(
         leading: const Icon(Icons.wallet),
         title: Text(name),
-        subtitle: Text('Last Updated on $lastUpdatedOn'),
+        subtitle: Text('Last Updated on $lastUpdatedOn', style: const TextStyle(fontSize: 10)),
         trailing: Text(NumberFormat.currency(locale: 'en_IN').format(lastBalance))
       )
     );
@@ -114,9 +114,13 @@ class FinPlanBankAccountWidget extends StatelessWidget {
     double ccMaxLimit = each['FinPlan__CC_Max_Limit__c'] ?? 0;
     double ccAvlLimit = each['FinPlan__CC_Available_Limit__c'] ?? 0;
     double ccSpentAmount = ccMaxLimit - ccAvlLimit;
-    int ccBillingCycleDate = int.parse(each['CC_Billing_Cycle_Date__c'] ?? '0');
-    // ignore: prefer_interpolation_to_compose_strings
-    log.d('hello!=>' + each['FinPlan__CC_Last_Bill_Paid_Date__c']);
+    int ccBillingCycleDate = int.parse(each['FinPlan__CC_Billing_Cycle_Date__c'] ?? '0');
+    log.d('hello!=> ${each['FinPlan__CC_Last_Bill_Paid_Date__c']}');
+    
+    String ccBillDueDate = '';
+    if(each['FinPlan__Bill_Due_Date__c'] != null){
+      ccBillDueDate = DateFormat('dd-MM-yyyy').format(DateTime.parse(each['FinPlan__Bill_Due_Date__c']));
+    }
     String ccLastBillPaidDateStr = each['FinPlan__CC_Last_Bill_Paid_Date__c'];
     double ccLastPaidAmount = each['FinPlan__CC_Last_Paid_Amount__c'] ?? 0;
     DateTime ccLastBillingDate = DateTime(DateTime.now().year, DateTime.now().month, ccBillingCycleDate);
@@ -144,17 +148,19 @@ class FinPlanBankAccountWidget extends StatelessWidget {
                 Visibility(
                   visible: ccLastBillingDate.isBefore(DateTime.parse('${ccLastBillPaidDateStr}T00:00:00')), 
                   child: const Text('Your bill is due.', style: TextStyle(fontSize: 8, color: Colors.red)),),
-                Text('Last Updated on $lastUpdatedOn'),
+                const Text('Bill Due Date'),
+                Text(ccBillDueDate, style: const TextStyle(fontSize: 24)),
+                Text('Last Updated on $lastUpdatedOn', style: const TextStyle(fontSize: 10)),
               ],
             ),
-            // trailing: Column(
-            //   mainAxisAlignment: MainAxisAlignment.center,
-            //   children: [
-            //     Text(NumberFormat.currency(locale: 'en_IN').format(ccSpentAmount)),
-            //     const Text('Of'),
-            //     Text(NumberFormat.currency(locale: 'en_IN').format(ccMaxLimit))
-            //   ],
-            // )
+            trailing: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(NumberFormat.currency(locale: 'en_IN').format(ccSpentAmount)),
+                const Text('Of'),
+                Text(NumberFormat.currency(locale: 'en_IN').format(ccMaxLimit))
+              ],
+            )
           )
         ),
 
