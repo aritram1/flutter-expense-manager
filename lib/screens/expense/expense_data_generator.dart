@@ -34,7 +34,7 @@ class ExpenseDataGenerator {
     List<Map<String, dynamic>> generatedDataForExpenseScreen0 = [];
     Map<String, dynamic> response = await SalesforceUtil.queryFromSalesforce(
       objAPIName: 'FinPlan__SMS_Message__c', 
-      fieldList: ['Id', 'CreatedDate', 'FinPlan__Transaction_Date__c', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c'], 
+      fieldList: ['Id', 'CreatedDate', 'FinPlan__Transaction_Date__c', 'FinPlan__Beneficiary__c', 'FinPlan__Amount_Value__c', 'FinPlan__Beneficiary_Type__c'], 
       whereClause: 'FinPlan__Device__c = $deviceId AND FinPlan__Approved__c = false AND FinPlan__Create_Transaction__c = true $dateClause',
       orderByClause: 'FinPlan__Transaction_Date__c desc',
       //count : 120

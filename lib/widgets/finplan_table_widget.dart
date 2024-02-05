@@ -206,9 +206,21 @@ class FinPlanTableWidgetState extends State<FinPlanTableWidget> {
           return DataCell(
             SizedBox(
               width: MediaQuery.of(context).size.width * widget.columnWidths[index], // Use provided column width
-              child: Padding(
-                padding: const EdgeInsets.all(1.0),
-                child : Text(getFormattedCellData(widget.headerNames[index], row), maxLines: 2)
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Visibility(
+                    visible: index == 0,
+                    child: Padding(
+                      padding: const EdgeInsets.all(0.0),
+                      child : getIcon(widget.headerNames[index], row) 
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 1.0),
+                    child : Text(getFormattedCellData(widget.headerNames[index], row), maxLines: 2)
+                  ),
+                ],
               ),
             ),
           );
@@ -354,6 +366,25 @@ class FinPlanTableWidgetState extends State<FinPlanTableWidget> {
         }
       }
     });
+  }
+
+  Icon getIcon(String columnName, dynamic row){
+    Icon icon = const Icon(Icons.other_houses_sharp);
+    String type = row['FinPlan__Type__c'] ?? '';
+    switch (type) {
+      case 'Grocery':
+        icon = const Icon(Icons.local_grocery_store);
+        break;
+      case 'Bills':
+        icon = const Icon(Icons.local_activity);
+        break;
+      case 'Others':
+        icon = const Icon(Icons.other_houses_sharp);
+        break;
+      default:
+        break;
+    }
+    return icon;
   }
 
   String getFormattedCellData(String columnName, dynamic row){
