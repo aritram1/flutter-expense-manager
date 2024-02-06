@@ -29,6 +29,7 @@ class ExpenseHomeScreenState extends State<ExpenseHomeScreen>{
   @override
   Widget build(BuildContext context) {
     return 
+    
       // show alert dialog during loading
       isLoading 
       ? AlertDialog(
@@ -41,6 +42,7 @@ class ExpenseHomeScreenState extends State<ExpenseHomeScreen>{
             ],
           ),
         )
+
       // once loading is completed, show the actual home screen
       : FinPlanAppHomeScreenWidget(
           title: 'Expense Home',

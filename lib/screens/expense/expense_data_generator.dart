@@ -61,6 +61,7 @@ class ExpenseDataGenerator {
               'Amount': double.parse(recordMap['FinPlan__Amount_Value__c'] ?? '0'),
               'Date': DateTime.parse(recordMap['FinPlan__Transaction_Date__c'] ?? DateTime.now().toString()),
               'Id': recordMap['Id'] ?? 'Default Id',
+              'BeneficiaryType': recordMap['FinPlan__Beneficiary_Type__c'] ?? '',
             });
           }
         }
@@ -114,6 +115,7 @@ class ExpenseDataGenerator {
               'Amount': recordMap['FinPlan__Amount__c'] ?? 0,
               'Date': DateTime.parse(recordMap['FinPlan__Transaction_Date__c'] ?? DateTime.now().toString()),
               'Id': recordMap['Id'] ?? 'Default Id',
+              'BeneficiaryType': recordMap['FinPlan__Beneficiary_Type__c'] ?? '',
             });
           }
         }
