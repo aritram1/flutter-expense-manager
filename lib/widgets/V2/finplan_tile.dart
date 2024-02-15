@@ -67,7 +67,7 @@ class _FinPlanTileState extends State<FinPlanTile> {
       child: Container(
         decoration:BoxDecoration(
           color : widget.color,
-          gradient: LinearGradient(colors: [Colors.amber.shade300, Colors.amber.shade500, Colors.amber.shade600]),
+          gradient: LinearGradient(colors: [Colors.purple.shade100, Colors.purple.shade200]),
           border: Border.all(
             color: borderColor,
             width: 1.0,

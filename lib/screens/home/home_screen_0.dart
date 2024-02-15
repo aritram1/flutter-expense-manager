@@ -210,7 +210,20 @@ class HomeScreen0State extends State<HomeScreen0>{
                         // width: row4Width,
                         padding: EdgeInsets.all(padding),
                         child: FinPlanTile(
-                          center: Icon(Icons.spa),
+                          center: Icon(Icons.cabin),
+                          topRight: Container(
+                            height: 80,
+                            width: 80,
+                            padding: EdgeInsets.all(padding),
+                            child: FinPlanTile(
+                              borderColor: Colors.purple.shade100,
+                              color: Colors.purple.shade100,
+                              center: Icon(Icons.near_me),
+                              onCallBack: (){
+
+                              }
+                            ),
+                          ),
                           onCallBack: (){
                         
                           }
