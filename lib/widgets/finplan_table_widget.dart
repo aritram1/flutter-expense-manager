@@ -121,7 +121,10 @@ class FinPlanTableWidgetState extends State<FinPlanTableWidget> {
           alignment: Alignment.bottomCenter,
           child: Visibility(
             visible: selectedRowIds.isNotEmpty,
-            child : createApproveButton()
+            child : Padding(
+              padding: EdgeInsets.all(8), 
+              child: createApproveButton()
+            )
           ),
         ),
       ],
@@ -137,7 +140,7 @@ class FinPlanTableWidgetState extends State<FinPlanTableWidget> {
             selectedRowIds.clear();
           });
         },
-        icon: const Icon(Icons.approval), //, color: Color.fromARGB(255, 194, 127, 233)), // Set the icon color
+        icon: const Icon(Icons.check), //, color: Color.fromARGB(255, 194, 127, 233)), // Set the icon color
         label: const Text('Approve'),
         style: ButtonStyle(
           backgroundColor: MaterialStateProperty.resolveWith<Color>(

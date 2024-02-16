@@ -2,11 +2,14 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 import 'package:ExpenseManager/routes.dart';
 import 'package:ExpenseManager/screens/expense/expense_home_screen.dart';
+import 'package:ExpenseManager/screens/expense/expense_screen_0.dart';
+import 'package:ExpenseManager/screens/expense/expense_screen_1.dart';
 import 'package:ExpenseManager/screens/expense/expense_screen_2.dart';
 import 'package:ExpenseManager/widgets/V2/finplan_month_view.dart';
 import 'package:ExpenseManager/widgets/V2/finplan_transaction_view.dart';
 import 'package:ExpenseManager/widgets/V2/finplan_tile.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 
 class HomeScreen0 extends StatefulWidget {
@@ -93,7 +96,14 @@ class HomeScreen0State extends State<HomeScreen0>{
                     // width: row1Width,
                     padding: EdgeInsets.all(padding),
                     child: FinPlanTile(
-                      center: Icon(Icons.calendar_month),
+                      center: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.calendar_month),
+                          SizedBox(height: 2),
+                          Text('Cal')
+                        ],
+                      ),
                       onCallBack: (){
                         var currentContext = context;
                         navigateTo(currentContext, null);
@@ -109,7 +119,14 @@ class HomeScreen0State extends State<HomeScreen0>{
                     height: row1Height,
                     // width: row1Width,
                     child: FinPlanTile(
-                      center: Icon(Icons.account_balance),
+                      center: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.bar_chart),
+                          SizedBox(height: 2),
+                          Text('Chart')
+                        ],
+                      ),
                       onCallBack: (){
                         var currentContext = context;
                         navigateTo(currentContext, null);  
@@ -125,7 +142,12 @@ class HomeScreen0State extends State<HomeScreen0>{
                     // width: row1Width,
                     padding: EdgeInsets.all(padding),
                     child: FinPlanTile(
-                      center: Icon(Icons.spa),
+                      center: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.spa)
+                        ],
+                      ),
                       onCallBack: (){
                         var currentContext = context;
                         navigateTo(currentContext, null);
@@ -148,7 +170,15 @@ class HomeScreen0State extends State<HomeScreen0>{
                         width: MediaQuery.of(context).size.width,
                         padding: EdgeInsets.all(padding),
                         child: FinPlanTile(
-                          center: const Text('Accounts'),
+                          center: 
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.account_balance),
+                              SizedBox(width: 10),
+                              const Text('Accounts')
+                            ],
+                          ),
                           topRight: Icon(Icons.arrow_outward),
                           onCallBack: (){
                             var currentContext = context;
@@ -177,10 +207,17 @@ class HomeScreen0State extends State<HomeScreen0>{
                         // width: row3Width,
                         padding: EdgeInsets.all(padding),
                         child: FinPlanTile(
-                          center: Icon(Icons.message),
+                          center: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.message_rounded),
+                              SizedBox(height: 2),
+                              Text('Message')
+                            ],
+                          ),
                           onCallBack: (){
                             var currentContext = context;
-                            navigateTo(currentContext, ExpenseHomeScreen());
+                            navigateTo(currentContext, Scaffold(appBar: AppBar(), body: ExpenseScreen0()));
                           }
                         )
                       ),
@@ -193,10 +230,16 @@ class HomeScreen0State extends State<HomeScreen0>{
                         // width: row3Width,
                         padding: EdgeInsets.all(padding),
                         child: FinPlanTile(
-                          center: Icon(Icons.camera),
+                          center: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.payments),
+                              Text('Transaction')
+                            ],
+                          ),
                           onCallBack: (){
                             var currentContext = context;
-                            navigateTo(currentContext, null);  
+                            navigateTo(currentContext, Scaffold(appBar: AppBar(), body: ExpenseScreen1()));  
                           }
                         )
                       ),
