@@ -20,7 +20,7 @@ class ExpenseDataGenerator {
     
     // Format the dates accordingly
     String formattedStartDateTime = DateFormat(DATE_FORMAT_IN).format(startDate); // startDate.toUTC() is not required since startDate is already in UTC
-    String formattedEndDateTime = DateFormat(DATE_FORMAT_IN).format(endDate);       // endDate.toUTC() is not required since endDate is already in UTC
+    String formattedEndDateTime = DateFormat(DATE_FORMAT_IN).format(endDate);     // endDate.toUTC() is not required since endDate is already in UTC
     
     // Create the date clause to use in query later
     String dateClause =  'AND FinPlan__Transaction_Date__c >= $formattedStartDateTime AND FinPlan__Transaction_Date__c <= $formattedEndDateTime';

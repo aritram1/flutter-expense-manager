@@ -1,5 +1,8 @@
 
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+import 'package:ExpenseManager/routes.dart';
+import 'package:ExpenseManager/screens/expense/expense_home_screen.dart';
+import 'package:ExpenseManager/screens/expense/expense_screen_2.dart';
 import 'package:ExpenseManager/widgets/V2/finplan_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
@@ -105,7 +108,7 @@ class HomeScreen0State extends State<HomeScreen0>{
                     child: FinPlanTile(
                       center: Icon(Icons.account_balance),
                       onCallBack: (){
-                    
+                        
                       }
                     )
                   ),
@@ -143,7 +146,8 @@ class HomeScreen0State extends State<HomeScreen0>{
                           center: const Text('Accounts'),
                           topRight: Icon(Icons.arrow_outward),
                           onCallBack: (){
-                        
+                            var currentContext = context;
+                            navigateTo(currentContext, Scaffold(appBar: AppBar(), body : ExpenseScreen2()));
                           }
                         )
                       ),
@@ -170,7 +174,8 @@ class HomeScreen0State extends State<HomeScreen0>{
                         child: FinPlanTile(
                           center: Icon(Icons.message),
                           onCallBack: (){
-                        
+                            var currentContext = context;
+                            navigateTo(currentContext, ExpenseHomeScreen());
                           }
                         )
                       ),
@@ -282,6 +287,16 @@ class HomeScreen0State extends State<HomeScreen0>{
       ),
     );
   }
+  
+  void navigateTo(BuildContext context, Widget w) {
+    Navigator.push(
+      context, 
+      MaterialPageRoute(
+        builder: (context)=> w
+      )
+    );
+  }
+  
   /*
   @override
   Widget build(BuildContext context) {

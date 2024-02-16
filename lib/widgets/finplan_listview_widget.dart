@@ -65,7 +65,7 @@ class FinPlanListViewWidgetState extends State<FinPlanListViewWidget> {
       );
   }
   
-  Widget getListTileWidget({required   item, required Color? color}) {
+  Widget getListTileWidget({required item, required Color? color}) {
     late String timeFrame;
     late String month;
     late String year;

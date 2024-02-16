@@ -1,6 +1,7 @@
 // ignore_for_file: must_be_immutable
 
 import 'package:ExpenseManager/utils/data_generator.dart';
+import 'package:ExpenseManager/widgets/V2/finplan_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
@@ -82,6 +83,10 @@ class FinPlanBankAccountWidget extends StatelessWidget {
         leading: const Icon(Icons.savings),
         title: Text(name),
         subtitle: Text('Last Updated on $lastUpdatedOn', style: const TextStyle(fontSize: 10)),
+        // trailing: FinPlanTile(
+        //   center: const Text('Hello'),
+        //   onCallBack: (){}
+        // ),
         trailing: Text(NumberFormat.currency(locale: 'en_IN').format(lastBalance))
       )
     );
@@ -111,6 +116,21 @@ class FinPlanBankAccountWidget extends StatelessWidget {
     // String code = each['FinPlan__Account_Code__c'];
     String name = each['Name'];
     String lastUpdatedOn = DateFormat('dd-MM-yyyy').format(DateTime.parse(each['LastModifiedDate']));
+    
+    int daysDiff = DateTime.now().difference(DateTime.parse(each['LastModifiedDate'])).inDays;
+    String daysDiffStr;
+    switch(daysDiff){
+      case 0:
+        daysDiffStr = 'Today';
+        break;
+      case 1:
+        daysDiffStr = 'Yesterday';
+        break;
+      default:
+        daysDiffStr = '$daysDiff days ago';
+        break;
+    }
+    
     double ccMaxLimit = each['FinPlan__CC_Max_Limit__c'] ?? 0;
     double ccAvlLimit = each['FinPlan__CC_Available_Limit__c'] ?? 0;
     double ccSpentAmount = ccMaxLimit - ccAvlLimit;
@@ -150,7 +170,9 @@ class FinPlanBankAccountWidget extends StatelessWidget {
                   child: const Text('Your bill is due.', style: TextStyle(fontSize: 8, color: Colors.red)),),
                 const Text('Bill Due Date'),
                 Text(ccBillDueDate, style: const TextStyle(fontSize: 24)),
-                Text('Last Updated on $lastUpdatedOn', style: const TextStyle(fontSize: 10)),
+                Text('Last Updated $daysDiffStr', style: const TextStyle(fontSize: 10)),
+                Text('Update Date/Time: $lastUpdatedOn', style: const TextStyle(fontSize: 10)),
+
               ],
             ),
             trailing: Column(

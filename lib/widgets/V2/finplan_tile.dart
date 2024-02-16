@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 
 class FinPlanTile extends StatefulWidget {
   
@@ -49,6 +50,8 @@ class _FinPlanTileState extends State<FinPlanTile> {
   late double borderRadius;
   late Color borderColor;
   late double iconPadding;
+
+  static final Logger log = Logger();
   
   @override
   void initState() {
@@ -64,135 +67,141 @@ class _FinPlanTileState extends State<FinPlanTile> {
     return 
     Padding(
       padding: EdgeInsets.all(0.0),
-      child: Container(
-        decoration:BoxDecoration(
-          color : widget.color,
-          gradient: LinearGradient(colors: [Colors.purple.shade100, Colors.purple.shade200]),
-          border: Border.all(
-            color: borderColor,
-            width: 1.0,
+      child: GestureDetector(
+        onTap: (){
+          log.d('Callback is invoked for the widget!');
+          widget.onCallBack();
+        },
+        child: Container(
+          decoration:BoxDecoration(
+            color : widget.color,
+            gradient: LinearGradient(colors: [Colors.purple.shade100, Colors.purple.shade200]),
+            border: Border.all(
+              color: borderColor,
+              width: 1.0,
+            ),
+            borderRadius: BorderRadius.circular(borderRadius),
           ),
-          borderRadius: BorderRadius.circular(borderRadius),
-        ),
-        child: Stack(
-          children: [
-
-            // Position 1 : Top left
-            Visibility(
-              visible: widget.topLeft != null,
-              child: Positioned(
-                top: 0,
-                left: 0,
-                child: Padding(
-                  padding: EdgeInsets.all(padding),
-                  child: widget.topLeft,
-                )
+          child: Stack(
+            children: [
+          
+              // Position 1 : Top left
+              Visibility(
+                visible: widget.topLeft != null,
+                child: Positioned(
+                  top: 0,
+                  left: 0,
+                  child: Padding(
+                    padding: EdgeInsets.all(padding),
+                    child: widget.topLeft,
+                  )
+                ),
               ),
-            ),
-
-            // Position 2 : Top Middle
-            Visibility(
-              visible: widget.topMid != null,
-              child: Positioned(
-                bottom: 0,
-                right: 0,
-                left: 0,
-                child: Padding(
-                  padding: EdgeInsets.all(padding),
-                  child: widget.topMid,
-                )
+          
+              // Position 2 : Top Middle
+              Visibility(
+                visible: widget.topMid != null,
+                child: Positioned(
+                  bottom: 0,
+                  right: 0,
+                  left: 0,
+                  child: Padding(
+                    padding: EdgeInsets.all(padding),
+                    child: widget.topMid,
+                  )
+                ),
               ),
-            ),
-
-            // Position 3 : Top Right
-            Visibility(
-              visible: widget.topRight != null,
-              child: Positioned(
-                top: 0,
-                right: 0,
-                child: Padding(
-                  padding: EdgeInsets.all(padding),
-                  child: widget.topRight,
-                )
+          
+              // Position 3 : Top Right
+              Visibility(
+                visible: widget.topRight != null,
+                child: Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Padding(
+                    padding: EdgeInsets.all(padding),
+                    child: widget.topRight,
+                  )
+                ),
               ),
-            ),
-
-            // Position 4 : Center Left
-            Visibility(
-              visible: widget.centerLeft != null,
-              child: Positioned(
-                top: 0,
-                bottom: 0,
-                left: 0,
-                child: Padding(
-                  padding: EdgeInsets.all(padding),
-                  child: widget.centerLeft,
-                )
+          
+              // Position 4 : Center Left
+              Visibility(
+                visible: widget.centerLeft != null,
+                child: Positioned(
+                  top: 0,
+                  bottom: 0,
+                  left: 0,
+                  child: Padding(
+                    padding: EdgeInsets.all(padding),
+                    child: widget.centerLeft,
+                  )
+                ),
               ),
-            ),
-            
-            // Position 5 : Center
-            Visibility(
-              visible: widget.center != null,
-              child: Center(
-                child: widget.center,
+              
+              // Position 5 : Center
+              Visibility(
+                visible: widget.center != null,
+                child: Center(
+                  child: widget.center,
+                ),
               ),
-            ),
-
-            // Position 6 : Center Right
-            Visibility(
-              visible: widget.centerRight != null,
-              child: Positioned(
-                top: 0,
-                bottom: 0,
-                right: 0,
-                child: Padding(
-                  padding: EdgeInsets.all(padding),
-                  child: widget.centerRight,
-                )
+          
+              // Position 6 : Center Right
+              Visibility(
+                visible: widget.centerRight != null,
+                child: Positioned(
+                  top: 0,
+                  bottom: 0,
+                  right: 0,
+                  child: Padding(
+                    padding: EdgeInsets.all(padding),
+                    child: widget.centerRight,
+                  )
+                ),
               ),
-            ),
-
-            // Position 7 : Bottom Left
-            Visibility(
-              visible: widget.bottomLeft != null,
-              child: Positioned(
-                bottom: 0,
-                left: 0,
-                child: Padding(
-                  padding: EdgeInsets.all(padding),
-                  child: widget.bottomLeft,
-                )
+          
+              // Position 7 : Bottom Left
+              Visibility(
+                visible: widget.bottomLeft != null,
+                child: Positioned(
+                  bottom: 0,
+                  left: 0,
+                  child: Padding(
+                    padding: EdgeInsets.all(padding),
+                    child: widget.bottomLeft,
+                  )
+                ),
               ),
-            ),
-
-            // Position 8 : Bottom Middle
-            Visibility(
-              visible: widget.bottomMid != null,
-              child: Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Padding(
-                  padding: EdgeInsets.all(padding),
-                  child: widget.bottomMid,
-                )
+          
+              // Position 8 : Bottom Middle
+              Visibility(
+                visible: widget.bottomMid != null,
+                child: Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Padding(
+                    padding: EdgeInsets.all(padding),
+                    child: widget.bottomMid,
+                  )
+                ),
               ),
-            ),
-
-            // Position 9 : Bottom Right
-            Visibility(
-              visible: widget.bottomRight != null,
-              child: Positioned(
-                bottom: 0,
-                right: 0,
-                child: Padding(
-                  padding: EdgeInsets.all(padding),
-                  child: widget.bottomRight,
-                )
-              ),
-            )
-          ]
+          
+              // Position 9 : Bottom Right
+              Visibility(
+                visible: widget.bottomRight != null,
+                child: Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Padding(
+                    padding: EdgeInsets.all(padding),
+                    child: widget.bottomRight,
+                  )
+                ),
+              )
+            ]
+          ),
         ),
       ),
     );
