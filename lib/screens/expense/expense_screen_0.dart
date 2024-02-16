@@ -106,3 +106,12 @@ class ExpenseScreen0State extends State<ExpenseScreen0>{
   }
 
 }
+
+// json format for data for this widget
+// {
+//   'Paid To': '',
+//   'Amount': '',
+//   'Date': '',
+//   'Id': '',
+//   'BeneficiaryType': '',
+// }

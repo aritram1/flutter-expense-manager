@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:ExpenseManager/utils/data_generator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -96,28 +98,24 @@ class FinPlanTableWidgetState extends State<FinPlanTableWidget> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Column(
-          children: [
-            Expanded(
-              child: widget.data.isEmpty
-                ? _buildEmptyTableMessage()
-                : isLoading
-                  ? const Center(
-                    child: CircularProgressIndicator(), // Show loading indicator
-                  )
-                  : SingleChildScrollView( 
-                      scrollDirection: Axis.vertical,
-                      child: DataTable(
-                        showCheckboxColumn: widget.showSelectionBoxes,
-                        columnSpacing: 0.0,
-                        headingRowHeight: 40.0,
-                        sortAscending: _sortAscending,
-                        columns: _generateColumns(),
-                        rows: _generateRows(),
-                      ),
+        SingleChildScrollView( 
+          scrollDirection: Axis.vertical,
+          child: widget.data.isEmpty
+            ? _buildEmptyTableMessage()
+            : isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Column(
+                  children: [
+                    DataTable(
+                      showCheckboxColumn: widget.showSelectionBoxes,
+                      columnSpacing: 0.0,
+                      headingRowHeight: 40.0,
+                      sortAscending: _sortAscending,
+                      columns: _generateColumns(),
+                      rows: _generateRows(),
                     ),
-            ),
-          ],         
+                  ],
+                ),
         ),
         Align(
           alignment: Alignment.bottomCenter,
@@ -165,8 +163,7 @@ class FinPlanTableWidgetState extends State<FinPlanTableWidget> {
     return List.generate(widget.headerNames.length, (index) {
       return DataColumn(
         label: SizedBox(
-          width: MediaQuery.of(context).size.width *
-              widget.columnWidths[index], // Use provided column width
+          width: MediaQuery.of(context).size.width * widget.columnWidths[index], // Use provided column width
           child: InkWell(
             onTap: () {
               log.d('I am here $index');
@@ -206,22 +203,29 @@ class FinPlanTableWidgetState extends State<FinPlanTableWidget> {
           return DataCell(
             SizedBox(
               width: MediaQuery.of(context).size.width * widget.columnWidths[index], // Use provided column width
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Visibility(
-                    visible: index == 0,
-                    child: Padding(
-                      padding: const EdgeInsets.all(0.0),
-                      child : getIcon(widget.headerNames[index], row) 
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 1.0),
-                    child : Text(getFormattedCellData(widget.headerNames[index], row), maxLines: 2)
-                  ),
-                ],
-              ),
+              child: Padding(
+                padding: const EdgeInsets.all(1.0),
+                child : Text(getFormattedCellData(widget.headerNames[index], row), maxLines: 2)
+              )
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.start,
+              //   children: [
+              //     Visibility(
+              //       visible: index == 0,
+              //       child: SizedBox(
+              //         // height: 
+              //         // width : 
+              //         // padding: const EdgeInsets.all(0.0),
+              //         child : getIcon(widget.headerNames[index], row) 
+              //       ),
+              //     ),
+                  
+              //     Container(
+              //       padding: const EdgeInsets.all(1.0),
+              //       child : Text(getFormattedCellData(widget.headerNames[index], row), maxLines: 2)
+              //     ),
+              //   ],
+              // ),
             ),
           );
         }),

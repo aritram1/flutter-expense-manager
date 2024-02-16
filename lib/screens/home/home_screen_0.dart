@@ -3,6 +3,8 @@
 import 'package:ExpenseManager/routes.dart';
 import 'package:ExpenseManager/screens/expense/expense_home_screen.dart';
 import 'package:ExpenseManager/screens/expense/expense_screen_2.dart';
+import 'package:ExpenseManager/widgets/V2/finplan_month_view.dart';
+import 'package:ExpenseManager/widgets/V2/finplan_transaction_view.dart';
 import 'package:ExpenseManager/widgets/V2/finplan_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
@@ -93,7 +95,8 @@ class HomeScreen0State extends State<HomeScreen0>{
                     child: FinPlanTile(
                       center: Icon(Icons.calendar_month),
                       onCallBack: (){
-                    
+                        var currentContext = context;
+                        navigateTo(currentContext, null);
                       }
                     )
                   ),
@@ -108,7 +111,8 @@ class HomeScreen0State extends State<HomeScreen0>{
                     child: FinPlanTile(
                       center: Icon(Icons.account_balance),
                       onCallBack: (){
-                        
+                        var currentContext = context;
+                        navigateTo(currentContext, null);  
                       }
                     )
                   ),
@@ -123,7 +127,8 @@ class HomeScreen0State extends State<HomeScreen0>{
                     child: FinPlanTile(
                       center: Icon(Icons.spa),
                       onCallBack: (){
-                    
+                        var currentContext = context;
+                        navigateTo(currentContext, null);
                       }
                     )
                   ),
@@ -190,7 +195,8 @@ class HomeScreen0State extends State<HomeScreen0>{
                         child: FinPlanTile(
                           center: Icon(Icons.camera),
                           onCallBack: (){
-                        
+                            var currentContext = context;
+                            navigateTo(currentContext, null);  
                           }
                         )
                       ),
@@ -222,15 +228,17 @@ class HomeScreen0State extends State<HomeScreen0>{
                             padding: EdgeInsets.all(padding),
                             child: FinPlanTile(
                               borderColor: Colors.purple.shade100,
-                              color: Colors.purple.shade100,
+                              gradientColors: [Colors.purple.shade100, Colors.purple.shade200],
                               center: Icon(Icons.near_me),
                               onCallBack: (){
-
+                                var currentContext = context;
+                                navigateTo(currentContext, null);   
                               }
                             ),
                           ),
                           onCallBack: (){
-                        
+                            var currentContext = context;
+                            navigateTo(currentContext, null);  
                           }
                         )
                       ),
@@ -257,7 +265,8 @@ class HomeScreen0State extends State<HomeScreen0>{
                         child: FinPlanTile(
                           center: Icon(Icons.spa),
                           onCallBack: (){
-                        
+                            var currentContext = context;
+                            navigateTo(currentContext, null);  
                           }
                         )
                       ),
@@ -271,7 +280,8 @@ class HomeScreen0State extends State<HomeScreen0>{
                         child: FinPlanTile(
                           center: Icon(Icons.spa),
                           onCallBack: (){
-                        
+                            var currentContext = context;
+                            navigateTo(currentContext, null);  
                           }
                         )
                       ),
@@ -288,14 +298,25 @@ class HomeScreen0State extends State<HomeScreen0>{
     );
   }
   
-  void navigateTo(BuildContext context, Widget w) {
+  void navigateTo(BuildContext context, Widget? widget) {
     Navigator.push(
       context, 
       MaterialPageRoute(
-        builder: (context)=> w
+        builder: (context)=> widget ??  
+          Scaffold(
+            appBar: AppBar(), 
+            body : Container(
+              padding: EdgeInsets.all(8),
+              // child: // FinPlanMonthView()
+              child: Center(
+                child: const Text("Hello Hi there!"),
+              ),
+            )
+          )
       )
     );
   }
+}
   
   /*
   @override
@@ -431,5 +452,3 @@ class HomeScreen0State extends State<HomeScreen0>{
 //     }
 //     return widgetList;
 //   }
-
-}

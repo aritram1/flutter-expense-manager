@@ -10,7 +10,7 @@ class FinPlanTile extends StatefulWidget {
     this.padding,
     this.borderRadius,
     this.borderColor,
-    this.color,
+    this.gradientColors,
     this.title, 
     this.topLeft,
     this.topMid,
@@ -26,7 +26,7 @@ class FinPlanTile extends StatefulWidget {
 
   final double? padding;
   final double? borderRadius;
-  final Color? color;
+  final List<Color>? gradientColors;
   final Color? borderColor;
   final String? title;
   final Widget? topLeft;
@@ -39,25 +39,28 @@ class FinPlanTile extends StatefulWidget {
   final Widget? bottomMid;
   final Widget? bottomRight;
   final Function onCallBack;
-
   @override
   State<FinPlanTile> createState() => _FinPlanTileState();
 }
 
 class _FinPlanTileState extends State<FinPlanTile> {
 
+  //declare state variables
   late double padding;
   late double borderRadius;
   late Color borderColor;
   late double iconPadding;
+  late List<Color> gradientColors;
 
   static final Logger log = Logger();
   
   @override
   void initState() {
+    // initialize state variables
     padding = widget.padding ?? 8.0;
     borderRadius = widget.borderRadius ?? 20;
     borderColor = widget.borderColor ?? Colors.amber.shade500;
+    gradientColors = widget.gradientColors ?? [Colors.purple.shade100, Colors.purple.shade200];
     super.initState();
   }
 
@@ -74,8 +77,7 @@ class _FinPlanTileState extends State<FinPlanTile> {
         },
         child: Container(
           decoration:BoxDecoration(
-            color : widget.color,
-            gradient: LinearGradient(colors: [Colors.purple.shade100, Colors.purple.shade200]),
+            gradient: LinearGradient(colors: gradientColors),
             border: Border.all(
               color: borderColor,
               width: 1.0,
