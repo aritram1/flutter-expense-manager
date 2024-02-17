@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
@@ -59,7 +59,7 @@ class _FinPlanTileState extends State<FinPlanTile> {
     // initialize state variables
     padding = widget.padding ?? 8.0;
     borderRadius = widget.borderRadius ?? 20;
-    borderColor = widget.borderColor ?? Colors.amber.shade500;
+    borderColor = widget.borderColor ?? Colors.purple.shade100;
     gradientColors = widget.gradientColors ?? [Colors.purple.shade100, Colors.purple.shade200];
     super.initState();
   }
@@ -83,6 +83,11 @@ class _FinPlanTileState extends State<FinPlanTile> {
               width: 1.0,
             ),
             borderRadius: BorderRadius.circular(borderRadius),
+            // boxShadow: [
+            //   BoxShadow(blurRadius: 2, color: Colors.purple.shade300, offset: Offset(1, -1)), 
+            //   // BoxShadow(blurRadius: 10, color: Colors.purple.shade100), 
+            //   // BoxShadow(blurRadius: 10, color: Colors.purple.shade100), 
+            // ]
           ),
           child: Stack(
             children: [

@@ -15,10 +15,12 @@ class FinPlanTransactionView extends StatefulWidget {
     required this.onCallBack
   });
 
+  // Declare it's state class
   @override
   State<FinPlanTransactionView> createState() => _FinPlanTransactionViewState();
 }
 
+// State class for `FinPlanTransactionView`
 class _FinPlanTransactionViewState extends State<FinPlanTransactionView> {
 
   late List<Map<String, dynamic>> data;
@@ -30,8 +32,6 @@ class _FinPlanTransactionViewState extends State<FinPlanTransactionView> {
 
   @override
   Widget build(BuildContext context) {
-    
-
     return 
     Padding(
       padding: const EdgeInsets.all(8.0),
@@ -48,7 +48,9 @@ class _FinPlanTransactionViewState extends State<FinPlanTransactionView> {
           borderRadius: BorderRadius.circular(20),
         ),
         child: Stack(
-          children: []
+          children: [
+            Text(widget.sms),
+          ]
         ),
       ),
     );
