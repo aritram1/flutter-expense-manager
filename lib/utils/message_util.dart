@@ -88,10 +88,15 @@ class MessageUtil {
     bool isPersonal = false;
     bool isTransactional = false;
     for(int i = 0; i < msgList.length; i++){
+
+      String msgUppercase = (msgList[i].body ?? '').toUpperCase();
       
-      isOTP = msgList[i].body!.toUpperCase().contains('OTP') || msgList[i].body!.toUpperCase().contains('VERIFICATION CODE');
+      isOTP = msgUppercase.contains('OTP') || msgUppercase.contains('VERIFICATION CODE');
       isPersonal = msgList[i].sender!.toUpperCase().startsWith('+');
-      isTransactional = msgList[i].body!.toUpperCase().contains('RS ') || msgList[i].body!.toUpperCase().contains('RS. ') || msgList[i].body!.toUpperCase().contains('INR ');
+      isTransactional = msgUppercase.contains('RS ') 
+                        || msgUppercase.contains('RS. ') 
+                        || msgUppercase.contains('RS.')
+                        || msgUppercase.contains('INR ');
       
       if(!isOTP && !isPersonal && isTransactional){
         filteredMsgList.add(msgList[i]);

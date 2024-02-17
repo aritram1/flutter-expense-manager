@@ -74,6 +74,21 @@ class FinPlanBankAccountWidget extends StatelessWidget {
     String name = each['Name'];
     double lastBalance = each['FinPlan__Last_Balance__c'] ?? 0;
     String lastUpdatedOn = DateFormat('dd-MM-yyyy').format(DateTime.parse(each['LastModifiedDate']));
+
+    int daysDiff = DateTime.now().difference(DateTime.parse(each['LastModifiedDate'])).inDays;
+    String daysDiffStr;
+    switch(daysDiff){
+      case 0:
+        daysDiffStr = 'Today';
+        break;
+      case 1:
+        daysDiffStr = 'Yesterday';
+        break;
+      default:
+        daysDiffStr = '$daysDiff days ago';
+        break;
+    }
+    
     return Card(
       color: Colors.blue.shade100,
       shape: RoundedRectangleBorder(
@@ -82,7 +97,13 @@ class FinPlanBankAccountWidget extends StatelessWidget {
       child: ListTile(
         leading: const Icon(Icons.savings),
         title: Text(name),
-        subtitle: Text('Last Updated on $lastUpdatedOn', style: const TextStyle(fontSize: 10)),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Last Updated $daysDiffStr', style: const TextStyle(fontSize: 10)),
+            // Text('Update Date/Time: $lastUpdatedOn', style: const TextStyle(fontSize: 10)),
+          ],
+        ),
         // trailing: FinPlanTile(
         //   center: const Text('Hello'),
         //   onCallBack: (){}
@@ -98,6 +119,21 @@ class FinPlanBankAccountWidget extends StatelessWidget {
     String name = each['Name'];
     double lastBalance = each['FinPlan__Last_Balance__c'] ?? 0;
     String lastUpdatedOn = DateFormat('dd-MM-yyyy').format(DateTime.parse(each['LastModifiedDate']));
+    
+    int daysDiff = DateTime.now().difference(DateTime.parse(each['LastModifiedDate'])).inDays;
+    String daysDiffStr;
+    switch(daysDiff){
+      case 0:
+        daysDiffStr = 'Today';
+        break;
+      case 1:
+        daysDiffStr = 'Yesterday';
+        break;
+      default:
+        daysDiffStr = '$daysDiff days ago';
+        break;
+    }
+
     return Card(
       color: Colors.green.shade100,
       shape: RoundedRectangleBorder(
@@ -106,7 +142,13 @@ class FinPlanBankAccountWidget extends StatelessWidget {
       child: ListTile(
         leading: const Icon(Icons.wallet),
         title: Text(name),
-        subtitle: Text('Last Updated on $lastUpdatedOn', style: const TextStyle(fontSize: 10)),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Last Updated $daysDiffStr', style: const TextStyle(fontSize: 10)),
+            // Text('Update Date/Time: $lastUpdatedOn', style: const TextStyle(fontSize: 10)),
+          ],
+        ),
         trailing: Text(NumberFormat.currency(locale: 'en_IN').format(lastBalance))
       )
     );
@@ -157,7 +199,6 @@ class FinPlanBankAccountWidget extends StatelessWidget {
             title: Text(name),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              // mainAxisAlignment: MainAxisAlignment.start, 
               children: [
                 const Text('Last Bill Date'),
                 Text(DateFormat('dd-MM-yyyy').format(ccLastBillingDate), style: const TextStyle(fontSize: 24)),
@@ -171,7 +212,7 @@ class FinPlanBankAccountWidget extends StatelessWidget {
                 const Text('Bill Due Date'),
                 Text(ccBillDueDate, style: const TextStyle(fontSize: 24)),
                 Text('Last Updated $daysDiffStr', style: const TextStyle(fontSize: 10)),
-                Text('Update Date/Time: $lastUpdatedOn', style: const TextStyle(fontSize: 10)),
+                // Text('Update Date/Time: $lastUpdatedOn', style: const TextStyle(fontSize: 10)),
 
               ],
             ),
