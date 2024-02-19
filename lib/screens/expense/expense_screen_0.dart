@@ -63,24 +63,33 @@ class ExpenseScreen0State extends State<ExpenseScreen0>{
             child: FutureBuilder(
               future: data,
               builder: (context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+                // Case 1 : Async job in progress
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
                     child: CircularProgressIndicator(),
                   );
                 }
+                // Case 2 : Async job received an error
                 else if (snapshot.hasError) {
                   log.e('Error loading data => ${snapshot.error.toString()}');
                   return Center(
                     child: Text('Error loading data => ${snapshot.error.toString()}'),
                   );
                 }
+                // Case 3 : Async job succeeds but returns no data
+                else if (snapshot.data!.isEmpty) {
+                  return Center(
+                    child: Text('Nothing to approve now'),
+                  );
+                }
+                // Case 4 : Async job succeeds with data  
                 else {
                   List<Widget> allTiles = [];
                   for(int i = 0; i<snapshot.data!.length; i++){
                     dynamic each = snapshot.data![i];
                     allTiles.add(
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
                         child: Container(
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.purple.shade100, width: 1),
@@ -92,18 +101,18 @@ class ExpenseScreen0State extends State<ExpenseScreen0>{
                             leading: getIcon(each),
                             title: Text(
                               each['Paid To'],
-                              style: const TextStyle(fontSize: 18, color: Colors.black),
+                              style: const TextStyle(fontSize: 16, color: Colors.black),
                             ),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   NumberFormat.currency(locale: 'en_IN', symbol: '₹').format(each['Amount']),
-                                  style: const TextStyle(fontSize: 24)
+                                  style: const TextStyle(fontSize: 18)
                                 ),
                                 Text(
                                   DateFormat('dd-MM-yyyy').format(each['Date']),
-                                  // style: const TextStyle(fontSize: 24)
+                                  style: const TextStyle(fontSize: 12)
                                 ),
                               ],
                             ),
@@ -134,7 +143,6 @@ class ExpenseScreen0State extends State<ExpenseScreen0>{
                         ),
                       ),
                     );
-                    allTiles.add(SizedBox( height: 4));
                   }
                   return SingleChildScrollView(
                     child: Column(
@@ -191,13 +199,16 @@ class ExpenseScreen0State extends State<ExpenseScreen0>{
         icon = const Icon(Icons.local_grocery_store);
         break;
       case 'Bills':
-        icon = const Icon(Icons.local_activity);
+        icon = const Icon(Icons.receipt);
+        break;
+      case 'Food and Drinks':
+        icon = const Icon(Icons.restaurant);
         break;
       case 'Others':
-        icon = const Icon(Icons.other_houses_sharp);
+        icon = const Icon(Icons.miscellaneous_services);
         break;
       default:
-        icon = const Icon(Icons.other_houses_sharp);
+        icon = const Icon(Icons.person);
         break;
     }
     return icon;
